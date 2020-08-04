@@ -1,0 +1,447 @@
+\documentclass{article}
+\title{\textbf{Notes on Numerical Analysis}}
+\author{Matthew Mo}
+\date{\today}
+\input{heads.tex}
+\begin{document}
+\maketitle
+\section{Introduction and Math Basics}
+
+\textbf{Reference} \textit{Numerical Analysis}
+
+\subsection{Rounding/Chopping}
+\begin{itemize}
+    \item Truncation/Rounding Error
+    \item Roundoff Error
+\end{itemize}
+
+t位有效数字\tRarr t是最大非负整数,使得
+\begin{align}
+    \frac{|p-p^*|}{|p|}<5\times 10^{-t}
+\end{align}
+
+为了降低这些误差,可以利用一下变换:
+\begin{itemize}
+    \item $\sqrt{x+\varepsilon}-\sqrt{x}=\frac{\varepsilon}{\sqrt{x+\varepsilon}+x}$
+    \item $\ln(x+\varepsilon)-\ln(x)=\ln(1+\frac{\varepsilon}{x})$
+    \item $1-\cos x=\sin(\frac{x}{2})^2$
+    \item $\exp(x)=1+\frac{x}{2}+\frac{x^2}{6}+\dots$
+    \item $x^3+x^2+1\Rightarrow 1+x^2(x+1)$
+\end{itemize}
+
+\subsection{Algorithm and Convergence}
+
+\textbf{Stability} 输入的小改变只导致输出的小改变
+
+\textbf{Conditional Stability} 仅限于某些输入
+
+\dots %Convergence speed 
+
+\section{Equation Solution}
+
+\subsection{Bisection}
+
+算法:略
+
+收敛条件:$|\bs p_n-\bs p_{n-1}|\le \varepsilon$
+
+前向误差: $|x_N-x^*|$
+
+后向误差: $|f(x_N)|$
+
+敏感性:
+$$
+    f(x)=0\rightarrow f(x+\Delta x)+\varepsilon g(x+\Delta x)=0\\
+    \Delta x \approx -\varepsilon \frac{g(x)}{f'(x)}
+$$
+对于Wilkinson多项式$f(x)=\prod_{i=1}^16(x-i)$,$\Delta x\approx 6.14\times 10^13 \varepsilon$
+
+收敛速度: 线性,$|p_n-p|\le \frac{b-a}{2^n}$,初始区间为$[a,b]$
+
+\subsection{Fixed Point Iteration}
+
+$p$是一个不动点,若$f(p)=p \Leftrightarrow f(p)-p=0$.
+
+\textbf{Theorem} (Existence of Fixed Point) If $g: X\rightarrow X$ is surjective, then exists $x\in X, s.t. g(x)=x$
+
+\textbf{Corollary} $X=[a, b], g\in C[a, b], |g'(x)|<1$, then the fixed point is \textbf{unique}.
+
+\textbf{Algorithm} \\
+\begin{tabular}{l}
+    $x_0=\text{given value}$ \\
+    \hline
+    $x_n=f(x_{n-1})$         \\
+    \hline
+    Stop until $|x_n-x_{n-1}|<\varepsilon$
+\end{tabular}
+
+\textbf{Theorem} (Convergence) If $g$ has unique FP on $[a,b]$, then algorithm converges to fixed point $p$.
+
+\textbf{Corollary} $|x_n-p|\le k^n max{p_0-a,b-p_0}\wedge |x_n-p|\le \frac{k^n}{1-k}|x_1-x_0|$
+
+\subsection{Newton Method}
+
+考虑二阶泰勒展开
+$$f(x)=f(x_0)+f'(x)(x-x_0)+\frac{1}{2}f''(\xi)(x-x_0^2)$$
+若$x-x_0$很小,则
+$$
+    0=f(p)\approx f(x_0) +f'(x_0)(p-x_0)\Rightarrow p\approx x_0-\frac{f(x_0)}{f'(x_0)}
+$$
+得到迭代步:
+$$p_n\approx p_n-1-\frac{f(p_{n-1})}{f'(p_{n-1})}$$
+
+\textbf{Theorem} (Convergence) if $f\in C^2[a,b],p\in[a,b] s.t. f(p)=0,f'(p)\neq 0 s$, exists $\delta>0, s.t. p_n\rightarrow p$ for any initial $p_0\in [p-\delta, p+\delta]$
+
+\textbf{Note} Need to compute derivatives!
+
+\subsubsection{Secant Method}
+$$f'(p_{n-1})=\lim_{x\to p_{n-1}} \frac{f(x)-f(p_{n-1})}{x-p_{n-1}}$$
+使用$p_{n-2}$代替$x$,有割线法迭代(之后衍生出BFGS等一众拟牛顿法):
+$$p_n\approx p_n-1-\frac{f(p_{n-1})(p_{n-2}-p_{n-1})}{f(p_{n-2})-f(p_{n-1})}$$
+
+\textbf{Convergenece}
+$$e_{i+1}\approx \left|\frac{f''(r)}{2f'(r)}\right| e_ie_{i-1}$$
+\tRarr
+$$e_{i+1}\approx \left|\frac{f''(r)}{2f'(r)}\right|^a e_i^a,\\
+    a=1+\varphi =\frac{1+\sqrt{5}}{2}\approx 1.65$$
+
+\textbf{Note} False Position Method(Regula Falsi) ?
+
+\textbf{Muller's Method} 使用二次函数而非切线:
+$$
+    \text{given }x_0, x_1, x_2, \text{find }a, b, c, s.t. P(x)=a(x-x_2)^2+b(x-x_2)+c
+$$
+迭代公式:
+$$
+    x_3=x_2-\frac{2c}{b+sgn(b)\sqrt{b^2-4ac}}
+$$
+
+\subsubsection{Analysis on Error}
+
+\textbf{Theorem} $g\in C[a,b], g(x)\in [a, b], |g'(x)|\le 1 \Rightarrow p_n=g(p_{n-1})$ 线性收敛到$p$.
+
+\textbf{Theorem} $p$是$g$的一个不动点,$g'(p)=0,g''(p)$在区间$S$上连续并且有上界$M$,则存在$\delta>0, s.t.$不动点迭代序列在$[p-\delta, p+\delta]$二次收敛于$p$.,且
+$$|p_n-p|\le \frac{M}{2}|p_{n-1}-p|^2$$
+
+\subsubsection{Zero Point Multiplicity}
+
+\textbf{Definition} 一个$f$的根是m重的,若$f(x)=(x-p)^m q(x)\wedge \lim_{x\to p}\neq 0$
+
+\textbf{Theorem} iff $f^{(i)}(p)=0,\forall i=1...(m-1),f^{(m)}=0,p$是m重根.
+
+\textbf{Solution} $\mu(x)=f(x)/f'(x)$
+
+\textbf{Failure of NM} $f(x)=4x^4-6x^2-11/4, x_0=1/2$
+
+\subsubsection{Other Methods}
+\begin{itemize}
+    \item IQI Method
+    \item Brent's Method
+\end{itemize}
+
+\section{Interpolation and Polynomial Approx.}
+
+\textbf{Weierstrass Approximation Theorem} 对于任何$\varepsilon>0$,存在多项式$p,s.t.|p(x)-f(x)|\le \varepsilon$
+
+\subsection{Lagrange Polynomial}
+
+$$
+    \begin{aligned}
+        p(x)                  & =\sum_{k=0}^n f(x_k) L_{n,k}(x)                                                                               \\
+        \text{where } L_{n,k} & =\frac{(x-x_0)\dots (x-x_{k-1})(x-x_{k+1})\dots(x-x_n)}{(x_k-x_0)\dots x_k-x_{k-1})(x_k-x_{k+1})...(x_k-x_n)}
+    \end{aligned}
+$$
+
+\textbf{Theorem} $f\in C^m[a,b], given {x_k, f(x_k)},\exists \xi, \forall x\in [a,b],f(x)=p(x)+\frac{f^{(n+1)}(xi)}{(n+1)!}\prod_{i=0}{n}(x-x_i)$
+
+\textbf{Runge Phenomenon} 误差并不一定随多项式阶数提高而降低$e.g. f(x)=\frac{1}{1+25x^2}$!它们在边界上有很大的高阶导数(Cauchy-Lorentz函数). 高阶拉格朗日多项式+均匀采样点会导致龙格现象\tRarr 使用不均匀的sample,如Chebyshev多项式.
+
+\textbf{Difficulty} 难以决定到底用何阶多项式.
+
+\subsubsection{Neville Method}
+
+\define $P_{m_1,\dots,m_k}$ is \lp on ${x_{m_1},\dots,{x_{m_k}}}$
+
+\trm
+$
+    P_{1,2,\dots,k}(x)=\frac{(x-x_j)P_{1,2,\dots,j-1,j+1,\dots,k}-(x-x_i)P_{1,2,\dots,i-1,i+1,\dots,k}}{x_i-x_j}
+$
+
+\coro $
+    P_{1,2,\dots,k}(x)=\frac{(x-x_1)P_{2,\dots,k}-(x-x_k)P_{1,\dots,k-1}}{x_k-x_1}
+$
+
+可用如下形式计算P:
+\begin{tabular}{c|c|c|c}
+    $P_1$                                       \\
+    \hline
+    $P_2$   & $P_{12}$                          \\
+    \hline
+    $P_{3}$ & $P_{23}$ & $P_{123}$              \\
+    \hline
+    $P_4$   & $P_{34}$ & $P_{234}$ & $P_{1234}$ \\
+\end{tabular}
+
+Neville法常常用于外插.
+
+\subsection{\np}
+
+\subsubsection{Divided Difference}
+
+\define 均差
+$$\begin{aligned}
+        [x_i]                   & =f(x_i)                                                                      \\
+        [x_{j_0},\dots,x_{j_k}] & =\frac{[x_{j_1},\dots,x_{j_k}]-[x_{j_0},\dots,x_{j_{k-1}}]}{x_{j_k}-x_{j_0}}
+    \end{aligned}$$
+若$j_0,\dots,j_k$是连续的下标.
+
+给出以下均差格式是方便的:\\
+\begin{tabular}{c|ccccc}
+    \hline
+    $x_0$ & $[x_0]$                                                                       \\
+          &         & $[x_0x_1]$                                                          \\
+    $x_1$ & $[x_1]$ &            & $[x_0x_1x_2]$                                          \\
+          &         & $[x_1x_2]$ &               & $[x_0x_1x_2x_3]$                       \\
+    $x_2$ & $[x_2]$ &            & $[x_1x_2x_3]$ &                  & $[x_0x_1x_2x_3x_4]$ \\
+          &         & $[x_2x_3]$ &               & $[x_1x_2x_3x_4]$                       \\
+    $x_3$ & $[x_3]$ &            & $[x_2x_3x_4]$                                          \\
+          &         & $[x_3x_4]$                                                          \\
+    $x_4$ & $[x_4]$                                                                       \\
+    \hline
+\end{tabular}
+
+可以给出Newton内插公式
+$$P_n(x)=\sum_i c_i N_i. c_i=[x_0,...,x_n], N_0(x)=1,N_i(x)=\prod_j^{i-1}(x-x_j)$$
+对于相等间隔的采样点$x_j=x_0+jh$,有
+$$
+    [x_ix_{i+1}\dots x_{i+k}]=\frac{1}{k!h^k}\Delta^k y_i
+$$
+以及前向差分(Forward Difference)
+$$
+    \Delta^0 y_i=y_i,\Delta^k y_i=\Delta^{k-1} y_{i+1}-\Delta^{k-1} y_{i}
+$$
+得到牛顿-格里高利I型插值公式
+$$
+    P_n(x)=y_0+\sum_{i=0}^n \binom{t}{h} \Delta^u y_0,x=x_0+th
+$$
+也可采用后向差分(Backward Difference)
+$$
+    \nabla^0 y_{n-j}=y_{n-j},\nabla^k y_{n-j}=\nabla^{k-1} y_{n-j}-\nabla^{k-1} y_{n-j-1}
+$$
+以及Newton-Gregory II插值公式
+$$
+    I_n(x)=y_n+\sum_{i=1}^n \binom{s}{i} \nabla^i y_n, x=x_n+sh.
+$$
+
+有牛顿均差公式
+$$
+    [x_0x_1\dots x_k]=\frac{\Delta^k y_k}{k! h^k}
+$$
+
+\subsection{Hermite Interpolation}
+
+\bt{Target} 内插函数值和导数值!
+
+以下的2n+1阶函数内插了两者
+$$
+    H_{2n+1}(x)
+    =\sum_{j=0}^n f(x_j)H_{n,j}(x)+
+    \sum_{j=0}^n f'(x_j)\widehat H_{n,j}(x)
+$$
+其中
+$$
+    \begin{aligned}
+        H_{n,j}(x)          & = (1-2(x-x_j)L'_{n,j}(x_j)))L^2_{n,j}(x) \\
+        \widehat H_{n,j}(x) & = (x-x_j)L^2_{n,j}(x)
+    \end{aligned}
+$$
+误差
+$$
+    \prod_{i=0}^n(x-x_j)\frac{f^{(2n+2)}(\xi)}{(2n+2)!}
+$$
+
+写成牛顿迭代的形式,以迭代计算
+$$
+    \begin{aligned}
+        H_{2n+1}(x)
+                            & =[z_0]+\sum_{k=1}^{2n+1} [z_0\dots z_k](x-z_0)(x-z_1)\dots(x-z_{k-1}) \\
+        \text{where }z_{2i} & =z_{2i+1}=x_i, [z_{2i},z_{2i+1}]=f'(z_{2i})=f'(x_i)
+    \end{aligned}
+$$
+
+\trm $x_i\in[a,b], f\in C^n[a,b],\exists \xi \in [a,b], [x_0\dots x_k]=\frac{f^{(n)}(\xi)}{n!}$
+
+\subsection{Cubic Spline Interpolation}
+
+一种分段连续的逼近
+
+\define 一个对函数$f$的三次样条内插函数$S$,且插值点$a=x_0<x_1<\dots < x_n=b$需要满足:
+\begin{enumerate}
+    \item $S(x)$是分段三次的,由在$[x_j,x_j+1]$上定义的函数$s_j(x)$组成
+    \item $S(x_j)=f(x_j)$
+    \item $s_{j+1}(x_{j+1})=s_j(x_{j+1})$ 函数值连续性
+    \item $s'_{j+1}(x_{j+1})=s'_j(x_{j+1})$ 导数连续性
+    \item $s''_{j+1}(x_{j+1})=s''_j(x_{j+1})$ 二阶导数连续性
+    \item 满足下列之一的边界条件:
+          \begin{itemize}
+              \item $S''(x_0)=S''(x_n)=0$ Natural
+              \item $S'(x_0)=f'(x_0),S'(x_n)=f'(x_n)$ Clamped
+          \end{itemize}
+\end{enumerate}
+
+这些三次函数的形式
+$$
+    \begin{aligned}
+        s_j(x)=a_j+b_j(x-x_j)+c_j(x-x_j)^2+d_j(x-x_j)^3
+        s'_j(x)=b_j+2c_j(x-x_j)+3d_j(x-x_j)^2
+        s''_j(x)=2c_j+6d_j(x-x_j)
+    \end{aligned}
+$$
+对于自然边界条件
+$$
+    \begin{aligned}
+        A & =\left(
+        \begin{array}{ccccc}
+            1      & 0          & 0       & \dots              & 0       \\
+            h_0    & 2(h_0+h_1) & h_1     & \dots                        \\
+            \vdots & \vdots     & \vdots  &                    & \vdots  \\
+            0      & \cdots     & h_{n-2} & 2(h_{n-1}+h_{n-2}) & h_{n-1} \\
+            0      & \cdots     & 0       & 0                  & 1
+        \end{array}
+        \right),\text{which is diagonally dominant} \\
+        b & =\left(
+        \begin{array}{ccccc}
+            0                                                   \\
+            3/h_1(a_2-a_1)-3/h_0(a_1-a_0)                       \\
+            \vdots                                              \\
+            3/h_{n-1}(a_{n}-a_{n-1})-3/h_{n-2}(a_{n-1}-a_{n-2}) \\
+            0
+        \end{array}
+        \right), x=(c_0,\dots,c_n)^T, AX=b          \\
+    \end{aligned}
+$$
+对于clamped边界条件
+$$
+    \begin{aligned}
+        A & =\left(
+        \begin{array}{ccccc}
+            2h_0   & h_0        & 0       & \dots              & 0        \\
+            h_0    & 2(h_0+h_1) & h_1     & \dots                         \\
+            \vdots & \vdots     & \vdots  &                    & \vdots   \\
+            0      & \cdots     & h_{n-2} & 2(h_{n-1}+h_{n-2}) & h_{n-1}  \\
+            0      & \cdots     & 0       & h_{n-1}            & 2h_{n-1}
+        \end{array}
+        \right),\text{which is diagonally dominant} \\
+        b & =\left(
+        \begin{array}{ccccc}
+            3/h_1(a_2-a_1)-3/f'(a)                       \\
+            3/h_1(a_2-a_1)-3/h_0(a_1-a_0)                       \\
+            \vdots                                              \\
+            3/h_{n-1}(a_{n}-a_{n-1})-3/h_{n-2}(a_{n-1}-a_{n-2}) \\
+            3f'(b)-3/h_{n-1}(a_{n}-a_{n-1})
+        \end{array}
+        \right), x=(c_0,\dots,c_n)^T, AX=b          \\
+    \end{aligned}
+$$
+
+\subsection{Bernstein Polynomials}
+
+B-样条函数,用于在参数曲线上拟合
+$$
+B^n_i(t)=\binom{n}{i}(1-t)^{n-i}t^i
+$$
+以及
+$$
+\bs x(t)=\sum_i B^3_i(t)\bs p(t)
+$$
+
+\section{Numerical Differentiation and Integration}
+
+\section{Linear/Polynomial System Approx.}
+
+\subsection{Normal Equation (on LP/Linear Programming)}
+$$\bs A\bs x=\bs b\Rightarrow \overline{\bs x}=(\bs A^T \bs A)^{-1} \bs A^T \bs b$$
+
+\subsection{Discrete Least Mean Square}
+
+使用L2-范数衡量误差:
+$$
+E=||\bs y-f(\bs x;\bs \theta)||_2^2
+$$
+
+\subsection{As a Hilbert Space}
+
+给出函数空间上的内积,如果能找到一组正交基$\phi_i$,则有Gram矩阵
+$$\bs G=(g_{ij})=(\iprod{\phi_i}{\phi_j})$$
+将函数表示为
+$p(x)=\sum_k c_k \phi_k(x)$
+则可表示内积为
+$$\iprod{f}{\phi_j}=\sum_k c_k g_{jk}\Rightarrow \bs G\bs c=\iprod{f}{\bs \phi}$$
+
+考虑普通的多项式逼近$f(x):P_n(x)=\sum_k a_k x^k$的误差
+$$
+E[f]=\int_{[a,b]}(f(x)-P_n(x))^2 dx
+$$
+为了计算系数$a_j$,我们要解方程
+$$
+\sum_{k=0}^n a_k\int_{[a,b]}x^{j+k} dx=\int_{[a,b]}x^f f(x) dx
+$$
+这个方程当采样点数增加,条件数趋向于无穷\tRarr 数值计算的困难性.
+
+\trm $\phi_j$是线性无关的,如果它们的阶不同.
+
+我们可以考虑广义的带权内积
+$$
+\iprod{f}{g}=\int_X f(x)g(x)w(x) dx,w(x)|_{x\in X}>0
+$$
+给出内积之后,就可以通过Gram-Schimdt正交化得出一组正交基,
+当$w(x)\equiv 1$对应的正交基是Legendre多项式.
+
+\trm $\iprod{Q}{\phi_n}$若$Q$的阶数小于$\phi_n$
+
+\subsection{Chebyshev Polynomials}
+
+$X=[-1,1], w(x)=\frac{1}{\sqrt{1-x^2}}$给出切比雪夫多项式
+$$
+\begin{aligned}
+    T_n(x)     & =\cos (n \arccos(x)), \\
+    T_0(x)     & =1,T_1(x)=x,          \\
+    T_{n+1}(x) & =2xT_n(x)-T_{n-1}(x)
+\end{aligned}
+$$
+它们有单根$x_k=\cos(\frac{2k-1}{n}\frac{\pi}{2})$
+那么系数
+$$
+c_k=\frac{2}{\pi}\int^{\pi}_0 f(cos(\phi)) k\phi d\phi
+$$
+以及$\iprod{T_i}{T_j}=\frac{\pi}{2}\delta_{ij},i+j\neq 0\wedge \iprod{T_0}{T_0}=\pi$
+
+\trm 切比雪夫多项式有零点$x_k=\cos(\frac{2k-1}{n}\frac{\pi}{2})$和极值$x'_k=\cos(\frac{k\pi}{n})$
+
+\subsubsection{Monic CP}
+
+首一CP:
+$$
+\widetilde T_n(x)=\frac{1}{2^{n-1}}T_n(x)
+$$
+那么
+$$
+\widetilde T_n(x)=x\widetilde T_{n-1}(x)-\frac{1}{4}\widetilde T_{n-2}(x)
+$$
+有零点$x_k=\cos(\frac{2k-1}{n}\frac{\pi}{2})$和极值$x'_k=\cos(\frac{k\pi}{n})$.
+设$\widetilde \Pi_n$是所有n阶及以下首一多项式,有
+
+\trm $\forall P_n (x)\in\widetilde\Pi_n,x\in[−1,1]$,$\frac{1}{2^{n−1}}=\max⁡|\widetilde{T}_n(x)|\le\max⁡|P_n(x)|$
+
+\coro
+
+\section{Iterative Techs in Matrix Algebra}
+
+\section{ODEs}
+
+\section{Nonlinear Systems}
+
+\section{Eigenvalues}
+
+\section{PDEs}
+\end{document}

@@ -1,0 +1,94 @@
+\documentclass{article}
+\title{\textbf{Notes on GNNs}}
+\author{Matthew Mo}
+\date{\today}
+\usepackage{ctex}
+\usepackage{metalogo, amsfonts, amsmath, physics}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\rarr}{\rightarrow}
+\newcommand{\lop}{Laplace算子}
+\newcommand{\tRarr}{$\Rightarrow$}
+\newcommand{\trarr}{$\Rightarrow$}
+\newcommand{\filter}{\Gamma_{l,l'}}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\iprod}[2]{\langle #1, #2 \rangle}
+\newcommand{\define}{\textbf{Definition} }
+\newcommand{\trm}{\textbf{Theorem} }
+\newcommand{\alg}{\textbf{Algorithm} }
+\newcommand{\note}{\textbf{Note} }
+\newcommand{\coro}{\textbf{Corollary} }
+\newcommand{\tgt}{\textbf{Target} }
+\newcommand{\bt}[1]{\textbf{#1}}
+\newcommand{\lp}{Lagrange Polynomial}
+\newcommand{\np}{Newton Polynomial}
+\begin{document}
+\maketitle
+\section{Vanilla GNN(Scarselli et al.)}
+
+\bt{Target} node $v$ \trarr  representation $\bs h_v \in \R^s$ \trarr  out $\bs o_v$
+
+\bt{Domain} undirected graph + node feature $\bs x_v$ + possible edge feature.
+
+$co[v], ne[v]$:edges, neighbors of $v$.
+
+\subsection{Model} 
+\begin{align}
+    \label{upd1}
+    h_v&=f(x_v, x_{co[v]}, h_{ne[v]}, x_{ne[v]})\\
+    o_v&=g(h_v,x_v)
+\end{align}
+where $f$:local transition function, $g$: local out function, both parametric. Let $\bs{H, O, X, X_N}$ are those states in mat form
+\begin{align}
+    \bs H&=F(\bs H, \bs X)\\
+    \bs O&=F(\bs H, \bs X_N)
+\end{align}
+$F$:global transition function, $G$: global out function, both parametric, use fixed point iteration to calculate $\bs H$:
+\begin{align}
+    \bs H^{t+1}&=F(\bs H^t, \bs X)
+\end{align}
+write loss using supervisory target info $t_i$
+\begin{align}
+    loss=\sum_{i=1}^p(t_i-o_i)
+\end{align}
+$p$ is node count supervised.
+
+\note An Implicit Neuron Representation!
+
+\alg 
+\begin{enumerate}
+    \item update $h'_v$ from (\ref{upd1}) for $T$ time steps
+    \item compute loss and gradients
+    \item update parameters
+\end{enumerate}
+
+\note equals $T$ layers of GNN of same parameters
+ 
+\subsection{Limitations}
+
+\begin{itemize}
+    \item computational inefficient
+    \item each layer share same parameters\tRarr goto either RNN(GRU/LSTM)/ use different params
+    \item edge features?
+    \item large $T$ \trarr graph representation be smooth, hard to distinguish nodes
+    \item \bt{Further Nets} 
+    \begin{itemize}
+        \item GGNN(computational efficiency)
+        \item R-GCN(directed graph)
+    \end{itemize}
+\end{itemize}
+
+\section{Graph Convolutional Networks/GCN}
+
+\subsection{Spectral Methods}
+
+\subsubsection{Spectral CNN}
+
+\begin{align}
+    &\bs g_\theta * \bs x=\bs U \bs g_\theta(\bs \Lambda) \bs U^T \bs x\\
+    &\bs \Delta=\bs I - \bs D^{-\frac{1}{2}} \bs A \bs D^{-\frac{1}{2}}=\bs U \bs \Lambda \bs U^T\text{ normalized laplacian}
+\end{align}
+
+\subsubsection{ChebNet a.k.a. GCNN}
+\subsubsection{GCN}
+
+\end{document}

@@ -1,0 +1,344 @@
+\documentclass{article}
+\title{\textbf{Notes on Point-Based DL in 3D Point Cloud}}
+\author{Matthew Mo}
+\date{\today}
+
+\input{heads.tex}
+\input{note_style.tex}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{背景}
+
+\subsection{Datasets}
+\begin{itemize}
+    \item 3d形状分类
+    \begin{itemize}
+        \item synthetic/real-world
+    \end{itemize}
+    \item 3d对象检测/追踪
+    \begin{itemize}
+        \item indoor/outdoor urban
+    \end{itemize}
+    \item 3d点云分割
+    \begin{itemize}
+        \item sensors: MLS/ALS/TLS/RGBD Cams/Other 3D Scanners
+    \end{itemize}
+\end{itemize}
+\subsection{Eval. Metrics}
+\begin{itemize}
+    \item 3d形状分类
+    \begin{itemize}
+        \item Overall Accuracy(OA)
+        \item Mean Class Accu.(mAcc)
+    \end{itemize}
+    \item 3d对象检测
+    \begin{itemize}
+        \item Average Precision(AP). 是在precion-recall曲线下的面积
+    \end{itemize}
+    \item 3d对象追踪
+    \begin{itemize}
+        \item Precision
+        \item Sucess
+        \item Multi Obj. \~ Average Multi-Object Tracking Accuracy(AMOTA)
+        \item Multi Obj. \~ Average Multi-Object Tracking Precision(AMOTP)
+    \end{itemize}
+    \item 3d点云分割
+    \begin{itemize}
+        \item OA 
+        \item mean Intersection over Union(mIoU)
+        \item mAcc
+        \item mean Avergae Precision(mAp)
+    \end{itemize}
+\end{itemize}
+
+\section{3D形状分类}
+
+常常学习每个点的embedding,最后在点云上用某种aggregation来得到最终结果.
+\begin{itemize}
+    \item Multi-view based: 将点云投影在平面上
+    \item Vol. based: 将点云转化为3D体积元表示
+    \item Point based: 直接在点云上操作,无需体素化/投影 \trarr 本文的主要内容!
+\end{itemize}
+
+\subsection{多视野(multi-view)方法}
+\begin{itemize}
+    \item MVCNN\footnote{H. Su, S. Maji, E. Kalogerakis, and E. Learned-Miller, “Multiview convolutional neural networks for 3D shape recognition,”
+    in ICCV, 2015.}: 先驱性工作,简单地把multiview特征pooling得到global desciptor \tRarr info loss
+    \item MHBN\footnote{T. Yu, J. Meng, and J. Yuan, “Multi-view harmonized bilinear
+    network for 3D object recognition,” in CVPR, 2018.}: 使用harmonic双线性pooling得到紧的表示
+    \item (Yang et al. \footnote{Z. Yang and L. Wang, “Learning relationships for multi-view 3D object recognition,” in ICCV, 2019.})利用relation-network考虑view之间的关系
+    \item View-GCN\footnote{X. Wei, R. Yu, and J. Sun, “View-gcn: View-based graph convolutional network for 3D shape analysis,” in CVPR, 2020.}把不同的view考虑成图的顶点,并使用了一个有向图
+\end{itemize}
+\subsection{Volumetric Methods}
+\begin{itemize}
+    \item VoxNet\footnote{D. Maturana and S. Scherer, “VoxNet: A 3D convolutional neural network for real-time object recognition,” in IROS, 2015.}
+    \item ShapeNets\footnote{Z. Wu, S. Song, A. Khosla, F. Yu, L. Zhang, X. Tang, and J. Xiao, “3D shapeNets: A deep representation for volumetric shapes,” in
+    CVPR, 2015.}: 基于深度信度网络,学习shape的分布,用在3d中有点的概率表示
+\end{itemize}
+以上两种方法难以规模化,应为是立方复杂度的.之后,结构性和紧的结构被引入来降低复杂度(如octree)
+\begin{itemize}
+    \item OctNet\footnote{G. Riegler, A. Osman Ulusoy, and A. Geiger, “OctNet: Learning deep 3D representations at high resolutions,” in CVPR, 2017}是第一个结构性划分点云的方法,使用了混杂格点-八叉树结构,使用位向量高效编码.
+    \item (Wang et al.\footnote{P.-S. Wang, Y. Liu, Y.-X. Guo, C.-Y. Sun, and X. Tong, “OCNN: Octree-based convolutional neural networks for 3D shape
+    analysis,” ACM TOG, 2017.})是基于八叉树的CNN的3d形状分类方法.在最细粒度的叶子上采样的Average Normal Vec. 送到网络中,3DCNN在对应网络象限计算.
+    \item {Le et al.\footnote{T. Le and Y. Duan, “PointGrid: A deep network for 3D shape understanding,” in CVPR, 2018.}}聚合了点-格点表示,在每个格点单元里常数个点被采样,进而送进3dCNN.
+    \item {Ben-Shabat et al.\footnote{Y. Ben-Shabat, M. Lindenbaum, and A. Fischer, “3D point cloud classification and segmentation using 3D modified fisher vector representation for convolutional neural networks,” arXiv
+    preprint arXiv:1711.08241, 2017.}} 把点云用3DmFV(3d-modified Fischer Vec.)表示,并用CNN计算表示.
+\end{itemize}
+\subsection{点方法}
+\begin{enumerate}
+    \item Pointwise MLP
+    \item Conv. Based
+    \item Graph Based 
+    \item Hierarchical Data Structure Based
+    \item Other
+\end{enumerate}
+
+\subsubsection{逐点MLP}
+
+\begin{itemize}
+    \item 作为先驱性工作,PointNet\footnote{C. R. Qi, H. Su, K. Mo, and L. J. Guibas, “PointNet: Deep learning on point sets for 3D classification and segmentation,” in CVPR,2017.}把$N\times 3$的点云坐标送到MLP中(共享权值),然后得到features $N\times M$,max-pooling得到feature $1\times M$,通过一个对称的函数来得到变换不变性. 
+    \item Deep Sets\footnote{M. Zaheer, S. Kottur, S. Ravanbakhsh, B. Poczos, R. R. Salakhutdinov, and A. J. Smola, “Deep sets,” in NeurIPS, 2017.}达到平移不变性,通过features加合起来,并应用non-linearity.
+    \item PointNet++\footnote{C. R. Qi, L. Yi, H. Su, and L. J. Guibas, “PointNet++: Deephierarchical feature learning on point sets in a metric space,” in
+    NeurIPS, 2017}利用了PointNet无法获取的局域关系信息:采用有层次结构的network.
+\end{itemize}
+
+由于PointNet的简洁性,许多方法都基于它.
+\begin{itemize}
+    \item MoNet采用了有限个patch.
+    \item PATs(Point Attention Transformers\footnote{J. Yang, Q. Zhang, B. Ni, L. Li, J. Liu, M. Zhou, and Q. Tian,“Modeling point clouds with self-attention and gumbel subsetsampling,” in CVPR, 2019.})把每个点用绝对位置表示,把关系用相对于这个点的位置表示,进而学习一个高维表示,GSA(Graph Shuffle Attention)随后被用于捕捉点之间的关系,最后一个变换不变的,可微的,可学习的端到端GSS(Gumbel Subset Sampling)层被用于学习结构特征.
+    \item 基于PN++,PointWeb\fn{J. Yang, Q. Zhang, B. Ni, L. Li, J. Liu, M. Zhou, and Q. Tian,“Modeling point clouds with self-attention and gumbel subsetsampling,” in CVPR, 2019.}利用了点的邻域上下文,通过AFA(Adaptive Feature Adjusting).
+    \item (Duan et al.)SRN\fn{Y. Duan, Y. Zheng, J. Lu, J. Zhou, and Q. Tian, “Structural relational reasoning of point clouds,” in CVPR, 2019.}(Structural Relation Net)用于在局部结构之间学习结构性关系特征.
+    \item Lin et al.\fn{H. Lin, Z. Xiao, Y. Tan, H. Chao, and S. Ding, “Justlookup: One
+    millisecond deep feature extraction for point clouds by lookup
+    tables,” in ICME, 2019.}通过在输入/函数两个空间上记录loopkup table加速推理(32倍速)
+    \item SRINet先利用投影得到旋转不变的表示,在利用PN估价得到全局feature,再通过基于图的聚合得到局部特征
+    \item PointASNL\fn{X. Yan, C. Zheng, Z. Li, S. Wang, and S. Cui, “Pointasnl: Robust
+    point clouds processing using nonlocal neural networks with
+    adaptive sampling,” in CVPR, 2020.}利用了Adaptive Sampling(AS)模块来动态调整由FPS算法采样到的点,并提出了local-nonlocal(L-NL)模块来捕捉采样的点的局部-长程依赖.
+\end{itemize}
+
+\subsection{卷积方法}
+相比于2D网格结构的卷积,点云卷积更难设计.
+\subsubsection{3D连续卷积方法}
+在连续空间上做卷积(嵌入在欧氏空间或在流形上?),权重由到邻域中心点的位置关系(距离+取向,或者说坐标)决定.
+
+3D卷积\tRarr 子集上的带权和,
+\begin{itemize}
+    \item RS-CNN[62]的核心卷积层RSConv:输入为一个几何邻域,用MLP来学习低阶关系(e.g.欧式坐标,相对位置)到权重的关系.
+    \item \ [63],核元素(邻域中心?)在一个单位空间中随机选择(s.t.密度近似相等),一个基于MLP的函数用于建立核的位置和点云的关系.
+    \item DensePoint[64], 卷积使用单层感知机(SLP)+非线性激活.特征在之前所有层的特征拼接(concat)上学习.
+    \item [65],一个rigid/deformable卷积算子KPConv(Kernel Point Convolution),使用一组可学习的核元素.
+    \item ConvPoint[66],卷积核分为空间-特征两部分,空间部分在单位球中随机选择,权函数由MLP学习得到.
+\end{itemize}
+
+使用既有算法实现卷积,
+\begin{itemize}
+    \item PointConv[67], 卷积定义为(关于重要度采样的)3D卷积的Monte-Carlo估计.卷积核通过权函数(MLP学习)和密度估计组成(核化密度估计(kernelized density est.)+MLP学习).为了降低TC/SC,3D卷积简化为:矩阵乘法和2D卷积,降低内存消耗64倍.
+    \item MCCNN[68],卷积依赖于对样本密度函数(MLP学习)的MC估计.Poisson Disk采样接着用于构建点云结构.
+    \item SpiderCNN[69], SpiderConv的卷积是阶跃函数和在kNN上的Taylor展开的乘积.阶跃函数捕捉粗粒度几何关系(通过编码局部测地距离),泰勒展开捕捉内蕴几何关系,通过在立方体顶点上拟合函数.
+    \item PCNN[70]基于RBF.
+\end{itemize}
+
+一些算法为了解决旋转不变性而提出,
+\begin{itemize}
+    \item \ [71], 3D Spherical CNN,学习旋转协变的表示,使用多值球函数作为输入.局部化滤波器通过在带锚点的球谐谱上的参数化得到.
+    \item \ [72], Tensor Field Net.,卷积是可学习的及径向函数和球谐函数的乘积(分离系数?).
+    \item \ [73], 基于球面交叉互相关(cross-correlation),使用推广的FFT实现.
+    \item 基于PCNN,SPHNet[74]通过包含球谐核函数在容量函数的卷积过程中.
+\end{itemize}
+
+为了加速计算
+\begin{itemize}
+    \item Flex-Conv. [75],定义卷积为在kNN上的标量积,可用CUDA加速.
+\end{itemize}
+
+\subsubsection{3D离散卷积方法}
+
+3D卷积\tRarr 子集嵌入空间的网格上的带权和,
+\begin{itemize}
+    \item \ [76]把非均匀的点云转化为了均匀的格点,并在格点上定义卷积核.给定一点,计算上一层在同一格网上的点的平均特征,然后这些结果加权求和得到这一层的结果.
+    \item \ [77]学习了一个球面函数,通过把球形邻域分割成块,并且应用可学习的权重.一个点的卷积核的输出=邻接点的值的权重和+激活函数
+    \item GeoConv[78],点与邻接点的关系显式通过六个基写出.每个方向上的权分别学习,并且每个方向上按角度再加权.
+    \item PointConv[79],将输入的点变为隐含核潜在可排序的,通过$\chi$-conv变换(MLP实现),在应用经典的卷积算子.
+    \item InterConv[80], 在邻接离散卷积\bt{核-权}坐标上内插.
+    \item RIConv[81], 是旋转不变的,将低阶旋转不变几何特征作为输入,通过inning(翻译为块化?)转化为1D卷积.
+    \item A-CNN[82], 定义annular conv., 通过在每个邻接点环上作与核大小相符的循环乘积.
+\end{itemize}
+
+为了降低TC/SC
+\begin{itemize}
+    \item Rectified Phase Volumn(ReLPV)块[83],使用短时傅里叶变换(STFT)来从3D邻域提取phase,大大降低参数数量.
+    \item SFCNN[84], 点云投影到正二十面体晶格上,带有对齐的球形坐标. 通过把顶点上与邻接点上的特征concat后conv.-maxpool.-conv.来达成卷积.\trarr 旋转和变换不变性.
+\end{itemize}
+
+\subsection{图方法}
+
+输入\trarr 图构建 \trarr 图特征提取 \trarr 输出
+
+\subsubsection{时域/空域图方法}
+边特征常常是两点间的几何属性,点特征常常是坐标/颜色/激光强度等等.卷积常常是空间邻域上的MLP.
+\begin{itemize}
+    \item \ [85]点作为图顶点,作有向邻接图.ECC(Edge-Conditioned Conv.)+VoxelGrid[86]图粗化.
+    \item DGCNN[87],图在特征空间中构建,并且每层动态更新.EdgeConv中MLP用于学习边特征.
+    \item 更进一步,LDGCNN[88]去除了DGCNN中的transformer网络,链接其不同层的结构特征,以降低模型大小和提速.
+    \item FoldingNet[89]作为图AE网络,用concat的向量化局部协方差矩阵和坐标作为输入.
+    \item 由Inception和DGCNN启发,[91]提出了多任务无监督AE用于提取特征.其中编码器在多尺度图(multi-scale graph)上构建,解码器用三个无监督任务(聚类,自监督分类,重建)构建,使用分离的所任务loss.
+    \item Dynamic Points Agglomeration Module(DPAM, [92]),通过图卷积来简化聚集操作(取样/组队/池化)为一步\trarr 聚集矩阵和点特征矩阵的乘积.基于PointNet和多层DPAM建立了一种学习结构,相较于PointNet++,动态利用了点关系和在语义空间聚集点.
+    \item 为了利用局部几何结构,KCNet[93] 基于核互相关学习特征.首先,一个可学习的点集合,称为核,用于标识几何结构.然后在每个点,计算核和邻域的亲和度.
+    \item G3D[94],卷积定义为邻接矩阵的某个多项式,图粗化是用粗化矩阵乘到Laplacian和定点特征矩阵上.
+    \item ClusterNet[95]使用严格旋转不变的模块在kNN图上找旋转不变的feature.通过无监督层次聚类+ward-linkage criteria建立点云的结构.每个子聚类中的特征通过一个EdgeConv块后用max-pooling聚合.
+    \item 为了解决TC问题, [97]提出混合基于容积-点的方法.ModelNet上的实验(本文提出的)Grid-GCN有5x加速.
+\end{itemize}
+
+\subsubsection{频域图方法}
+卷积定义为频域的滤波器.
+\begin{itemize}
+    \item RGCNN[100]做一个全连接图,每层更新Laplacian,损失函数带有邻域相似先验.
+    \item 为了解决分散的图拓扑带来的问题,SGC-LL层(in AGCN[101])用于\bt{学习}一个点邻接度量(Mahalanobis dist.),总的距离用高斯核和这个学习到的度量一起决定.
+    \item HGNN[102],在超图(hypergraph)上建立卷积(谱卷积).
+    \item LocalSpecGCN[103]是kNN图上的端到端谱卷积网络.无需Laplacian离线计算(显式计算?)和图粗化.
+    \item PointGCN[104],kNN图+高斯核边权+ChebNet,使用了全局池化-多分辨率池化,来捕捉全局-局部信息.
+    \item 3DTI-Net[105] kNN图上的谱卷积.使用相对欧式和方向距离来达到几何变换不变性.
+\end{itemize}
+
+\subsubsection{层次数据结构方法}
+这些方法基于某些层次数据结构(八叉树(octree),kd-tree).点特征按照结点层次向上学习.
+\begin{itemize}
+    \item octree引导的CNN[77],使用球面卷积核,八叉树每一层对应一层卷积,结点值是子节点值的平均.
+    \item 不像OctNet,Kd-Net[106]基于多个kd-tree,它们在每次分割上有不同的方向.基于自底向上原则,非叶节点的特征由MLP给出,并且在每层的相同结点分割类型上共享权重.
+    \item 3DContextNet[107]使用标准平衡kd-tree.点特征先在local cue和global context cue上用MLP学习.然后非叶节点特征由子节点MLP和max-pooling得到.
+    \item SO-Net[108],kNN by 点到节点搜索.使用一个修改的,轮换不变的SOM来建模点云空间分布.点特征来自正则化的点-结点坐标+一系列fc层.SOM中每个节点特征有和它相连的点的按channel max-pooling得到.最终的特征类似于PointNet来学习.
+\end{itemize}
+\subsubsection{其它方法}
+
+\begin{itemize}
+    \item RBFNet[113] 使用稀疏分布的RBF核(位置核尺寸可学习),并聚合特征.
+    \item 3DPointCapsNet[112] MLP学习点的独立特征,使用逐点MLP和卷积层,并用多个max-pooling来提取全局隐含表示. (?)基于无监督动态routing(这是个基于capsule的net!),接着学习latent capsules.
+    \item PointDAN[116],端到端无监督domain-adaptive net. 
+    \item \ [117],使用自监督方法重建点云来捕捉语义信息,且其部分被随机重排.
+    \item PointAugment[118], 一个自动数据增强框架. 具体来讲,对于每个输入样本,学习按形状的变换和按点的替换.网络根据优化它的增强器(augmentor)和分类器训练.
+    \item ShapeContextNet[109], 组合了affinity point sel.+紧特征聚合于软对齐操作(soft align. op.),使用点积形式的自注意力机制[120].
+    \item 为了处理噪声和occuluion(遮挡?), [121]使用了手写的点配对函数(基于4D旋转不变descriptor),得到4D的CNN.
+    \item \ [122]首先在单位球里均匀采样一个基点集合,然后把点云作为到基点集合的距离来编码(相当于多极坐标).这样点云中就变成了一个短定长向,在用传统方法处理.
+    \item RCNet[115], RNN+2D-CNN以建立一个轮换不变的网络.点云分割为平行的束(beams),然后按某特定维度排序,然后每个束送到一个共享的RNN中.学到的特征再传到一个2DCNN中进行层级特征聚合.RCNet-E采用聚合多个不同方向和不同分割的RCNet模型来提高性能.
+    \item Point2Sequences[114]也基于RNN,捕捉不同局部区域间的互相关.它考虑各局部区域在多尺度上学习到特征,并且视为序列送到基于RNN的E-D(编码器-解码器)结构上来聚合局部区域特征.
+\end{itemize}
+
+一些方法同时在3D点云和2D图像中学习,
+\begin{itemize}
+    \item PVNet[110],从multi-view图像中提取的高阶特征通过一个嵌入网络(embedding net.)被投影到点云的子空间里,并通过一个软注意力(soft attention)mask和点云特征嵌合(fuse).最后,一个residual层应用在在嵌合特征和多视图特征上来进行形状分类.
+    \item PVRNet[111],通过一个关系打分模块,利用点云和2D视图们的关系.
+\end{itemize}
+
+\subsection{总结}
+
+Model10/40数据集是最常用的3D形状分类数据集,
+一些观察:
+\begin{itemize}
+    \item 逐点MLP常常是其他网络的基本模块.
+    \item 基于卷积的方法能在不规则3D点云上达到很好的性能.我们应该更多关注离散/连续卷积网络.
+    \item 由于其内蕴的处理不规则数据的能力,GNN这几年用得多了起来.但是谱域方法难以跨域是一个大问题.
+\end{itemize}
+
+\section{3D 对象检测和追踪}
+
+\subsection{3D对象检测}
+
+输入:3D场景点云,输出:有取向的3D范围盒(bounding box).算法可分为
+\begin{enumerate}
+    \item 基于区域提案的(region proposal-based):首先提出一些可能的区域(称为提案),再每区域地提取特征,来决定label.根据提案生成方法,分为:基于多视图的,基于分割(segmentation)的,基于(?)视锥体的(frustum).
+    \item 单步的(single-shot):直接通过一个阶段的网络得出结果,通过直接预测类属的概率和回归3D范围盒,不需要提案生成和后处理,所以可以高速推理.分类:基于BEV的,基于离散化的,基于点的.
+\end{enumerate}
+\subsubsection{基于区域提案的方法}
+
+\bt{基于多视图}  这些方法每提案地把不同的视图中的特征嵌合(e.g. LiDAR正面视图,BEV(Bird's Eye View),图像)来得到3D取向盒,TC常常很高.
+
+
+[4]从BEV图上生成高精度的候选盒子,再投影到多视图的特征图上(如RGB图,LiDAR正面图),最终结合这些每区域的特征来预测取向的3D盒子.这个方法达到了99.1\%的召回率(recall)以及再仅仅300个提案上0.25的IoU!但是非常慢,难以进入使用领域,故发展从两个方面发展别的方法来改进.
+
+\begin{enumerate}
+    \item 提出了快速嵌合不同模态的信息的方法
+    \begin{itemize}
+        \item \ [126]多模态融合的区域提案方法.从BEV和图像视图使用剪切和缩放提取等大小的特征,再用每元素-pooling嵌合特征.
+        \item \ [127]使用了连续卷积来嵌合不同分辨率的LiDAR特征图,具体上说,对于每一个BEV空间的点,提取了最近的相应图像特征(nearest corresponding image feature),使用双线性内插来和到BEV平面的投影来得到紧密的BEV特征图(dense BEV feat. map).
+        \item \ [128]提出多任务-多感知器的3D对象检测网络.多个任务被用于增强性能(2D对象检测,深度补全和地面估计)~多模态!实验证明这提高了性能(2D/3D检测和BEV检测).
+    \end{itemize}
+    \item 不同的方法用于从输入中提取健壮的特征.
+    \begin{itemize}
+        \item \ [39]探索了多尺度上下文信息,通过SCA模块(Spatial Chan. Atten.)在一个场景中捕捉全局和多尺度上下文来高亮有用的特征.提出了ESU(Extended Spatial Unsample)模块来得到rich-spatial的高阶repr.和低阶表示的融合.这很花时间,因为要为每个proposal进行特征池化.
+        \item \ [131]接着提出了pre-RoI来提高池化效率.具体地说,他们把卷积全部移到了池化之前,池化对于所有提案执行一次.~11.5fps, 5倍于MV3D[4].
+    \end{itemize}
+    
+\end{enumerate}
+
+\bt{基于分割的方法}:这些方法先用分割的方法移除大多数的背景点,再产生大量高质量的提案,来节省计算.和多视图方法比,有更高召回率,更适合复杂和封闭-拥挤的场景.
+\begin{itemize}
+    \item \ [132]使用2D分割网络来预测前景像素,并把他们投影到点云上来去除背景点.然后提出基于这些点提出提案,并设计了PointsIoU来减少提案的重复性和模糊性.
+    \item \ [133]接着提出了PointRCNN框架,他们直接分割点云来得到前景点,再把语义特征和局部空间特征嵌合来得到高质量3D盒子.
+    \item 接着[133]的RPN(Region Proposal Net.),[134]提出了使用GCN来进行3D对象检测的先驱性工作.具体地说,提出了两个模块来改善提案:R-GCN使用提案中的所有提案来得到每提案的特征聚合,C-GCN用于嵌合所有提案的每帧的信息来回归一个精确的盒子.
+    \item \ [135]把点云投影到2D分割网络的输出,把语义预测分数加到点上.改进的点云送到已有的检测器[133,136,137]里来得到显著性能提升.
+    \item \ [138]每个点联系一个球面锚点(spherical anchor),并且每个点的语义分数用于移除多余的锚点.这个方法大大降低计算复杂度(和[132, 133]相比). PointsPool层被提出来从提案的内点学习紧的特征,一个平行的IoU分支用于改善局域化精度和检测精度.
+\end{itemize}
+
+\bt{基于锥体的方法}\ 这些方法先利用2D对象检测器生成2D候选区域,再每候选区域生成一个3D锥体区域提案.快速,但性能有限.
+
+\begin{itemize}
+    \item F-PointNets[139(F-PointNets)]~先驱性工作,为每个2D区域生成锥体提案,用PointNet(or PN++)来学习点云表示,来进行无模态(amodal)盒子估计.
+    \item Point-SENet[140(SIFRNet)]模块来预测一些尺度因子载每特征上,并用PointSIFT[141]模块来捕捉点云的取向,来达到对形状放缩的健壮性.相比于F-PointNets,大大提高了性能.
+    \item \ [142(PointFusion)] 使用2D图片区域和对应的锥体区域来精确回归3D盒子.使用了一个全局嵌合网络来嵌合点云特征和图像特征来回归盒子的角落点.还提出了一个dense-net. 来预测盒子角落的偏移.
+    \item \ [143(RoarNet)] 先从2D图像估计3D对象的2D边界盒和3D姿势,再从中提取多个集合可行的对象候选.这些候选送到一个3D盒子回归网络来预测精确3D盒子.
+    \item \ [144(F-ConvNet)] 每2D区域生成了一系列沿着锥轴的锥体,再用PN提取每个锥体的特征.锥级的特征重组生成2D特征图,再送到全卷积网络(fully convolutional net.)来估计3D盒子. 这个方法再当时是基于2D图片的SOTA(KITTI的排行榜).
+    \item  \ [145(Patch Refinement)] 先再BEV获得初步检测结果,再基于这些预测提取小点集(i.e. patches).一个局部refinement net. 用于学习patch的局部特征并预测高精度的3D盒子.
+    
+\end{itemize}
+
+\bt{其它方法}\ 
+
+\begin{itemize}
+    \item 启发于图片中对象检测的轴对齐IoU的成功, [146(3D IoU Loss)]把两个3D旋转盒子的IoU结合到SOTA检测器上([134, 137, 158])来得到一致的性能提升.
+    \item \ [147(Fast Point R-CNN)]提出两阶段网络,使用点云和体素表示.首先,体素表示送到3D骨架网络(3D backbone net.)来产生初始检测结果,然后初始预测的内点特征用于进一步得到精细的盒子边界.虽然概念上很简答,但是和[133]有类似性能~16.7fps
+    \item \ [148] 提出PointVoxel-RCNN(PV-RCNN),使用3D-CNN和基于PN的集合抽象(set abstraction)来学习点云特征.具体上,体素化的点云被送到3D-稀疏CNN上来得到高质量提案.之后学到的每体素的特征编码成一个关键点的小子集,使用体素集合抽象模块(voxel set abstraction).此外,还提出了关键点到格点(keypoint-to-grid)的ROI抽象模块,来提取丰富的上下文信息,用于盒子精细化. 在Car类KITTI 3D检测中排行第一(2020.6.12)
+    \item 启发于基于Hough Voting的2D对象检测,[124]提出VoteNet来直接投票出一个对象的点云的虚拟中心,以及用聚合投票特征(vote feature)来得到一组高质量的提案.它显著超越了其它只用几何信息的方法(在室内数据集ScanNet, SUN RGB-D),但是在部分阻挡的物体上不稳定.
+    \item \ [149]进一步加入了方向向量的辅助分支,用于改进虚拟中心点的预测精度和3D候选盒子,并建立了3D对象提案间的关系图来对于精确目标检测强调有用的特征.
+    \item \ [150] 提出了ImVoteNet检测器,通过嵌合2D对象检测线索(cue)(如几何线索和语义-纹理线索)到3D投票管线中.受到3D对象ground truth盒子提供了精确的内-对象组件的精确位置.
+    \item \ [151]提出了Part-$A^2$网络,由part-aware步和part-aggregation步组成.part-aware阶段使用UNet-like[163] net.和稀疏卷积-反卷积来学到点特征用预测和内-对象的部件位置的粗略生成.part-aggr.阶段使用RoI-aware池化来聚合得到预测的部件位置用于盒子精细化.
+\end{itemize}
+
+\subsubsection{一次性方法(Single-Shot Methods)}
+
+这些方法使用一阶段网络直接预测(在点上)类概率和回归3D盒子\trarr 无需提案,高速.三类:基于BEV,基于离散化,基于点.
+
+\bt{基于BEV} 这些方法把BEV表示作为输入.
+
+\begin{itemize}
+    \item \ [129]把点云用均匀的格子离散化,再把反射率(reflectance)做同样处理,得到一个正规表示(reg. repr.).一个FCN(Fully Conv. Net.)用于估计对象的位置和方向角,这个方法已经在表现上超过了大多数一步法(VeloFCN[154], 3D-FCN[155], Vote3Deep[156]),28.6fps.
+    \item \ [152]利用了几何和语义先验(来自High-Definition/HD maps)来提高[129]的健壮性和性能.具体上,它们从HD map中得到了基准点(ground points)的坐标,然后使用BEV表示到基准点的距离来克服地面斜率带来的平移偏差.此外,concat了二值路面遮罩(binary road mask)到了BEV表示的channels上来只关注移动的对象.HD map不总是可用的,他们还提出了一个通过LiDAR点云估计图先验的在线图预测模块.这个map-aware方法显著优于基线(on TOR4D,KITTI).对于不同密度的点云的泛化能力效果差.
+    \item 进一步, [153]使用正则化图(map)来考虑不同LiDAR传感器的差异.正则化图是和BEV图一样分辨率的2D格子,编码了每个单元包含的最大点数.显著提高了泛化能力.
+\end{itemize}
+
+\bt{基于离散化} 把点云转换成离散表示,然后使用CNN来预测对象的3D盒子和类别.
+
+\subsection{3D对象追踪}
+\subsection{3D场景流估计}
+\subsection{总结}
+
+\section{3D 点云分割}
+
+\subsection{3D 语义分割}
+\subsection{3D 实例分割}
+\subsection{3D 部分分割}
+\subsection{总结}
+
+\subsection{略语表}
+\begin{itemize}
+    \item repr. \trarr representation
+    \item net. \trarr network
+    \item feat. \trarr feature
+    \item conv. \trarr convolution/convolutional
+    \item reg. \trarr regular/regularized
+    \item 
+\end{itemize}
+
+\end{document}
