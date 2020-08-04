@@ -320,7 +320,43 @@ Model10/40数据集是最常用的3D形状分类数据集,
 
 \bt{基于离散化} 把点云转换成离散表示,然后使用CNN来预测对象的3D盒子和类别.
 
+\begin{itemize}
+    \item \ [154]提出了第一个用FCN作3D对象检测的方法.他们把点云转换成2D点图,再用FCN来预测边界盒子和物体信度(confidence of obj.).
+    \item 之后, 他们在[155]中离散化点云到一个4D张量:(Length,Width,Height,Channels),然后把基于2D-FCN的检测技术扩展到3D上(3D-FCN),较[144]提到20\%精度,但TC更高,由于3D卷积和数据的稀疏性.
+    \item 为了解决稀疏性的问题, [156]使用了一个"特征中心的投票方案" (feature-centric voting scheme)来对每个非空体素生成一些投票,并使用投票来获得卷积结果.TC正比于非空体素数.
+    \item \ [157]使用堆叠的3D稀疏CNN层得到3D骨架网络,利用体素的稀疏性来加速计算和节省内存.
+    \item \ [136]提出了基于提速的端到端可训练架构VoxelNet.他们把点云分割成等距分布的体素,然后再4D张量中编码每个体素的特征.一个RPN接着用于产生结果.效果很强,但是性能很差(由于体素稀疏性和3D卷积).
+    \item 之后, [158]使用稀疏CNN[166*]来提高[136]的推理效率,他们还提出了正弦误差角度损失(sine-error angle loss)来区分取向$0$和$\pi$之间的模糊性.
+    \item \ [159]扩展了VoxelNet,通过在早期阶段嵌合图像和点云特征.具体上,把非空体素(by [136])投影到图片上,并使用预训练的网络来为每个体素提取图像特征.这些图片特征接着concat到了体素特征上来产生精确3D盒子,相较于[136][158],这个方法可以利用多模态信息,提高正确率.
+    \item \ [137]提出了PointPillars,使用PN学习一个垂直列(pillar)中的点特征,然后编码学到的特征为伪图像.再连接一个2D对象检测管线来预测3D边界盒子.性能超过了大多数嵌合方法(MV3D[4],RoarNet[43], AVOD[126], on AP(Average Precision)). 且能在3D和BEV-KITTI上以62fps运行\trarr 实用领域!
+    \item \ [160]启发于局部空域信息会在降采样中丢失,SA-SSD检测器使用细粒度结构信息来改进局域化精度. 具体上,他们将点云转换成一个张量,再送到骨架网络来提取多阶段特征.一个辅助网络(点级监督)用于指导学习点云结构的特征.是KITTI BEV Car类性能最高的.
+\end{itemize}
+
+\bt{基于点} 直接把点云作为输入.
+
+\begin{itemize}
+    \item 3D-SSD~先驱工作.为Distance-FPS/D-DPS和Feature-FPS/F-FPS使用嵌合采样策略来去除[133]花费时间的FP层(Feature Propagation)和精细化模块.接着CG(candidate generation)层用于探索代表点,这又和3D中心度标签一起被接着送到无锚点回归头部(anchor-free regression head)(网络)来预测3D盒子.超过[133]PointRCNN性能,25fps.
+\end{itemize}
+
+\bt{其他方法} 
+\begin{itemize}
+    \item \ LaserNet[162], 为每个点预测边界盒的pdf,再利用这些逐点的pdf来生成最终的3D盒子. 点云的dense Range View(RV)表示用于输入,一个快速的mean-shift算法用于降低逐点预测产生的噪声.较快速,0-50m SOTA.
+    \item 接着,[163]使用RGB图像提供的紧密纹理(dense texture).具体上,通过投影3D点云到图像上来关联了LiDAR点和图像像素,并且使用这种关联来嵌合RGB信息到点云上.也考虑了3D语义分割作为附属任务来学到更好的表示. 能显著提高长距(50-70m)性能,保持高性能.
+    \item Hotspot表示[164]和基于hotspot表示的无锚点检测器.具体上,原3D点云首先体素化,再送到骨架网络来得到3D特征图,这些特征图用于同时分类hotspot和预测3D盒子.hotspot再骨架网络的最后一个卷积层被指定. 对稀疏点云健壮.
+    \item \ [125]提出Point-GNN来检测3D对象. 先把输入点云作$\varepsilon$-NN图,作为输入,再把图送发哦Point-GNN中来预测物体边界和类别
+\end{itemize}
+
 \subsection{3D对象追踪}
+
+给出第一帧中的对象位置,任务是再之后的帧中追踪其运动. 相比基于图像的追踪,3D追踪技术可以客服一些局限性,如遮挡,发光和尺度变化.
+
+\begin{itemize}
+    \item 启发于[169] Siamese Net.在图像对象追踪的成功, [170]提出了3D Siamese网络,使用形状补全正规化(shape completion reg.). 具体上,用Kalman滤波来产生候选,再把模型和候选用形状正规化编码到一个紧表示. 余弦相似度用于搜索下一帧的被追踪对象位置. 表现大大超过2D对象追踪方法($STAPLE_{CA}$, SiamFC).
+    \item 为了有效搜索对象, [172]使用2D Siamese网络来BEV表示上生成大量粗糙的对象候选.
+\end{itemize}
+
+
+
 \subsection{3D场景流估计}
 \subsection{总结}
 
