@@ -1,0 +1,30 @@
+\contentsline {section}{\numberline {1}背景}{2}%
+\contentsline {subsection}{\numberline {1.1}Datasets}{2}%
+\contentsline {subsection}{\numberline {1.2}Eval. Metrics}{2}%
+\contentsline {section}{\numberline {2}3D形状分类}{3}%
+\contentsline {subsection}{\numberline {2.1}多视野(multi-view)方法}{3}%
+\contentsline {subsection}{\numberline {2.2}Volumetric Methods}{3}%
+\contentsline {subsection}{\numberline {2.3}点方法}{4}%
+\contentsline {subsubsection}{\numberline {2.3.1}逐点MLP}{4}%
+\contentsline {subsection}{\numberline {2.4}卷积方法}{5}%
+\contentsline {subsubsection}{\numberline {2.4.1}3D连续卷积方法}{5}%
+\contentsline {subsubsection}{\numberline {2.4.2}3D离散卷积方法}{6}%
+\contentsline {subsection}{\numberline {2.5}图方法}{7}%
+\contentsline {subsubsection}{\numberline {2.5.1}时域/空域图方法}{7}%
+\contentsline {subsubsection}{\numberline {2.5.2}频域图方法}{7}%
+\contentsline {subsubsection}{\numberline {2.5.3}层次数据结构方法}{8}%
+\contentsline {subsubsection}{\numberline {2.5.4}其它方法}{8}%
+\contentsline {subsection}{\numberline {2.6}总结}{9}%
+\contentsline {section}{\numberline {3}3D 对象检测和追踪}{9}%
+\contentsline {subsection}{\numberline {3.1}3D对象检测}{9}%
+\contentsline {subsubsection}{\numberline {3.1.1}基于区域提案的方法}{10}%
+\contentsline {subsubsection}{\numberline {3.1.2}一次性方法(Single-Shot Methods)}{12}%
+\contentsline {subsection}{\numberline {3.2}3D对象追踪}{14}%
+\contentsline {subsection}{\numberline {3.3}3D场景流估计}{14}%
+\contentsline {subsection}{\numberline {3.4}总结}{15}%
+\contentsline {section}{\numberline {4}3D 点云分割}{15}%
+\contentsline {subsection}{\numberline {4.1}3D 语义分割}{15}%
+\contentsline {subsection}{\numberline {4.2}3D 实例分割}{15}%
+\contentsline {subsection}{\numberline {4.3}3D 部分分割}{15}%
+\contentsline {subsection}{\numberline {4.4}总结}{15}%
+\contentsline {subsection}{\numberline {4.5}略语表}{15}%

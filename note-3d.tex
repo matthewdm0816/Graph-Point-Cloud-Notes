@@ -352,13 +352,33 @@ Model10/40数据集是最常用的3D形状分类数据集,
 
 \begin{itemize}
     \item 启发于[169] Siamese Net.在图像对象追踪的成功, [170]提出了3D Siamese网络,使用形状补全正规化(shape completion reg.). 具体上,用Kalman滤波来产生候选,再把模型和候选用形状正规化编码到一个紧表示. 余弦相似度用于搜索下一帧的被追踪对象位置. 表现大大超过2D对象追踪方法($STAPLE_{CA}$, SiamFC).
-    \item 为了有效搜索对象, [172]使用2D Siamese网络来BEV表示上生成大量粗糙的对象候选.
+    \item 为了有效搜索对象, [172]使用2D Siamese网络来BEV表示上生成大量粗糙的对象候选.再使用3D-Siamese 网络的余弦相似度来精细化预测. 效果显著好于[170](精度18\%和成功率12\%)
+    \item \ [173]提出了语义点云的追踪方法.具体上,先体素化语义点云+嵌合2D语义信息, 使用时域信息来提高多对象追踪的精度和健壮性. 提出了强大且简单的eval. methods(SRFs?, Scale-Rotation-Translation score)来提高训练和推理速度. Complexer-YOLO达到实时速度和不错的性能.
+    \item \ [174] 进一步提出Point-to-Box(P2B) 网络. 把模板和搜索空间送到骨架网络得到种子(seeds) . 搜索空间种子用目标特定的特征增强, 潜在目标中心用Hough Voting回归得到. 比[170]高10\%, 40fps.
 \end{itemize}
 
-
-
 \subsection{3D场景流估计}
+
+给出两个点云X和Y,3D场景流是$D=\{d_i\}^N$描述了X中点$x_i$移动到Y中点$x_i'=x_i+d_i$的位移.
+
+\begin{itemize}
+    \item \ [175]FlowNet3D直接从一对连续的点云中学习场景流.FlowNet3D通过流嵌入层学习点级特征和运动特征.两个问题: 部分运动向量大大偏离ground truth, 难以应用到非静态场景,特别是又可变性物体主导的场景.
+    \item 为了解决这些问题, [176]提出了余弦距离损失来最小化预测和ground truth的夹角.他们还提出了点到平面损失(point-to-plane loss)来提高刚性/动态场景.
+    \item \ [177] 提出Hierarchical Permutohedral Lattice FlowNet(HPLFlowNet)来直接从大尺度点云中估计流.提出了一些双边卷积层用于从点云重构结构信息,同时降低TC.
+    \item 为了高效处理点云序列,[178]~PointRNN, PointGRU, PointLSTM和提出了seq2seq模型来追踪移动的点. PointRNN, PointGRU, PointLSTM用于捕捉时空信息和建模动态点云.
+    \item 类似地, [179]使用MeteorNet直接从动态点云学习表示. 学习从时空邻域的点中聚集特征. 直接组队和链式流组队进一步用于决定时域邻接点. 性能受数据集尺寸限制.
+    \item \ [180] 提出了两个自监督损失来再大型无标注数据集上训练. 主要想法是:一个健壮的场景流估计方法必须要在正向和逆向估计中都有效. 被预测的点变形后最邻近的点看作了伪ground truth, 然而这不一定准确, 所以又计算了反向的场景流并提出了循环相容性loss(经过循环后把点移回原点).实验结果显示达到了有监督的SOTA水平.
+\end{itemize}
+
 \subsection{总结}
+
+KITTI是自动驾驶中最有影响力的数据集. 一些观察:
+\begin{enumerate}
+    \item RPN方法最被深入研究了, 大幅度领先一步法.
+    \item 现有方法的局限:长距离的检测能力相对较弱, 如何利用图片中的纹理信息还是open prob.
+    \item 多任务学习是未来方向,如MMF[128]结合多个任务来学习跨模态表示来得到SOTA性能.
+    \item 3D对象追踪和场景流估计是新领域, 2019年开始逐渐吸引研究.
+\end{enumerate}
 
 \section{3D 点云分割}
 
