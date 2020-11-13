@@ -1,0 +1,140 @@
+\documentclass{article}
+\input{heads.tex}
+\title{\textbf{Notes on 音乐与数学}}
+\author{Matthew Mo}
+\date{\today}
+\input{note_style.tex}
+\begin{document}
+\maketitle
+\section*{ }
+\label{contents}
+\tableofcontents
+
+\section{Basics}
+
+    和谐的音程: \begin{itemize}
+        \item 1:1 ~ 同度
+        \item 2:1 ~ 八度
+        \item 3:2 ~ 纯五度
+        \item 4:3 ~ 纯四度
+        \item 5:4 ~ 大三度(理想)
+    \end{itemize}
+
+\subsection{节奏:音乐的时间形式}
+    音乐的要素: 节奏, 旋律, 和声
+    
+    \bt{Def.} 节奏是乐音时值的有组织的顺序\dots
+
+    \bt{Note} 区分节拍和节奏
+    
+    \bt{Def.} 节拍... 2/4 etc.
+
+    \bt{Def.} 固定节奏型(rythmic orisnato). ``拍''(pulse):十六分音符.
+
+    \bt{Prop.} 极大均衡原则: 在所有的拍上,起拍应该尽量均匀.
+
+    \bt{Def.} ``圆周上的几何节奏模型''
+
+    \bt{Prop.} 节奏奇性: 圆周上起拍对位不是起拍.
+
+    \bt{Def.} 距离序列: 起拍之间的间隔序列.
+
+    听觉系统对绝对时间差相对不敏感, 对相对变化敏感 \trarr
+
+    \bt{Def.} 轮廓(Contour):节奏间隔变化的序列; 轮廓同构: 若节奏型可以通过循环轮换等价\dots 
+
+    \bt{Def.} 影子节奏. 古巴颂节奏轮廓同构于影子节奏轮廓!
+\subsection{旋律与对称}
+    \bt{Def.} 旋律(melody): 不同音高组成的序列. *旋律应遵循对称原则
+ 
+    重复与变化!
+
+    \bt{旋律的变化:移调(transposition)} 分为\bt{严格移调}和\bt{调性移调}.
+
+    \bt{旋律的变化:逆行(retrograde), 倒影(...)}
+    
+    这些都是旋律的某种对称. 传统调性音乐对这些对称的应用进行限制.
+
+    对称是美的重要来源. 群论用于研究对称.
+
+\section{成绩}
+
+成绩评定:平时 20' 期中研究 30' 期末闭卷考试 50'
+
+教材:音乐与数学.
+
+``基本乐理通用教材,李重光'', ``数学与音乐,周明儒''
+
+个人网页 | 北京大学电子教参平台
+
+``TheEnjoymentofMusic - A Glossory''
+
+\section{音乐基本知识}
+\subsection{音乐的诸要素}
+    音乐:\dots .声音是音乐的载体, 声波是纵波. 
+    音乐的要素: 
+    \begin{enumerate}
+        \item 频率\trarr 音高(pitch);
+        \item 空气压力 \trarr 力度;
+        \item 时间长度 \trarr 时值(durations);
+        \item 波形 \trarr 音色(timbre).
+    \end{enumerate}   
+
+    音乐会音高 440Hz - Center C
+
+    力度: 20微帕=0dB@1kHz. SPL:$L_p=20\log (p/p_0)$. HRTF/等响曲线
+
+    音色: 泛音(overtone), 波形(waveform), 频谱(spectrum)决定了音色.
+
+    乐音体系: 乐音(musical tone)与噪音(noise). 有组织的噪音(organized noise). 打击乐器中也有有固定音高(木琴,定音鼓)和无固定音高的乐器(嚓, 锣, 小军鼓). 每一个音有一个音名(pitch name): CDEFGAB, 是基本音级. 在每个八度(octave)里循环使用, 分为了若干音组. 变音符号 \trarr 变化音级(升降号, 重升降号, 还原号). 异名同音:两个音名有相同音高 \trarr 等音的(enharmonic). 唱名:do re mi fa so la si, mi-fa, si-do之间是半音. 首调唱名法(movable do), $1=X$.
+\subsection{乐谱}
+    
+    记谱法(notation), 五线谱. 非线性坐标系! 音符: 符头, 符干, 符尾. 音符代表的时值是相对长度 ~ 取决于拍子. 谱号(clef), 常用的有高音谱号(二线为$G_4$), 低音谱号(冒号中心为四线$F_3$), 这二者的上/下加一线为中央C; 中音谱号(次中音谱号...). 谱号+五线谱 \trarr 谱表(staff). 
+    变音记号: 谱号后面的调号(key signature), 在未改变调号之前都生效.
+
+    音程: 两个音级之间的距离称为音程(interval), 上方音(冠音)-下方音(根音); 度数(五线谱上的线和间的个数)+半音数决定了音程! 小二度(半音数为1),大二度(半音数为2); 小三度(和谐? 半音数为3), 大三度(半音数为4);纯四度(半音数为5, 和谐!), 增四度(半音数为6, 三全音); 减五度(半音数为6), 纯五度(半音数为7, 和谐?); 小七度(11), 纯八度(12), 纯一度(0). 自然音程(diatonic interval): 两边都是白键, 自然音程增减半音变为变化音程.大/纯增一个半音为增音程, 小/纯减一个半音为减音程. 
+    
+    (不)协和(consonant)音程: 纯五度最和谐开始; 和谐: 纯四/五/八(完全协和), 大小三/六度(不完全协和), 其他不协和.
+    
+    练习: 练耳程序-协和程度 | 预习教材第二章
+
+    泛音列重合理论.
+
+\section{音乐的数学理论}
+\begin{flushleft}
+    乐器的分类: 气鸣乐器, 弦鸣乐器, 电鸣乐器, 体鸣乐器, 膜鸣乐器.
+
+    振动满足Laplace初值问题
+    \begin{equation}
+        \begin{aligned}
+            &\frac{\partial^2 u}{\partial t^2} = c^2 \sum_{i} \frac{\partial^2 u}{\partial x_i^2}\\
+            &u|_{\partial \Omega} = 0
+        \end{aligned}
+    \end{equation}
+    一维振动方程的解
+    \begin{equation}
+        \begin{aligned}
+        u(x, t) &=\sum_{n=1}^{\infty} u_{n}(x, t) \\
+        &=\sum_{n=1}^{\infty} \sin \left(\frac{n \pi}{L} x\right)\left(a_{n} \cos \frac{n \pi c}{L} t+b_{n} \sin \frac{n \pi c}{L} t\right)
+        \end{aligned}
+    \end{equation}
+
+    \begin{theorem}
+        (Mersenne) $$f_1=\frac{1}{2L}\sqrt{\frac{T}{\rho}}$$
+    \end{theorem}
+
+    称$f_1$为基音, $f_n$为$n-1$泛音, 都是基频的倍频, 总共称为泛音列.
+
+    拨弦振动(L/2处)的Fourier级数阶 \trarr 只有奇次谐波!
+    \begin{equation}
+        \begin{aligned}
+        u(x, t) &=\sum_{n=1}^{\infty} a_{n} \sin \left(\frac{n \pi}{L} x\right) \cos \left(\frac{n \pi c}{L} t\right)(1) \\
+        &=\sum_{k=0}^{\infty}(-1)^{k} \frac{8}{(2 k+1)^{2} \pi^{2}} \sin \left(\frac{(2 k+1) \pi}{L} x\right) \cos \left(\frac{(2 k+1) \pi c}{L} t\right)
+        \end{aligned}
+    \end{equation}
+
+    管乐器的空气柱边界条件不确定, 往往调音(端口校正, end correction)需要靠听. 不计端口校正, 开口处为波腹, 闭口处必为波节. 故开管乐器$\lambda_n=\frac{2L}{n}, f_1=\frac{v}{2L}, f_n=nf_1$, 闭管乐器$\lambda_n=\frac{4L}{n}, n\text{为奇数}, f_1=\frac{v}{2L}, f_n=nf_1$, 只有奇数次谐波
+
+
+\end{flushleft}
+\end{document}

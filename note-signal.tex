@@ -1,0 +1,177 @@
+\documentclass{article}
+\title{\textbf{Notes on 信号与系统}}
+\author{Matthew Mo}
+\date{\today}
+
+\input{heads.tex}
+\input{note_style.tex}
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Basics}
+
+    \bt{Contents: Signal Proc.}
+    \begin{enumerate}
+        \item Intro to Signal Processing
+        \item 线性时不变系统时域分析/Temporal Ana. of Linear Time-Invariant System
+        \item Fourier Analysis
+        \item Laplace Transform
+        \item Z Transform
+        \item DFT and FFT
+    \end{enumerate}
+    
+    \bt{Contents: System}
+    \begin{enumerate}
+        \item 线性时不变系统分析
+        \item 数字滤波器设计
+        \item 数字滤波器结构
+        \item 有限字长效应的统计分析
+    \end{enumerate}
+
+    \bt{Grades}
+    \begin{itemize}
+        \item 出席 5' 课堂讨论 5' 
+        \item 作业 30'
+        \begin{itemize}
+            \item 课后网上发布, 一周后随堂提交.
+        \end{itemize}
+        \item 考试 60'
+    \end{itemize}
+
+\section{Signals}
+
+\subsection{Common Continous Signals}
+
+    \bt{Exponential} \begin{align}
+        &f(t)=K \exp(at)\\
+        &\where \tau = \frac{1}{|a|}\text{是时间常数}
+    \end{align}
+ 
+    \bt{Sine} \begin{align}
+        &f(t)=K \sin (\omega t+\theta)\\
+        &\where T = \frac{2\pi}{\omega}s
+    \end{align}
+
+    \bt{Complex Exponential} \begin{align}
+        &f(t)=K \exp(st)
+    \end{align}
+
+    \bt{Sa/抽样函数} \begin{align}
+        f(t) &= \frac{\sin t}{t}\\
+        \int_\R f(t)dt&=\pi, \int_{\R_+} f(t)dt=\pi/2
+    \end{align}
+
+    \bt{Gaussian} \begin{align}
+        &f(t) = E \exp(-\frac{t^2}{\tau^2})
+    \end{align}
+
+    \bt{Rectified Linear/ReLU} \begin{align}
+        &R(t) = \max(0, t)
+        &R(t) = \min(\tau, \max(0, t)) \text{截顶的ReLU}
+    \end{align}
+
+    \bt{Unit Leap/Heavside} \begin{align}
+        &u(t)=\begin{cases}
+            1, t > 0\\
+            1/2, t=0 \\
+            0, t<0
+        \end{cases}
+    \end{align}
+    
+    \bt{Square Impulse} \begin{align}
+        &G_\tau(t)=\begin{cases}
+            1, t\in (-\tau/2, \tau/2)\\
+            1/2, |t|=\tau/2\\
+            0, \text{otherwise}
+        \end{cases}\\
+        &G_\tau(t)=u(t+\tau/2)-u(t-\tau/2)
+    \end{align}
+
+    \bt{Sign} \begin{align}
+        &sgn(t)=\begin{cases}
+            1, t>0\\
+            -1, t<0
+        \end{cases}\\
+        &sgn(t) = 2u(t)-1
+    \end{align}
+
+    \bt{Dirac Delta} 一个广义函数/测度. \begin{align}
+        &\delta(t) = \begin{cases}
+            \infty, t=0\\
+            0, \text{otherwise}
+        \end{cases}
+    \end{align}
+    有性质\begin{align}
+        &\int_\R \delta(t)dt = 1\\
+        &\delta(at) = \frac{1}{|a|} \delta(t)\\
+        &\int_\R \delta_{t_0}(t) f(t) dt = f(t_0)
+    \end{align}
+    他的导数是一对正负冲激\begin{align}
+        \int_R \delta'_{t_0}(t) f(t)dt = -f'(t_0)
+    \end{align}
+
+\subsection{Discrete Time Signal}
+
+    \bt{Real/Complex Exponential} \begin{align}
+        &x[n] = A z^n
+    \end{align}
+
+    \bt{Unit Sampling/Leap} \begin{align}
+        \delta[n] &= \begin{cases}
+            1, n=0\\
+            0, n\not=0
+        \end{cases}\\
+        u[n]&=\begin{cases}
+            1, n\ge0\\
+            0, n<0
+        \end{cases}
+    \end{align}
+
+    \bt{Rectangular Seq.} \begin{align}
+        &R_N[n] = \begin{cases}
+            1, 0\le n < N \\
+            0, n\ge N
+        \end{cases}
+    \end{align}
+
+\subsection{Decompostion of Signals}
+
+    \bt{直流/交流分量} 记信号的平均值为直流分量
+    \begin{align}
+        &f_{DC} = \lim_{T\to \infty} \frac{1}{T} \int_{t\in [-T/2, T/2]} f(t)dt\\
+        &f_{AC} = f - f_{DC}\\
+        &P = f_{DC}^2 + \lim_{T\to \infty} \frac{1}{T} \int_{t\in [-T/2, T/2]} f_{AC}(t)^2 dt
+    \end{align}
+
+    \bt{奇偶分量} \begin{align}
+        &f(t) = g(t) + h(t),\\
+        \where &g(t)=\frac{1}{2} (f(t)+f(-t))\\
+        &h(t) = \frac{1}{2}(f(t)-f(-t))
+    \end{align}
+
+    \bt{R/C分量} \begin{align}
+        f(t) = \Re(f(t)) + \Im(f(t))
+    \end{align}
+
+    \bt{Impulse/Leap Decomp.} \begin{align}
+        f(t)&=\int^t_0 f(\tau) \delta(t-\tau)d\tau\\
+        &=f_{[0..t]} * \delta\\
+        f(t) &= f(0)u(t) + \int^t_0 f'(\tau) u(t-\tau)d\tau
+    \end{align}
+
+    \bt{Orthogonal Decomp.}
+
+\subsection{Classifications of Signals}
+
+    \begin{enumerate}
+        \item 连续/离散
+        \item 奇偶
+        \item 确定性/随机性
+        \item 周期/非周期
+        \item 因果/反因果/非因果:仅在$\R_+/\R_-/\R$有信号
+        \item 实/复信号
+        \item 能量/功率有限信号
+    \end{enumerate}
+
+\end{document}
