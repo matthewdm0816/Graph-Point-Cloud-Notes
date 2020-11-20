@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2020.10.29)  20 NOV 2020 16:20
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2020.10.29)  20 NOV 2020 17:15
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -843,28 +843,24 @@ Overfull \hbox (1.79666pt too wide) in paragraph at lines 1981--1982
 []\TU/lmr/m/n/10.53937 GCN \TU/FandolSong-Regular(0)/m/n/10.53937 随 着 层 数 增 加\TU/lmr/m/n/10.53937 , \TU/FandolSong-Regular(0)/m/n/10.53937 特 征 的 平 滑 度 缓 慢 下 降\TU/lmr/m/n/10.53937 , \TU/FandolSong-Regular(0)/m/n/10.53937 但 准 确 度 迅 速 下 降 \TU/lmr/m/n/10.53937 (\TU/FandolSong-Regular(0)/m/n/10.53937 数 层\TU/lmr/m/n/10.53937 ). \TU/FandolSong-Regular(0)/m/n/10.53937 这 可 能 是 由 于 \TU/lmr/m/n/10.53937 propag.
  []
 
-[59] [60] [61]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2159.
- [62]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2159.
+[59] [60] [61] [62] [63] [64]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2271.
+ [65]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2271.
  (./note-papers.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2159.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2159.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2271.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2271.
 Package rerunfilecheck Info: File `note-papers.out' has not changed.
-(rerunfilecheck)             Checksum: 1040A9327A86B8192ACEBF1571DEFB2C;19866.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2159.
+(rerunfilecheck)             Checksum: 065492AB0B3E38DC61A13ACA315D39EA;20566.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2271.
  ) 
 Here is how much of TeX's memory you used:
- 19011 strings out of 479819
- 367606 string characters out of 5895845
- 731960 words of memory out of 5000000
- 35743 multiletter control sequences out of 15000+600000
+ 19012 strings out of 479819
+ 367623 string characters out of 5895845
+ 732689 words of memory out of 5000000
+ 35744 multiletter control sequences out of 15000+600000
  548615 words of font info for 124 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  59i,19n,74p,601b,531s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on note-papers.pdf (62 pages).
+Output written on note-papers.pdf (65 pages).

@@ -2126,6 +2126,25 @@ Dual-Tree Algorithms: 使用cell-cell距离来进一步减少计算.
 
 \section{Autoregressive Flows}
 
+Planar Flow
+\begin{equation}
+    f(\mathbf{z})=\mathbf{z}+\mathbf{u} h\left(\mathbf{w}^{T} \mathbf{z}+b\right)
+\end{equation}
+行列式为
+\begin{equation}
+    \left|\operatorname{det} \frac{\partial f}{\partial \mathbf{z}}\right|=\left|1+\mathbf{u}^{T} h'(\bs w^T \bs z+b)\bs w\right|
+\end{equation}
+可以看做空间中的超平面, 收缩或者扩张其附近的空间.
+
+Radial Flow
+\begin{equation}
+    f(\mathbf{z})=\mathbf{z}+\beta h(\alpha, r)\left(\mathbf{z}-\mathbf{z}_{0}\right)
+\end{equation}
+其中$r=||\bs z-\bs z_0||_2, h(\alpha, r) = \frac{1}{\alpha+r}$
+类似的, 可以看作超空间的一个球, 收缩或者扩张其中的空间.
+
+由于这些都是比较sparse的变换,只影响空间的一小部分,需要很多层才能对高维空间有效.
+
 \subsection{Autoregressive Transformation}
 
 使用per-dim的AF
@@ -2153,7 +2172,100 @@ MAF用上文中的公式\eqref{MAF}进行变换, 这导致了他采样时极为�
 
 \subsection{IAF: Inverse Autoregressive Flow}
 
-IAF使用\eqref{IAF}来进行重参数化pdf.
+IAF使用\eqref{IAF}来进行重参数化pdf. 使用之前的逆变换作为变换
+\begin{equation}
+    y_{i}=z_{i} \sigma\left(\mathbf{z}_{1: i-1}\right)+\mu\left(\mathbf{z}_{1: i-1}\right)
+\end{equation}
+此时所有的$\sigma,\mu$可以并行获得! i.e.
+\begin{equation}
+    \mathbf{y}=\mathbf{z} \circ \sigma(\mathbf{z})+\mu(\mathbf{z})
+\end{equation}
+假设$\bs z_{k}=\bs z, \bs z_{k+1} = \bs y$,则有
+\begin{equation}
+    \frac{\partial \mathbf{z}_{k}}{\partial \mathbf{z}_{k-1}}=\underbrace{\frac{\partial \mu_{k}}{\partial \mathbf{z}_{k-1}}+\frac{\partial \sigma_{k}}{\partial \mathbf{z}_{k-1}} \operatorname{diag}\left(\mathbf{z}_{k-1}\right)}_{\text {lower triangular with zeros on the diagonal }}+\operatorname{diag}\left(\sigma_{k}\right) \underbrace{\frac{\partial \mathbf{z}_{k-1}}{\partial \mathbf{z}_{k-1}}}_{=\mathbf{I}}
+\end{equation}
+以及行列式
+\begin{equation}
+    \operatorname{det}\left(\frac{\partial \mathbf{z}_{k}}{\partial \mathbf{z}_{k-1}}\right)=\prod_{i=1}^{d} \sigma_{k, i}
+\end{equation}
+最终log-pdf可以写作
+\begin{equation}
+    \log q_{K}\left(\mathbf{z}_{k}\right)=\log q(\mathbf{z})-\sum_{k=0}^{K} \sum_{i=1}^{d} \log \sigma_{k, i}
+\end{equation}
+由于他的逆是MAF, 所以从目标分布倒过来求density需要计算所有逆, 这就和MAF一样难于计算, 虽然仍是可能的.
+
+\subsection{Sylvester NF(UAI 18')}
+
+\subsubsection{Idea}
+考虑单层MLP作为流
+\begin{equation}
+    \mathbf{z}^{\prime}=\mathbf{z}+\mathbf{A} h(\mathbf{B} \mathbf{z}+\mathbf{b})
+\end{equation}
+Jacobian可以从Sylvester行列式恒等式推出. Sylvester恒等式指出, 对于矩阵$\mathbf{A} \in \mathbb{R}^{D \times M}, \mathbf{B} \in \mathbb{R}^{M \times D}$,有
+\begin{equation}
+    \operatorname{det}\left(\mathbf{I}_{D}+\mathbf{A} \mathbf{B}\right)=\operatorname{det}\left(\mathbf{I}_{M}+\mathbf{B A}\right)
+\end{equation}
+据此,上述MLP的Jacobian行列式为
+\begin{equation}
+    \operatorname{det}\left(\frac{\partial \mathbf{z}^{\prime}}{\partial \mathbf{z}}\right)=\operatorname{det}\left(\mathbf{I}_{M}+\operatorname{diag}\left(h^{\prime}(\mathbf{B} \mathbf{z}+\mathbf{b})\right) \mathbf{B} \mathbf{A}\right)
+\end{equation}
+
+\subsubsection{Parametrization of A \& B}
+一般来说,MLP作为流不是可逆的, 提出以下特例
+\begin{equation}
+    \mathbf{z}^{\prime}=\mathbf{z}+\mathbf{Q} \mathbf{R} h\left(\tilde{\mathbf{R}} \mathbf{Q}^{T} \mathbf{z}+\mathbf{b}\right)=\phi(\mathbf{z})
+\end{equation},
+其中$\bs R, \tilde{\bs R}$是上三角矩阵, $\bs Q=(\bs q_1...\bs q_M)$是一个正交基构成的矩阵/正交矩阵. 则Jacobian行列式变为
+\begin{equation}
+    \begin{aligned}
+    \operatorname{det} \mathbf{J} &=\operatorname{det}\left(\mathbf{I}_{M}+\operatorname{diag}\left(h^{\prime}\left(\tilde{\mathbf{R}} \mathbf{Q}^{T} \mathbf{z}+\mathbf{b}\right)\right) \tilde{\mathbf{R}} \mathbf{Q}^{T} \mathbf{Q} \mathbf{R}\right) \\
+    &=\operatorname{det}\left(\mathbf{I}_{M}+\operatorname{diag}\left(h^{\prime}\left(\tilde{\mathbf{R}} \mathbf{Q}^{T} \mathbf{z}+\mathbf{b}\right)\right) \tilde{\mathbf{R}} \mathbf{R}\right)
+    \end{aligned}
+\end{equation}
+可以在O(M)时间内计算.
+
+给出以上流的可逆性条件
+\begin{theorem}
+    以上流是可逆的, 若满足
+    $$
+    r_{ii}\tilde r_{ii} > -\frac{1}{||h'||_\infty}
+    $$
+\end{theorem}
+
+\subsubsection{Preserving Orthogonality of Q}
+
+生成一个正交矩阵不总是可行的! 下面介绍两个显式可微地构建正交矩阵的方法, 和一个使用permut-mat. 的方法.
+
+\bt{Orthogonal Sylvester Flows/O-SNF} 使用如下可微变换
+\begin{equation}
+    \mathbf{Q}^{(k+1)}=\mathbf{Q}^{(k)}\left(\mathbf{I}+\frac{1}{2}\left(\mathbf{I}-\mathbf{Q}^{(k) \top} \mathbf{Q}^{(k)}\right)\right)
+\end{equation}
+一个充分收敛性条件
+\begin{equation}
+    \left\|\mathbf{Q}^{(0) \top} \mathbf{Q}^{(0)}-\mathbf{I}\right\|_{2}<1
+\end{equation}
+在本文实验中, 进行迭代直到
+\begin{equation}
+    \left\|\mathbf{Q}^{(k) \top} \mathbf{Q}^{(k)}-\mathbf{I}\right\|_{F} \leq \epsilon
+\end{equation}
+实验中大概会进行30次左右, 为了提高性能, 对所有流并行地计算这个正交化过程.
+
+\bt{Householder Sylvester Flows/H-SNF}
+
+Householder reflection, with respect to $\bs v\in \R^D$
+\begin{equation}
+    H(\mathbf{z})=\mathbf{z}-2 \frac{\mathbf{v} \mathbf{v}^{T}}{\|\mathbf{v}\|^{2}} \mathbf{z}
+\end{equation}\footnote{
+    In matrix sense, \begin{equation}
+        H_{\bs z}=\bs I-\frac{2\bs v \bs v^T}{||\bs v||^2}
+    \end{equation}
+}
+具体使用的Householder reflection数量是一个超参数, 而且要求$M=D$, 因为它使用的是方阵.
+
+\bt{Traingular Sylvester Flows/T-SNF}
+
+考虑为一个三角阵, 其中每个正交阵都在恒等矩阵和逆转$z$顺序的permut-mat. 之间转换(??),这等同于在每个流之间交换$\bs R, \tilde{\bs R}$的上下三角性.
+
 
 
 \end{document}

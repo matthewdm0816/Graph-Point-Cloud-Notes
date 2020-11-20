@@ -108,5 +108,9 @@
 \contentsline {subsubsection}{\numberline {27.4.2}Approximating t-SNE Gradients}{61}{subsubsection.27.4.2}%
 \contentsline {section}{\numberline {28}Autoregressive Flows}{62}{section.28}%
 \contentsline {subsection}{\numberline {28.1}Autoregressive Transformation}{62}{subsection.28.1}%
-\contentsline {subsection}{\numberline {28.2}MAF: Masked Autoregressive Flow}{62}{subsection.28.2}%
-\contentsline {subsection}{\numberline {28.3}IAF: Inverse Autoregressive Flow}{62}{subsection.28.3}%
+\contentsline {subsection}{\numberline {28.2}MAF: Masked Autoregressive Flow}{63}{subsection.28.2}%
+\contentsline {subsection}{\numberline {28.3}IAF: Inverse Autoregressive Flow}{63}{subsection.28.3}%
+\contentsline {subsection}{\numberline {28.4}Sylvester NF(UAI 18')}{63}{subsection.28.4}%
+\contentsline {subsubsection}{\numberline {28.4.1}Idea}{63}{subsubsection.28.4.1}%
+\contentsline {subsubsection}{\numberline {28.4.2}Parametrization of A \& B}{64}{subsubsection.28.4.2}%
+\contentsline {subsubsection}{\numberline {28.4.3}Preserving Orthogonality of Q}{64}{subsubsection.28.4.3}%
