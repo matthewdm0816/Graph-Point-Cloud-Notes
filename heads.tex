@@ -1,5 +1,6 @@
 \usepackage{ctex, xeCJK}
-\usepackage{metalogo, amsfonts, amsmath, physics, fancyhdr, geometry, graphicx,pdfpages}
+\usepackage{metalogo, makecell, svg, amssymb, amsfonts, amsmath, physics, fancyhdr, geometry, graphicx, pdfpages, ragged2e, bm}
+\usepackage{verbatim}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\rarr}{\rightarrow}
 \newcommand{\lop}{Laplace算子}
@@ -12,9 +13,39 @@
 \newcommand{\define}{\textbf{Definition} }
 \newcommand{\trm}{\textbf{Theorem} }
 \newcommand{\alg}{\textbf{Algorithm} }
+\newcommand{\cov}{\text{Cov}}
+\newcommand{\bb}{\mathbb}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
 
+\newenvironment{proof}[1][Proof]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+% \newenvironment{definition}[1][Definition]{\begin{trivlist}
+% \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{example}[1][Example]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{idea}[1][Idea]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\renewcommand{\cal}{\mathcal}
+\usepackage[hidelinks, bookmarks]{hyperref} % add index hyper-links
 \newcommand{\coro}{\textbf{Corollary} }
 \newcommand{\tgt}{\textbf{Target} }
 \newcommand{\bt}[1]{\textbf{#1}}
 \newcommand{\lp}{Lagrange Polynomial}
 \newcommand{\np}{Newton Polynomial}
+\newcommand{\where}{\text{where }}
+\newcommand{\centerimage}[2]{
+    \centerline{\includegraphics[width=#1\paperwidth]{#2}
+    }
+}
+\let\titleoriginal\title           % save original \title macro
+\newcommand{\thetitle}{}
+\renewcommand{\title}[1]{          % substitute for a new \title
+    \titleoriginal{#1}%               % define the real title
+    \renewcommand{\thetitle}{#1}        % define \thetitle
+}
