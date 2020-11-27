@@ -2266,6 +2266,167 @@ Householder reflection, with respect to $\bs v\in \R^D$
 
 考虑为一个三角阵, 其中每个正交阵都在恒等矩阵和逆转$z$顺序的permut-mat. 之间转换(??),这等同于在每个流之间交换$\bs R, \tilde{\bs R}$的上下三角性.
 
+\section{Contrastive Multi-view Representation Learning/MVRLG(ICML 20')}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\paperwidth]{contrast-graph-alg.png}
+\end{figure}
+\bt{Idea} 使用图上的扩散来生成增强图. 通过网络两个view得到不同的repr., 让他们contrast/作为正负样本. 来源于CV的对比学习(使用congrent/incongruent views).
 
+可以考虑两种图增强: 初始feature上的增强(如masking/加入Gaussian noise), 和图结构上的增强(增减连接性, 降采样, 从最短距离或扩散矩阵生成全局view). 前者往往会降低性能 \tRarr 使用全局图+降采样.
+
+\subsection{Augmentations}
+\begin{flushleft}
+Diffusion:
+\begin{equation}
+    \mathbf{S}=\sum_{k=0}^{\infty} \Theta_{k} \mathbf{T}^{k} \in \mathbb{R}^{n \times n}
+\end{equation},
+假设$\sum_k \theta_k =1$, 其中$\bs T$是广义转移矩阵.
+在PRR(Personal Page Rank)和heat kernel算法中, 
+\begin{align}
+    &\bs T = \bs A \bs D^{-1}, \\
+    &\theta_k=\alpha(1-\alpha)^k\text{(Geometric!)}, or \theta_k = e^{-t}t^k/k!\text{(Poisson!)}
+\end{align}
+其中$\alpha$可以看传送概率, $t$可以看做扩散时间. 可以得到闭形式的解:
+\begin{equation}
+    \begin{array}{c}
+    \mathbf{S}^{\text {heat }}=\exp \left(t \mathbf{A} \mathbf{D}^{-1}-t\right) \\
+    \mathbf{S}^{\text {PPR }}=\alpha\left(\mathbf{I}_{n}-(1-\alpha) \mathbf{D}^{-1 / 2} \mathbf{A} \mathbf{D}^{-1 / 2}\right)^{-1}
+    \end{array}
+\end{equation}
+
+关于降采样, 从一个view中采样, 并从另一个view中取相同的node和edges.
+\end{flushleft}
+
+\subsection{Encoders}
+\begin{flushleft}
+使用GCN作为基准encoder, 对于两个view使用分别的编码器$g_\theta, g_\omega$, 使用邻接/扩散矩阵作为两个全等的结构视图. 其中邻接矩阵上的GCN使用对称正则化($\tilde{\mathbf{A}}=\hat{\mathbf{D}}^{-1 / 2} \hat{\mathbf{A}} \hat{\mathbf{D}}^{-1 / 2},\hat{\mathbf{A}}=\mathbf{A}+\mathbf{I}_{\mathrm{N}}$), 并且使用PReLU函数作为非线性. GCN之后接着两层MLP得到图(节点)表示.
+
+使用图池化提取全局特征(readout): 通过(JK-Net like)concat所有GCN层的点特征的和, 并送到单层MLP中
+\begin{equation}
+    \vec{h}_{g}=\sigma\left(\Vert_{l=1}^{L}\left[\sum_{i=1}^{n} \vec{h}_{i}^{(l)}\right] \mathbf{W}\right) \in \mathbb{R}^{h_{d}}
+\end{equation}
+本实验中比更复杂的readout好(如DiffPool)效果并不比这个好. 再送到共享的proj. head, 一个双层MLP中.
+
+\end{flushleft}
+
+\subsection{Training}
+\begin{flushleft}
+使用Deep InfoMax, 并且最大化两个视图的MI
+\begin{equation}
+    \max _{\theta, \omega, \phi, \psi} \frac{1}{|\mathcal{G}|} \sum_{g \in \mathcal{G}}\left[\frac{1}{|g|} \sum_{i=1}^{|g|}\left[\operatorname{MI}\left(\vec{h}_{i}^{\alpha}, \vec{h}_{g}^{\beta}\right)+\operatorname{MI}\left(\vec{h}_{i}^{\beta}, \vec{h}_{g}^{\alpha}\right)\right]\right]
+\end{equation}
+MI使用一个判别器来建模
+$$
+\mathcal{D}(., .): \mathbb{R}^{d_{h}} \times \mathbb{R}^{d_{h}} \longmapsto \mathbb{R}
+$$
+最简单的,可以使用内积作为相似度度量.
+
+使用联合分布来做为正样本分布, 边缘分布的乘积作为负样本(即取不同图的视图作为负contrast)
+
+\end{flushleft}
+
+\section{GCC: Graph Contrastive Coding for GNN Pre-Training(KDD 20')}
+
+\bt{Note} 本工作使用的是结构特征, 没有用节点特征. 用于更好的预测未见过的图: 完全的transfer across domains.
+
+\subsection{GCC Pre-Training}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{gcc-fig.png}
+\end{figure}
+\begin{flushleft}
+
+\bt{Idea} 使用subgraph instance-discrimination + InfoNCE! 对于记录了一堆encoded keys的dict$\left\{k_{0}, \cdots, k_{K}\right\}$, 和新编码的query$\bs q$,contrast learning找到一个匹配的code$\bs k_+$,可以计算InfoNCE
+\begin{equation}
+    \mathcal{L}=-\log \frac{\exp \left(\boldsymbol{q}^{\top} \boldsymbol{k}_{+} / \tau\right)}{\sum_{i=0}^{K} \exp \left(\boldsymbol{q}^{\top} \boldsymbol{k}_{i} / \tau\right)}
+\end{equation}
+
+使用子图作为对比学习中的instance!
+\begin{definition}
+    r-ego network $G_v$是一个距离节点$v$最短距离$\le r$的节点的诱导子图. (difference with r-hop?)
+\end{definition}
+GCC把不同r-ego net.作为不相似实例.
+
+在CV中,两个经过不同aug.的图片作为了相似inst. pair, GCC中,同样考虑同个r-ego net. 的不同数据增强作为相似实例对, 并且使用图采样作为数据增强. 具体上讲, GCC使用三步: 带重启的随机游走, 子图诱导, 匿名化. 前两步的结果即ISRW(Induced Subgraph Random Walk Sampling). 最后一步匿名化把节点重新标号. 最后,两个经过如此图采样的方法被认为是相似实例对.
+
+GCC理论上使用任何GNN都可以(作为encoder), 本文使用GIN(Graph Isomophism Net.), 当前的SOTA GNN. 由于大多数GNN使用节点feature作为输入, 使用generalized positional embedding(*GPE abbr.)
+
+\begin{definition}
+    GPE. 对于每个子图, 其GPE为正则化Laplacian的主要eig-vecs. 即, 在正则化Laplacian上进行EVD:
+    \begin{equation}
+        I-D^{-1 / 2} A D^{-1 / 2}=U \Lambda U^{\top}
+    \end{equation}
+    并取top eig-vecs作为GPE.
+    (Question: EVD不唯一)
+\end{definition}
+
+GPE受到NLP的Transformer的启发. 此外还增加了one-hot编码的节点度, 以及binary的是否为中心节点的特征.
+
+训练上, 由于维护一个字典代价很高, 所以使用一些别的方法来计算contrast, 如E2E(end-to-end)和MoCo(momentum constrast). \begin{itemize}
+    \item E2E使用mini-batch,并把batch内的所有instance作为dictionary. Drawback: 词典大小受限与batch大小.
+    \item MoCo使用基于momentum更新的$f_k$: 
+    $$
+    \theta_k = \rho \theta_k + (1-\rho)\theta_q
+    $$
+\end{itemize}
+
+\end{flushleft}
+\subsection{Finetuning GCC}
+\begin{flushleft}
+\begin{itemize}
+    \item 对于graph-level下游任务, 使用图特征即可. 对于node-level下游任务, 使用r-ego net.的特征即可.
+    \item 可以freeze/full fine-tune.
+    \item GCC作为一个局部探索算法, 可以应用于大规模图和并行计算.
+\end{itemize}
+\end{flushleft}
+
+\section{GIN: Graph Isomorphism Network(ICLR 19')}
+
+\subsection{Weisfeiler-Lehman Test}
+图同构还没有多项式时间算法. WL算法是一个高效的近似算法, 它在每个节点上聚合邻接节点的label, 然后hash为唯一的新label. 若在某个层面上label不同,则说明graph不同. WL子树kernel把每一次聚合的label作为某个子树(的数据).
+
+\subsection{Math Intuitions}
+
+\begin{lemma}
+    若一个GNN把两个非同构图映射为不同表示, 则WL测试也把他们区分为非同构的.
+\end{lemma}
+
+这意味着所有给予聚合的GNN都最多和WL测试一样强(在区分非同构图上). 而且, 如果聚合操作和图readout函数都是单射,则和WL测试同样强.
+
+\begin{theorem}
+    Let $\mathcal{A}: \mathcal{G} \rightarrow \mathbb{R}^{d}$ be a GNN. With a sufficient number of GNN layers, $\mathcal{A}$ maps any graphs $G_{1}$ and $G_{2}$ that the Weisfeiler-Lehman test of isomorphism decides as non-isomorphic, to different embeddings if the following conditions hold:
+    a) $\mathcal{A}$ aggregates and updates node features iteratively with
+    $$
+    h_{v}^{(k)}=\phi\left(h_{v}^{(k-1)}, f\left(\left\{h_{u}^{(k-1)}: u \in \mathcal{N}(v)\right\}\right)\right)
+    $$
+    where the functions $f$, which operates on multisets, and $\phi$ are injective.
+    b) $\mathcal{A}$'s graph-level readout, which operates on the multiset of node features $\left\{h_{v}^{(k)}\right\},$ is injective.
+\end{theorem}
+
+\subsection{GIN}
+
+下面的引理说明了sum-aggr是单射, 并且可以用于表示任意函数.
+\begin{lemma}
+    假设$\cal{X}$是可数的, 存在函数$f:\cal{X}\longmapsto \R^n$,使得$h(X)=\sum_{x\in X} f(x)$对于任何大小有界的multi-set唯一. 进一步, 任何multiset函数可以分解为$g(X)=\phi\left(\sum_{x \in X} f(x)\right)$.
+\end{lemma}
+然而, 常用的mean-aggr.不是单射.
+
+\begin{corollary}
+    假设$\cal{X}$是可数的, 存在函数$f:\cal{X}\longmapsto \R^n$,使得存在任意多$\epsilon$的选择(包括所有无理数), 使得$h(c, X)=(1+\epsilon)f(c)+\sum_{x\in X} f(x)$对于任何大小有界的multi-set对$(c, X)$唯一. 进一步, 任何bi-multiset函数可以分解为$g(c, X)=\varphi\left((1+\epsilon) \cdot f(c)+\sum_{x \in X} f(x)\right)$.
+\end{corollary}
+
+使用MLP近似函数$f,\varphi$, 而且直接表示他们的合成$f^{(k+1)} \circ \varphi^{(k)}$.
+\begin{equation}
+    h_{v}^{(k)}=\operatorname{MLP}^{(k)}\left(\left(1+\epsilon^{(k)}\right) \cdot h_{v}^{(k-1)}+\sum_{u \in \mathcal{N}(v)} h_{u}^{(k-1)}\right)
+\end{equation}
+
+\subsection{Graph Readout of GIN}
+
+使用每一层级上的repr.(JK-Net like).
+\begin{equation}
+    h_{G}=\operatorname{CONCAT}\left(\operatorname{READOUT}\left(\left\{h_{v}^{(k)} \mid v \in G\right\}\right) \mid k=0,1, \ldots, K\right)
+\end{equation}
+根据已有定理, 如果READOUT函数是求和同一层中的feature, 则确实推广了WL.
 
 \end{document}
