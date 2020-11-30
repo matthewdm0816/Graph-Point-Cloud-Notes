@@ -12,6 +12,31 @@
 \section*{ }
 \label{contents}
 \tableofcontents
+
+\newenvironment{dedication}
+    {\clearpage           % we want a new page
+    \thispagestyle{empty}% no header and footer
+    \vspace*{\stretch{1}}% some space at the top 
+    \itshape \Large             % the text is in italics
+    \raggedleft          % flush to the right margin
+    }
+    {\par % end the paragraph
+    \vspace{\stretch{3}} % space at bottom is three times that at the top
+    \clearpage           % finish off the page
+    }
+
+\begin{dedication}
+    {
+    \mincho
+    世界はこんなに美しいべきが、僕が同じくらい醜い。
+
+    だがこの状況を変わチカラはない。
+    }
+
+    Dedicated to Amatsukaze and Elaina, Fairies From The Ideal World.
+\end{dedication}
+
+
 \section{NeVAE}
     \bt{Idea} VAE on graph, node-wise repr, permutation invariant.
     \subsection{Encoder}
@@ -2428,5 +2453,98 @@ GPE受到NLP的Transformer的启发. 此外还增加了one-hot编码的节点度
     h_{G}=\operatorname{CONCAT}\left(\operatorname{READOUT}\left(\left\{h_{v}^{(k)} \mid v \in G\right\}\right) \mid k=0,1, \ldots, K\right)
 \end{equation}
 根据已有定理, 如果READOUT函数是求和同一层中的feature, 则确实推广了WL.
+
+\section{GraphLoG: Self-Supervised Represtation Learning with Local \& Global Structure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{graphlog-alg.png}
+\end{figure}
+
+\subsection{Preliminaries}
+
+\bt{GNN and READOUT} GNN-layer
+\begin{equation}
+    h_{v}^{(l)}=\operatorname{COMBINE}^{(l)}\left(h_{v}^{(l-1)}, \text { AGGREGATE }^{(l)}\left(\left\{\left(h_{v}^{(l-1)}, h_{u}^{(l-1)}, X_{u v}\right): u \in \mathcal{N}(v)\right\}\right)\right)
+\end{equation}
+Graph Readout: 
+\begin{equation}
+    h_{\mathcal{G}}=\operatorname{READOUT}\left(\left\{h_{v} \mid v \in \mathcal{V}\right\}\right)
+\end{equation}
+
+\bt{Mutual Info. Est.} InfoNCE
+\begin{equation}
+    \mathcal{L}_{\mathrm{NCE}}\left(q, z_{+},\left\{z_{i}\right\}_{i=1}^{K}\right)=-\log \frac{\exp \left(T\left(q, z_{+}\right)\right)}{\exp \left(T\left(q, z_{+}\right)\right)+\sum_{i=1}^{K} \exp \left(T\left(q, z_{i}\right)\right)}
+\end{equation}
+其中T是某个参数化的判别函数.
+
+\bt{RPCL: Rival Penalized Competitive Learning} 
+RPCL在每个新样本上不仅推近winning cluster(最近聚类), 也推开rival cluster(次近聚类). 可以不预先指定聚类数地进行clustering.
+
+\subsection{Local-Inst. Stru. Learning}
+
+使用mask来获得相近(correlated)图. 对于每个mini-batch获得相近图(通过mask). 得到他们的node(patch)/graph repr.
+\begin{equation}
+    \begin{aligned}
+    h_{\mathcal{V}_{j}}=\left\{h_{v} \mid v \in \mathcal{V}_{j}\right\} &=\operatorname{GNN}\left(X_{\mathcal{V}_{j}}, X_{\mathcal{E}_{j}}\right), \quad h_{\mathcal{V}_{j}^{\prime}}=\left\{h_{v} \mid v \in \mathcal{V}_{j}^{\prime}\right\}=\operatorname{GNN}\left(X_{\mathcal{V}_{j}^{\prime}}, X_{\mathcal{E}_{j}^{\prime}}\right) \\
+    h_{\mathcal{G}_{j}} &=\operatorname{READOUT}\left(h_{\mathcal{V}_{j}}\right), \quad h_{\mathcal{G}_{j}^{\prime}}=\operatorname{READOUT}\left(h_{\mathcal{V}_{j}^{\prime}}\right)
+    \end{aligned}
+\end{equation}
+最小化InfoNCE\footnote{如同其他contrast learning}
+\begin{equation}
+    \begin{array}{c}
+    \mathcal{L}_{\text {patch }}=\frac{1}{\sum_{j=1}^{N}\left|\mathcal{V}_{j}^{\prime}\right|} \sum_{j=1}^{N} \sum_{v^{\prime} \in \mathcal{V}_{j}^{\prime}} \sum_{v \in \mathcal{V}_{j}} \mathbb{1}_{v \leftrightarrow v^{\prime}} \cdot \mathcal{L}_{\mathrm{NCE}}\left(h_{v^{\prime}}, h_{v},\left\{h_{\tilde{v}} \mid \tilde{v} \in \mathcal{V}_{j}, \tilde{v} \neq v\right\}\right) \\
+    \mathcal{L}_{\text {graph }}=\frac{1}{N} \sum_{j=1}^{N} \mathcal{L}_{\mathrm{NCE}}\left(h_{\mathcal{G}_{j}^{\prime}}, h_{\mathcal{G}_{j}},\left\{h_{\mathcal{G}_{k}} \mid 1 \leqslant k \leqslant N, k \neq j\right\}\right) \\
+    \mathcal{L}_{\text {local }}=\mathcal{L}_{\text {patch }}+\mathcal{L}_{\text {graph }}
+    \end{array}
+\end{equation}
+
+\bt{Note} 同个batch中的其他图repr.作为negative instance. 同个图中其他node repr.作为negative instance.
+
+\subsection{Global-Semantic Repr. Learning}
+
+Graph(如分子图)常常有hierachical structure \trarr \textit{hierachical prototypes},建模图嵌入的分布. 他们是一些树的集合, 每个节点对应了一个prototype, 并且指向唯一的父节点(除非是根节点). 正式地, 这些节点是$\{c_i^l\}_{i=1}^{M_l},(l=1,2,...,L_p)$, 除了树叶节点, 每个节点都有一些子节点集合$\bm{C}(c_i^l)$.
+
+\subsubsection{Init. of HP(Hirechichal Prototypes)}
+
+先用$\cal{L}_{local}$预训练一个epoch, 利用这个GNN得到所有训练集中图的表示$\left\{h_{\mathcal{G}_{i}}\right\}_{i=1}^{N_{D}}$, 作为HP的叶子节点,并且使用RPCL得到底层的节点
+\begin{equation}
+    \left\{c_{i}^{L_{p}}\right\}_{i=1}^{M_{L_{p}}}=\operatorname{RPCL}\left(\left\{h_{\mathcal{G}_{i}}\right\}_{i=1}^{N_{D}}\right)
+\end{equation}
+之后RPCL被迭代的应用来得到整个HP树.
+
+\subsubsection{Maintainance of HP}
+
+训练过程中, 图嵌入在动态改变. 使用一下策略来更新HP:
+\begin{enumerate}
+    \item 每有一个batch训练完, 得到图embedding, 分成$M_{L_p}$个组(属于HP最底层聚类), 计算每一组的平均embedding. 并且更新节点上的embedding, 使用(momentum-like)指数移动平均更新模型
+    \begin{equation}
+        c_{i}^{L_{p}} \leftarrow \beta c_{i}^{L_{p}}+(1-\beta) \widehat{c}_{i}^{L_{p}}, \quad 1 \leqslant i \leqslant M_{L_{p}}
+    \end{equation}
+    此处$\beta$是衰减常数, 之后上层节点embedding更新为子节点的平均.
+    \item 
+\end{enumerate}
+
+为了捕捉global-semantic structure, 让相关图属于同一聚类! 具体上讲, 对于每一个图$\cal{G}_j$, 使用cosine sim., 在每一层上寻找最接近的embedding
+$$
+s\left(\mathcal{G}_{j}\right)=\left\{s_{1}\left(\mathcal{G}_{j}\right), s_{2}\left(\mathcal{G}_{j}\right), \cdots, s_{L_{p}}\left(\mathcal{G}_{j}\right)\right\}
+$$
+这里要让相关图的embedding和这些repr.相近, 使用InfoNCE
+\begin{equation}
+    \mathcal{L}_{\text {global }}=\frac{1}{N \cdot L_{p}} \sum_{j=1}^{N} \sum_{l=1}^{L_{p}} \mathcal{L}_{\mathrm{NCE}}\left(h_{\mathcal{G}_{j}^{\prime}}, s_{l}\left(\mathcal{G}_{j}\right),\left\{c_{i}^{l} \mid 1 \leqslant i \leqslant M_{l}, c_{i}^{l} \neq s_{l}\left(\mathcal{G}_{j}\right)\right\}\right)
+\end{equation}
+即, 对于每一层, 正样本是那个(原图)最相近的embedding, 负样本是(原图)其他样本repr.
+
+模型在每一个iteration上最小化全loss
+\begin{equation}
+    \min _{\operatorname{GNN}, T} \mathcal{L}_{\text {local }}+\mathcal{L}_{\text {global }}
+\end{equation}
+
+\subsection{Sup-GraphLoG: A Supervised Baseline}
+
+使用label来简单监督学习, 作为baseline. 对于任何一个图, 找到在HP底层匹配的(随机的)一个匹配的prototype, 把搜索路径作为正样本, 再随机选择另一条不正确的路径作为负样本. 然后mini-batch上的全局loss为
+\begin{equation}
+    \mathcal{L}_{\mathrm{global}}^{\mathrm{sup}}=\frac{1}{N \cdot L_{p}} \sum_{j=1}^{N} \sum_{l=1}^{L_{p}} \mathcal{L}_{\mathrm{NCE}}\left(h_{\mathcal{G}_{j}}, s_{l}\left(\mathcal{G}_{j}\right), s_{l}^{n}\left(\mathcal{G}_{j}\right)\right)
+\end{equation}
 
 \end{document}
