@@ -2547,4 +2547,330 @@ $$
     \mathcal{L}_{\mathrm{global}}^{\mathrm{sup}}=\frac{1}{N \cdot L_{p}} \sum_{j=1}^{N} \sum_{l=1}^{L_{p}} \mathcal{L}_{\mathrm{NCE}}\left(h_{\mathcal{G}_{j}}, s_{l}\left(\mathcal{G}_{j}\right), s_{l}^{n}\left(\mathcal{G}_{j}\right)\right)
 \end{equation}
 
+
+\section{Orthogonal Weights in DNNs}
+
+\subsection{Formulation \& Good Properties}
+\flushleft
+优化参数, 使得权重是(伪)正交的
+\begin{equation}
+    \begin{aligned}
+    \theta^{*}=& \arg \min _{\theta} \mathbb{E}_{(\mathbf{x}, \mathbf{y}) \in D}[\mathcal{L}(\mathbf{y}, f(\mathbf{x} ; \theta))] \\
+    & \text { s.t. } \quad \mathbf{W}^{l} \in \mathcal{O}_{l}^{n_{l} \times d_{l}}, l=1,2, \ldots, L
+    \end{aligned}
+\end{equation}
+此处伪正交矩阵在一个实Stiefel流形$\mathcal{O}_{l}^{n_{l} \times d_{l}}=\left\{\mathbf{W}^{l} \in \mathbb{R}^{n_{l} \times d_{l}}: \mathbf{W}^{l}\left(\mathbf{W}^{l}\right)^{T}=\mathbf{I}\right\}$上. \trarr OMDSM(Optim. on Multiple Depedent Stiefel Manifolds) Problem
+
+好处
+\begin{itemize}
+    \item $\bs s = \bs W \bs x, \bs W\in \R^{n\times d}$, 若输入$\bs x$是白化了的, 则输出$\bs s$也是(0均值且分量不相关)； 如果$n=d$,则$||\bs s|| = || \bs x ||$; 梯度相等$\left\|\frac{\partial \mathcal{L}}{\partial \mathbf{x}}\right\|=\left\|\frac{\partial \mathcal{L}}{\partial \mathbf{s}}\right\|$
+    \item 自动地, 这正则化了权重. 减少了自由度(Stiefel Manifold的维度减少了): $\dim \mathcal{O}^{n\times d}=nd-n(n+1)/2$
+\end{itemize}
+
+\subsection{OWN: Orthogonal Weight Normalization}
+
+\flushleft
+使用Riemann(流形)优化算法(like in RNNs\footnote{
+    What's that actually?
+})导致了收敛的不稳定性/性能差. 显式地使用参数矩阵的重参数化
+\begin{equation}
+    \phi: \mathbb{R}^{n_{l} \times d_{l}} \rightarrow \mathbb{R}^{n_{l} \times d_{l}}
+\end{equation}
+并且$\phi(\bs V)=\bs W, s.t. \bs W\bs W^T=\bs I$.
+
+使用一个线性变换来作为函数
+\begin{align}
+    \phi(\bs V)&=\bs P \bs V_C\\
+    \bs V_C&= \bs V - \bs c \bs 1_d^T\\
+    \bs c&= \frac{1}{d}\bs V\bs 1_d\\
+    \text{which means} \bs V_C&=\bs V - \frac{1}{d} \bs V \bs E_d=\bs V(\bs I - \frac{1}{d}E_d)
+\end{align}
+使用以下变换来得到权重, 使得Jacobian的奇异值接近于1
+\begin{equation}
+    \begin{array}{c}
+    \min _{\mathbf{P}} \operatorname{tr}\left(\left(\mathbf{W}-\mathbf{V}_{C}\right)\left(\mathbf{W}-\mathbf{V}_{C}\right)^{T}\right) \\
+    \text { s.t. } \quad \mathbf{W}=\mathbf{P} \mathbf{V}_{C} \text { and } \mathbf{W} \mathbf{W}^{T}=\mathbf{I}
+    \end{array}
+    \label{ortho:1}
+\end{equation}  
+进而, 这个优化问题有closed form sol. 
+\begin{equation}
+    \mathbf{P}^{*}=\mathbf{D} \bm \Lambda^{-1 / 2} \mathbf{D}^{T}
+\end{equation}
+其中$\bs V_C \bs V_C^T=\bm \Sigma=\bs D\bm \Lambda \bs D^T$是协方差矩阵的EVD(SVD). 
+最后的形式为
+\begin{equation}
+    \mathbf{W}=\phi(\mathbf{V})=\mathbf{D} \Lambda^{-1 / 2} \mathbf{D}^{T}\left(\mathbf{V}-\mathbf{c} \mathbf{1}_{d}^{T}\right)
+\end{equation}
+类似但没有最小化\eqref{ortho:1}的选择$\bs P_{var}=\bm \Lambda^{-1/2}\bs D^T$
+
+\subsubsection{Backpropagation}
+
+计算Jacobian
+\begin{equation}
+    \begin{aligned}
+    \frac{\partial \mathcal{L}}{\partial \Lambda} &=-\frac{1}{2} \mathbf{D}^{T} \frac{\partial \mathcal{L}}{\partial \mathbf{W}} \mathbf{W}^{T} \mathbf{D} \Lambda^{-1} \\
+    \frac{\partial \mathcal{C}}{\partial \mathbf{D}} &=\mathbf{D} \Lambda^{\frac{1}{2}} \mathbf{D}^{T} \mathbf{W} \frac{\partial \mathcal{L}}{\partial \mathbf{W}} \mathbf{D} \Lambda^{-\frac{1}{2}}+\frac{\partial \mathcal{L}}{\partial \mathbf{W}} \mathbf{W}^{T} \mathbf{D} \\
+    \frac{\partial \mathcal{C}}{\partial \mathbf{S}} &=\mathbf{D}\left(\left(\mathbf{K}^{T} \odot\left(\mathbf{D}^{T} \frac{\partial \mathcal{L}}{\partial \mathbf{D}}\right)\right)+\left(\frac{\partial \mathcal{L}}{\partial \Lambda}\right)_{\operatorname{diag}}\right) \mathbf{D}^{T} \\
+    \frac{\partial \mathcal{L}}{\partial \mathbf{c}} &=-\mathbf{1}_{d}^{T} \frac{\partial \mathcal{L}}{\partial \mathbf{W}} \mathbf{D} \Lambda^{-\frac{1}{2}} \mathbf{D}^{T}-2 \cdot \mathbf{1}_{d}^{T}\left(\mathbf{V}-\mathbf{c} \mathbf{1}_{d}^{T}\right)^{T}\left(\frac{\partial \mathcal{L}}{\partial \Sigma}\right)_{s} \\
+    \frac{\partial \mathcal{L}}{\partial \mathbf{V}} &=\mathbf{D} \Lambda^{-\frac{1}{2}} \mathbf{D}^{T} \frac{\partial \mathcal{L}}{\partial \mathbf{W}}+2\left(\frac{\partial \mathcal{L}}{\partial \Sigma}\right)_{s}\left(\mathbf{V}-\mathbf{c} \mathbf{1}_{d}^{T}\right)+\frac{1}{d} \frac{\partial \mathcal{L}^{T}}{\partial \mathbf{c}} \mathbf{1}_{d}^{T}
+    \end{aligned}
+\end{equation}
+此处
+\begin{equation}
+    \mathbf{K}_{i j}=\frac{1}{\sigma_{i}-\sigma_{j}}[i \neq j]
+\end{equation}是一个对角线为0的矩阵.
+
+\subsubsection{As Convolution}
+
+\flushleft
+卷积层的参数$\bs W^C\in \R^{n\times d\times F_h\times F_w}$, 以及上一层的输入特征$\bs X\in \R^{d\times h\times w}$, 那么activation可以计算为
+\begin{equation}
+    s_{k, \delta}=\sum_{i=1}^{d} \sum_{\tau \in \Omega} w_{k, i, \tau} h_{i, \delta+\tau}=\langle\mathbf{w}_{k}, \mathbf{h}_{\delta}\rangle
+\end{equation}
+此处使用$\bs W\in \R^{n\times p},p=d F_h F_w$作为总的filters.
+
+\subsubsection{Group Based Orthogonalization: Divided Filters}
+
+\flushleft
+权重按行分为多组, 每组大小一致(为一个小数$N_G<d$,如64/128), 使得EVD的计算代价很小. 大大降低计算难度.
+
+\section{OrthDNNs: Orthogonal DNNs(TPAMI 19')}
+
+在数据分布$\cal Z=\cal X\times \cal Y$上, ML的目标是最优化期望风险
+\begin{equation}
+    R(f)=\mathbb{E}_{z \sim P}[\mathcal{L}(f(\boldsymbol{x}), y)]
+\end{equation}
+然而真实分布未知,所以用样本期望(训练集$S_m$)代替
+\begin{equation}
+    R_{m}(f)=\frac{1}{m} \sum_{i=1}^{m} \mathcal{L}\left(f\left(\boldsymbol{x}_{i}\right), y_{i}\right)
+\end{equation}
+统计学习的一大目标是计算泛化误差/gen. gap
+\begin{equation}
+    \mathrm{GE}\left(f_{S_{m}}\right)=\left|R\left(f_{S_{m}}\right)-R_{m}\left(f_{S_{m}}\right)\right|
+\end{equation}
+这里考虑由DNN建模的分类-表示模型(Class. Repr. Learning)
+\begin{equation}
+    \begin{aligned}
+    R(f, T) &=\mathbb{E}_{z \sim P}[\mathcal{L}(f(T \boldsymbol{x}), y)] \\
+    R_{m}(f, T) &=\frac{1}{m} \sum_{i=1}^{m} \mathcal{L}\left(f\left(T \boldsymbol{x}_{i}\right), y_{i}\right)
+    \end{aligned}
+\end{equation}
+
+\subsection{GE Analysis in a Robustness and Isomeric Mapping Perspecitve}
+
+\begin{definition}
+    ($K,\epsilon(\cdot)$-robustness)对于$K\in \mathbb{N},\epsilon: \cal{Z}^m\mapsto \R$一个算法是$K,\epsilon(\cdot)$-robust的,如果$\cal Z$可以分为K个分离的集合, 记为$\mathcal{C}=\left\{C_{k}\right\}_{k=1}^{K}$, 且
+    \begin{equation}
+        \begin{array}{r}
+        \forall s_{i}=\left(\boldsymbol{x}_{i}, y_{i}\right) \in C_{k}, \forall z=(\boldsymbol{x}, y) \in C_{k} \\
+        \Longrightarrow\left|\mathcal{L}\left(f\left(\boldsymbol{x}_{i}\right), y_{i}\right)-\mathcal{L}(f(\boldsymbol{x}), y)\right| \leq \epsilon\left(S_{m}\right)
+        \end{array}
+    \end{equation}
+\end{definition}
+
+对于任何健壮的算法, 有以下定理\footnote{Huan Xu and Shie Mannor.  Robustness and generalization.Ma-chine Learning, 86(3):391–423, 2012.1,2,4,6,8}
+\begin{theorem}
+如果一个算法是($K,\epsilon(\cdot)$-robust, 并且一个损失函数$\cal L$是有界的,则
+\begin{equation}
+    \operatorname{Pr}\left(G E\left(f_{S_{m}}\right) \leq \epsilon\left(S_{m}\right)+M \sqrt{\frac{2 K \log (2)+2 \log (1 / \nu)}{m}}\right)\ge 1-\nu
+\end{equation}.
+\end{theorem}
+
+\begin{definition}
+    (Covering Number)给出一个度量空间$(\cal M, d)$, 集合$\hat S$是另一个集合$S$的$\gamma$-cover, 若$\forall s\in S, \exists \hat s\in \hat S, s.t. d(\hat s, s)\le \gamma$. 集合S的$\gamma$-covering number是
+    \begin{equation}
+        \mathcal{N}_{\gamma}(\mathcal{S}, \rho)=\min \{|\hat{\mathcal{S}}|: \hat{\mathcal{S}} \text { is a } \gamma \text { -covering of } \mathcal{S}\}
+    \end{equation}
+\end{definition}
+
+\begin{definition}
+    ($\delta$-isometry) 映射$T:\cal P\mapsto \cal Q$(其中$\cal P, \cal Q$度量空间)是$\delta$-保距的, 若
+    \begin{equation}
+        \forall \boldsymbol{x}, \boldsymbol{x}^{\prime} \in \mathcal{P},\left|\rho_{Q}\left(T \boldsymbol{x}, T \boldsymbol{x}^{\prime}\right)-\rho_{P}\left(\boldsymbol{x}, \boldsymbol{x}^{\prime}\right)\right| \leq \delta
+    \end{equation}
+\end{definition}
+
+\begin{theorem}
+    对与任何CRL问题的算法, 若$\cal L\circ f$(关于$\bs T \bs x$)的Lipschitz Constant有上界A, 且T是$\delta$-保距的,且$\cal X$是紧的, 且有covering number$\mathcal{N}_{\gamma / 2}(\mathcal{X}, \rho)$, 则这个算法是$\left(|\mathcal{Y}| \mathcal{N}_{\gamma / 2}(\mathcal{X}, \rho), A(\gamma+\delta)\right)$-robust.
+\end{theorem}
+
+\subsection{GE Analysis of DNN}
+
+\footnote{TO READ AND MAKE NOTES}
+
+\subsection{OrthDNN by SVB(Singular Value Bound)}
+
+类似于之前的一篇, 为在Stiefel流形上的约束优化. 可以通过流形上的SGD(切空间投影法)或者Frank-Wolfe算法(流形投影法). 太慢! 使用SVB来进行优化.
+
+\begin{itemize}
+    \item 使用估计的带偏移的梯度投影方向. 每隔一定数量迭代拉回到流形上.
+    \item 考虑到DNN的优化问题含有巨大数量的局部极小/临界点. 在目标流形附近探索可能会得到更好的解(避免local minima/critical points)
+    \item BN会改变权重矩阵的谱, 使得严格正交化的努力白费.
+\end{itemize}
+
+Algorithm Sketch(SVB)
+\begin{enumerate}
+    \item 使用普通的SGD来更新参数.
+    \item 每隔一些epochs, 对于每一层, 使用SVD来clamp奇异值到$((1+\epsilon)^{-1}, 1+\epsilon)$: 
+    \begin{align}
+        \bs W &= \bs U \bm \Sigma \bs V^T\\
+        \bs W&\leftarrow \bs U \bm \Sigma_{\epsilon-clamped} \bs V^T
+    \end{align}
+    .
+\end{enumerate} 
+
+还可以使用罚函数法来作为无约束优化问题优化(SoftRegu)
+\begin{equation}
+    \min _{\Theta=\left\{\boldsymbol{W}_{l}, \boldsymbol{b}_{l}\right\}_{l=1}^{L}} \mathcal{L}\left(\left\{\boldsymbol{x}_{i}, y_{i}\right\}_{i=1}^{m} ; \Theta\right)+\lambda \sum_{l=1}^{L}\left\|\boldsymbol{W}_{l}^{\top} \boldsymbol{W}_{l}-\boldsymbol{I}\right\|_{F}^{2}
+\end{equation}
+需要假设$n_l \ge n_{l-1}$, 为了放松这一假设, 使用自然1-范数/谱范数(SRIP)而不是Frobenius范数
+\begin{equation}
+    \min _{\Theta=\left\{\boldsymbol{W}_{l, b}\right\}_{l-1}^{L}} \mathcal{L}\left(\left\{\boldsymbol{x}_{i}, y_{i}\right\}_{i=1}^{m} ; \Theta\right)+\kappa \sum_{i}^{L} \sigma_{\max }\left(\boldsymbol{W}_{l}^{\top} \boldsymbol{W}_{l}-\boldsymbol{I}\right)
+\end{equation}
+
+\subsubsection{BN Compatibility}
+
+BN实际上干了
+\begin{equation}
+\mathrm{BN}(\boldsymbol{h})=\bm \Upsilon \bm \Phi(\boldsymbol{h}-\boldsymbol{\mu})+\boldsymbol{\beta}
+\end{equation}
+其中$\bm \mu \in \R^n$是这一层n个神经元的(batch的)均值, 对角阵$\bm \Phi=\operatorname{Diag}(1/\phi_i)$是神经元输出的标准差倒数矩阵(加上小值来增加数值稳定性).
+并且$\bm \Upsilon, \bm \beta$是可训练的对角矩阵和bias. 最终的均值和标准差由running average给出训练样本的总体估计.
+
+但是乘上一个对角矩阵会导致原先的权重矩阵sig-val不再相等! 所以让可训练的对角阵和偏差在每层都相等\trarr 对于精确形式的OrhDNN, 使用DBN(Degenerate Batch Norm), 其中$\bar \phi = \frac{1}{n}\sum_n \phi_i$
+
+对于approx. OrthDNN, 使用BBN(Bounded BN), 控制(通过clamp)$\{v_i/\phi_i\}$在均值$\alpha=\frac{1}{n}\sum_i \frac{v_i}{\phi_i}, v_i/\phi_i\in [\alpha(1+\epsilon)^{-1}, \alpha(1+\epsilon)]$内.
+
+\subsubsection{On CNN: OrthDNN as Convolution}
+
+对于CNN的某一层, 要求的参数形状为$n_{l} \times n_{l-1} \times n_{h} \times n_{w}$, 本作使用生成$n_{l} \times n_{l-1}n_{h}n_{w}$形状的参数矩阵来得到这些filter.
+
+\section{SimCLR: A Simple Framework for Contrastive Learning of Visual Representations}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{simclr-alg.png}
+\end{figure}
+
+\subsection{Ideas \& Basics}
+
+\begin{enumerate}
+    \item 使用随机数据增强来得到两个相关视图:
+    \begin{itemize}
+        \item 随机剪裁/裁剪+缩放至原大小
+        \item 随机色彩distortion
+        \item 随机高斯模糊
+        \item 没啥用的: cutoff, Sobel filters etc.
+    \end{itemize}
+    \item Encoder使用经典的ResNet结构.
+    \item 一个小的MLP投影头(proj. head)用于投影到contrastive loss用于计算的空间.
+    \item 在最后的特征空间上最小化InfoNCE(yet another \textit{contrastive loss}), 最大化相关图的MI
+    \begin{equation}
+        \ell_{i, j}=-\log \frac{\exp \left(\operatorname{sim}\left(z_{i}, z_{j}\right) / \tau\right)}{\sum_{k=1}^{2 N} \bm{1}_{[k \neq i]} \exp \left(\operatorname{sim}\left(\boldsymbol{z}_{i}, \boldsymbol{z}_{k}\right) / \tau\right)}
+    \end{equation}
+    其中相似度度量使用归一化点积(i.e. cosine similarity)$\operatorname{sim}(\boldsymbol{u}, \boldsymbol{v})=\boldsymbol{u}^{\top} \boldsymbol{v} /\|\boldsymbol{u}\|\|\boldsymbol{v}\|$
+    其中负样本来自同一minibatch, $\tau$是温度系数.
+\end{enumerate}
+
+本方法没有利用类似MoCo的memory bank, 而是使用较大的batchsize(256-8192). SGD+Momemtum的优化器似乎和较大的batchsize上不稳定, 所以使用LARS优化器. 
+
+使用Global BN: 在各个设备上本来BN的均值和方差是分别计算的, 这里在BN里使用聚合了所有设备的mean/variance. 其他方法包括在设备间shuffle samples, 或者使用layer norm\footnote{
+    在MLP中, 归一化每一层的权重为期望0标准差1, 先计算均值和方差
+    \begin{equation}
+        \mu^{l}=\frac{1}{H} \sum_{i=1}^{H} w_{i}^{l} \quad \sigma^{l}=\sqrt{\frac{1}{H} \sum_{i=1}^{H}\left(w_{i}^{l}-\mu^{l}\right)^{2}}
+    \end{equation}
+    在计算FP前进行权重归一化
+    \begin{equation}
+        \hat{\mathbf{w}}^{l}=\frac{\mathbf{w}^{l}-\mu^{l}}{\sqrt{\left(\sigma^{l}\right)^{2}+\epsilon}}
+    \end{equation}
+    LN在权重够多的情况下和BN效果类似. 似乎在CNN上不能使用???
+    \begin{remark}
+        对于权重的更弱的限制(相比OrthDNN和OWN中近似正交化权重), 注意随机正交矩阵必然是归一化了的, 分量还是不相关的.
+    \end{remark}
+}而不是BN.
+
+\section{BYOL: Build Your Own Latent}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{byol-fig.png}
+\end{figure}
+\subsection{Ideas \& Method}
+
+使用两个网络来学习: online/target 网络, 每个网络都类似得由三个阶段组成:encoder $f_\theta$, proj. head $g_\theta$, predictor $q_\theta$(discriminator). online/target网络使用相同的结构,但是为不同的参数, 并且target网络的参数$\xi$是online参数$\theta$的moving average(under decay const. $\tau$)
+\begin{equation}
+    \xi \leftarrow \tau \xi+(1-\tau) \theta
+\end{equation}
+
+假设通过两个图像变换之后的view是$v,v'$, 然后我们使用要\underline{区分}两者的repr., 所以最小化负的cosine-simliarity\footnote{equivalent to MSE of normalized feature}
+\begin{equation}
+    \mathcal{L}_{\theta, \xi} \triangleq\left\|\overline{q_{\theta}}\left(z_{\theta}\right)-\bar{z}_{\xi}^{\prime}\right\|_{2}^{2}=2-2 \cdot \frac{\left\langle q_{\theta}\left(z_{\theta}\right), z_{\xi}^{\prime}\right\rangle}{\left\|q_{\theta}\left(z_{\theta}\right)\right\|_{2} \cdot\left\|z_{\xi}^{\prime}\right\|_{2}}
+\end{equation}
+同样的交换两个视图送到网络的顺序, 并且得到另一个loss, 加和来得到对称化loss
+\begin{equation}
+    \mathcal{L}_{\theta, \xi}^{\mathrm{BYDL}}=\mathcal{L}_{\theta, \xi}+\widetilde{\mathcal{L}}_{\theta, \xi}
+\end{equation}
+参数的更新
+\begin{equation}
+    \begin{array}{l}
+    \theta \leftarrow \text { optimizer }\left(\theta, \nabla_{\theta} \mathcal{L}_{\theta, \xi}^{\mathrm{BYOL}}, \eta\right), \\
+    \xi \leftarrow \tau \xi+(1-\tau) \theta
+    \end{array}
+\end{equation}
+
+BYOL没有使用显式的方法防止mode collapse(negative samples etc.). 但是根据假设, 他们证明了, 至少在predictor是optimal的时候($q_\theta = q^\star$), 鞍点是不稳定的.
+
+\section{MoCo: Momentum Contrast for Unsupervised Visual Representation Learning}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{byol-fig.png}
+\end{figure}
+\subsection{Ideas \& Method}
+
+InfoNCE on memory bank
+\begin{equation}
+    \mathcal{L}_{q}=-\log \frac{\exp (q \cdot k+/ \tau)}{\sum_{i=0}^{K} \exp \left(q \cdot k_{i} / \tau\right)}
+\end{equation}
+
+Momentum encoder: 按照moving average更新k-encoder
+\begin{equation}
+    \theta_{\mathrm{k}} \leftarrow m \theta_{\mathrm{k}}+(1-m) \theta_{\mathrm{q}}
+\end{equation}
+
+Tricks: Shuffling BNs
+
+\section{SimSiam: Exploring Simple Siamese Representation Learning}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{simsiam-comp.png}
+\end{figure}
+\subsection{Intuitions}
+
+BYOL既没有使用negative samples, 但是使用了momentum encoder+不对称的proj. head+stop-grad策略来避免collapse, 并且不需要巨大的batchsize! 所以本方法可以考虑为BYOL-momentum encoder, 使用两个共享权重的网络(like SwAV without online clustering/SimCLR without negative pairs), 即使如此, 不会导致mode collapse!
+
+\begin{remark}
+    stop-grad是关键的, 没有stop-grad则会直接收敛到trivial解(mode collapse)
+\end{remark}
+
+\subsection{Method}
+
+使用共享权重的backbone(like ResNet)+proj. head(MLP), 最小化不同视图最后特征的负cosine-sim.
+\begin{equation}
+    \mathcal{D}\left(p_{1}, z_{2}\right)=-\frac{p_{1}}{\left\|p_{1}\right\|_{2}} \cdot \frac{z_{2}}{\left\|z_{2}\right\|_{2}}
+\end{equation}
+并且使用对称化loss
+\begin{equation}
+    \mathcal{L}=\frac{1}{2} \mathcal{D}\left(p_{1}, z_{2}\right)+\frac{1}{2} \mathcal{D}\left(p_{2}, z_{1}\right)
+\end{equation}
+并且不对一边的网络进行参数更新.
+
+\bt{Settings} \begin{itemize}
+    \item Optimizer: SGD for pre-traininig. $lr=lr_{base}\times \text{BatchSize}/256$, base lr为0.05, 使用cosine decay(annealing) schedule, L2正则化1e-4, 动量0.9.
+    \item Batch Size ~ 512, Synchronized BN across devices.
+    \item Proj. Head: 3FCN of 2048-d.
+    \item Pred. Head: 2FCN of 2048-512-2048-d.
+\end{itemize}
+
+
+
 \end{document}

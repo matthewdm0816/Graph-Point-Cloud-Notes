@@ -1,135 +1,156 @@
-\contentsline {section}{\numberline {1}NeVAE}{7}{section.1}%
-\contentsline {subsection}{\numberline {1.1}Encoder}{7}{subsection.1.1}%
-\contentsline {subsection}{\numberline {1.2}Decoder}{8}{subsection.1.2}%
-\contentsline {subsection}{\numberline {1.3}Training}{9}{subsection.1.3}%
-\contentsline {subsection}{\numberline {1.4}Property Oriented Mol. Gen.}{9}{subsection.1.4}%
-\contentsline {section}{\numberline {2}Seminar on Self/Un-Supervised Learning @ 2020/9/16}{10}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Self-Learning @ Video Learning}{10}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Transformation Equivariance vs. Invariance @ Visial Repr. Learning}{12}{subsection.2.2}%
-\contentsline {section}{\numberline {3}AET, AVT: Autoencoding Transformations}{14}{section.3}%
-\contentsline {section}{\numberline {4}Flow-Based Generative Models}{16}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Outline \& Basics}{16}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}MoFlow}{17}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}GCF/Graph Conditional Flow}{19}{subsubsection.4.2.1}%
-\contentsline {subsubsection}{\numberline {4.2.2}Validity Correction \& Misc}{20}{subsubsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.3}GraphNVP}{21}{subsection.4.3}%
-\contentsline {section}{\numberline {5}WGAN}{21}{section.5}%
-\contentsline {section}{\numberline {6}GMMN+AE}{22}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Structure \& Idea}{22}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Training}{23}{subsection.6.2}%
-\contentsline {section}{\numberline {7}FoldingNet - An AntoEncoder}{23}{section.7}%
-\contentsline {section}{\numberline {8}PointFlow: Flow-based Generative Model on Point Clouds}{24}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Continuous Normalizing Flow(CNF)}{24}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Variational Auto-Encoder}{24}{subsection.8.2}%
-\contentsline {subsection}{\numberline {8.3}Model}{25}{subsection.8.3}%
-\contentsline {section}{\numberline {9}FFJORD}{27}{section.9}%
-\contentsline {subsection}{\numberline {9.1}CNF}{27}{subsection.9.1}%
-\contentsline {subsection}{\numberline {9.2}Backpropagation through ODE Solutions with Adjoint Method}{27}{subsection.9.2}%
-\contentsline {subsection}{\numberline {9.3}Unbiased Linear-Time Log-Density Estimation}{27}{subsection.9.3}%
-\contentsline {section}{\numberline {10}Dequantization to Learn Discrete Distribution}{28}{section.10}%
-\contentsline {subsection}{\numberline {10.1}Dequantization as Latent Variable Model}{28}{subsection.10.1}%
-\contentsline {subsection}{\numberline {10.2}Variational Dequantization}{29}{subsection.10.2}%
-\contentsline {subsection}{\numberline {10.3}Importance-Weighted Dequantization}{29}{subsection.10.3}%
-\contentsline {subsection}{\numberline {10.4}Renyi Dequantization}{30}{subsection.10.4}%
-\contentsline {subsection}{\numberline {10.5}Dequantization Distribution}{30}{subsection.10.5}%
-\contentsline {subsection}{\numberline {10.6}(Choice of) Continuous Distribution}{31}{subsection.10.6}%
-\contentsline {section}{\numberline {11}DGI: Deep Graph Infomax}{31}{section.11}%
-\contentsline {subsection}{\numberline {11.1}Backgrounds, Approach, Math}{31}{subsection.11.1}%
-\contentsline {subsection}{\numberline {11.2}Algorithm}{32}{subsection.11.2}%
-\contentsline {section}{\numberline {12}GraphSAGE: Inductive Representation Learning on Graph}{33}{section.12}%
-\contentsline {subsection}{\numberline {12.1}Embedding Generation/FP}{33}{subsection.12.1}%
-\contentsline {subsection}{\numberline {12.2}Aggragator Selection}{33}{subsection.12.2}%
-\contentsline {section}{\numberline {13}SGC: Simplified Graph Convolution}{34}{section.13}%
-\contentsline {section}{\numberline {14}FastGCN}{34}{section.14}%
-\contentsline {subsection}{\numberline {14.1}Method}{34}{subsection.14.1}%
-\contentsline {subsection}{\numberline {14.2}Variance Reduction}{35}{subsection.14.2}%
-\contentsline {section}{\numberline {15}GWNN: Wavelet Transform on Graph}{36}{section.15}%
-\contentsline {subsection}{\numberline {15.1}Supplementary Math: Real and Complex Wavelets}{36}{subsection.15.1}%
-\contentsline {subsection}{\numberline {15.2}Graph Wavelets}{37}{subsection.15.2}%
-\contentsline {subsection}{\numberline {15.3}GWNN}{38}{subsection.15.3}%
-\contentsline {subsubsection}{\numberline {15.3.1}Details}{38}{subsubsection.15.3.1}%
-\contentsline {section}{\numberline {16}Graph Wavelets}{38}{section.16}%
-\contentsline {subsection}{\numberline {16.1}经典小波变换/CWT}{38}{subsection.16.1}%
-\contentsline {subsection}{\numberline {16.2}谱小波变换/SGWT}{39}{subsection.16.2}%
-\contentsline {subsubsection}{\numberline {16.2.1}Scaling Functions}{40}{subsubsection.16.2.1}%
-\contentsline {subsection}{\numberline {16.3}SGWT的性质}{40}{subsection.16.3}%
-\contentsline {subsubsection}{\numberline {16.3.1}Inverse SGWT}{40}{subsubsection.16.3.1}%
-\contentsline {subsubsection}{\numberline {16.3.2}局域性}{40}{subsubsection.16.3.2}%
-\contentsline {subsubsection}{\numberline {16.3.3}Spectral Wavelet Frames}{41}{subsubsection.16.3.3}%
-\contentsline {subsection}{\numberline {16.4}Fast SGWT Approximation by Polynomials}{41}{subsection.16.4}%
-\contentsline {subsubsection}{\numberline {16.4.1}Fast Approximation of Adjoint}{42}{subsubsection.16.4.1}%
-\contentsline {subsubsection}{\numberline {16.4.2}Inverse Calculation}{43}{subsubsection.16.4.2}%
-\contentsline {subsection}{\numberline {16.5}Implementations and Details}{43}{subsection.16.5}%
-\contentsline {section}{\numberline {17}GMNN: Graph Markov Neural Network}{44}{section.17}%
-\contentsline {subsection}{\numberline {17.1}Psedolikelihood Variaional EM}{44}{subsection.17.1}%
-\contentsline {subsection}{\numberline {17.2}Inference}{45}{subsection.17.2}%
-\contentsline {subsection}{\numberline {17.3}Learning}{46}{subsection.17.3}%
-\contentsline {subsection}{\numberline {17.4}Optimization}{46}{subsection.17.4}%
-\contentsline {section}{\numberline {18}ClusterGCN: Fast Deep \& Large GCNs}{47}{section.18}%
-\contentsline {subsection}{\numberline {18.1}Vanilla ClusterGCN: Cluster For Batch}{47}{subsection.18.1}%
-\contentsline {subsection}{\numberline {18.2}Stochastic Multiple Partitions}{48}{subsection.18.2}%
-\contentsline {subsection}{\numberline {18.3}Analysis of Deeper Networks}{48}{subsection.18.3}%
-\contentsline {section}{\numberline {19}GAT: Graph Attention Network}{49}{section.19}%
-\contentsline {section}{\numberline {20}Note on Probalistic Graphical Models}{49}{section.20}%
-\contentsline {subsection}{\numberline {20.1}Bayesian Networks}{49}{subsection.20.1}%
-\contentsline {subsection}{\numberline {20.2}Undirected Networks}{50}{subsection.20.2}%
-\contentsline {subsection}{\numberline {20.3}Local Probablistic Models | i.e. Specific Models Corresponds to Last 2 Sections}{52}{subsection.20.3}%
-\contentsline {subsection}{\numberline {20.4}Temporal Models}{53}{subsection.20.4}%
-\contentsline {section}{\numberline {21}RSCNN(CVPR 19')}{53}{section.21}%
-\contentsline {subsection}{\numberline {21.1}Architecture}{53}{subsection.21.1}%
-\contentsline {subsection}{\numberline {21.2}Details \& Implementation}{54}{subsection.21.2}%
-\contentsline {section}{\numberline {22}SimpleView(ICLR 21' Candidate)}{54}{section.22}%
-\contentsline {subsection}{\numberline {22.1}Simple Review of Existing Protocols}{54}{subsection.22.1}%
-\contentsline {subsection}{\numberline {22.2}Model: SimpleView}{54}{subsection.22.2}%
-\contentsline {section}{\numberline {23}OT-Flow}{55}{section.23}%
-\contentsline {subsection}{\numberline {23.1}Idea \& Formulations}{55}{subsection.23.1}%
-\contentsline {subsection}{\numberline {23.2}Parametrization of Model}{55}{subsection.23.2}%
-\contentsline {subsection}{\numberline {23.3}Exact Hessian of Multilayer NN}{56}{subsection.23.3}%
-\contentsline {section}{\numberline {24}Node2vec: Unsupervised Feature Learning}{56}{section.24}%
-\contentsline {subsection}{\numberline {24.1}Basics}{56}{subsection.24.1}%
-\contentsline {subsection}{\numberline {24.2}Biased Random Walk}{57}{subsection.24.2}%
-\contentsline {subsection}{\numberline {24.3}Edge Feature}{58}{subsection.24.3}%
-\contentsline {section}{\numberline {25}DeepWalk: Online Representation Learning}{58}{section.25}%
-\contentsline {subsection}{\numberline {25.1}DeepWalk}{58}{subsection.25.1}%
-\contentsline {subsection}{\numberline {25.2}SkipGram}{59}{subsection.25.2}%
-\contentsline {subsection}{\numberline {25.3}Hierachichal Softmax}{59}{subsection.25.3}%
-\contentsline {subsection}{\numberline {25.4}Parallelization}{60}{subsection.25.4}%
-\contentsline {subsection}{\numberline {25.5}Variants}{60}{subsection.25.5}%
-\contentsline {section}{\numberline {26}DAGNN: Towards Deeper GNN}{60}{section.26}%
-\contentsline {subsection}{\numberline {26.1}Smoothness Metrics}{61}{subsection.26.1}%
-\contentsline {subsection}{\numberline {26.2}Convergence of Propagation}{61}{subsection.26.2}%
-\contentsline {subsection}{\numberline {26.3}DAGNN: Deep Adaptive GNN}{61}{subsection.26.3}%
-\contentsline {section}{\numberline {27}t-SNE(t-Distributed Stochastic Neighbor Embedding)}{62}{section.27}%
-\contentsline {subsection}{\numberline {27.1}SNE}{62}{subsection.27.1}%
-\contentsline {subsection}{\numberline {27.2}UNI-SNE}{62}{subsection.27.2}%
-\contentsline {subsection}{\numberline {27.3}t-SNE}{62}{subsection.27.3}%
-\contentsline {subsection}{\numberline {27.4}Barnes-Hut-SNE}{63}{subsection.27.4}%
-\contentsline {subsubsection}{\numberline {27.4.1}Approximating Input Simularities by Vantage-point Tree}{63}{subsubsection.27.4.1}%
-\contentsline {subsubsection}{\numberline {27.4.2}Approximating t-SNE Gradients}{63}{subsubsection.27.4.2}%
-\contentsline {section}{\numberline {28}Autoregressive Flows}{64}{section.28}%
-\contentsline {subsection}{\numberline {28.1}Autoregressive Transformation}{64}{subsection.28.1}%
-\contentsline {subsection}{\numberline {28.2}MAF: Masked Autoregressive Flow}{65}{subsection.28.2}%
-\contentsline {subsection}{\numberline {28.3}IAF: Inverse Autoregressive Flow}{65}{subsection.28.3}%
-\contentsline {subsection}{\numberline {28.4}Sylvester NF(UAI 18')}{65}{subsection.28.4}%
-\contentsline {subsubsection}{\numberline {28.4.1}Idea}{65}{subsubsection.28.4.1}%
-\contentsline {subsubsection}{\numberline {28.4.2}Parametrization of A \& B}{66}{subsubsection.28.4.2}%
-\contentsline {subsubsection}{\numberline {28.4.3}Preserving Orthogonality of Q}{66}{subsubsection.28.4.3}%
-\contentsline {section}{\numberline {29}Contrastive Multi-view Representation Learning/MVRLG(ICML 20')}{67}{section.29}%
-\contentsline {subsection}{\numberline {29.1}Augmentations}{67}{subsection.29.1}%
-\contentsline {subsection}{\numberline {29.2}Encoders}{67}{subsection.29.2}%
-\contentsline {subsection}{\numberline {29.3}Training}{67}{subsection.29.3}%
-\contentsline {section}{\numberline {30}GCC: Graph Contrastive Coding for GNN Pre-Training(KDD 20')}{69}{section.30}%
-\contentsline {subsection}{\numberline {30.1}GCC Pre-Training}{69}{subsection.30.1}%
-\contentsline {subsection}{\numberline {30.2}Finetuning GCC}{70}{subsection.30.2}%
-\contentsline {section}{\numberline {31}GIN: Graph Isomorphism Network(ICLR 19')}{70}{section.31}%
-\contentsline {subsection}{\numberline {31.1}Weisfeiler-Lehman Test}{70}{subsection.31.1}%
-\contentsline {subsection}{\numberline {31.2}Math Intuitions}{71}{subsection.31.2}%
-\contentsline {subsection}{\numberline {31.3}GIN}{71}{subsection.31.3}%
-\contentsline {subsection}{\numberline {31.4}Graph Readout of GIN}{71}{subsection.31.4}%
-\contentsline {section}{\numberline {32}GraphLoG: Self-Supervised Represtation Learning with Local \& Global Structure}{72}{section.32}%
-\contentsline {subsection}{\numberline {32.1}Preliminaries}{72}{subsection.32.1}%
-\contentsline {subsection}{\numberline {32.2}Local-Inst. Stru. Learning}{72}{subsection.32.2}%
-\contentsline {subsection}{\numberline {32.3}Global-Semantic Repr. Learning}{73}{subsection.32.3}%
-\contentsline {subsubsection}{\numberline {32.3.1}Init. of HP(Hirechichal Prototypes)}{73}{subsubsection.32.3.1}%
-\contentsline {subsubsection}{\numberline {32.3.2}Maintainance of HP}{73}{subsubsection.32.3.2}%
-\contentsline {subsection}{\numberline {32.4}Sup-GraphLoG: A Supervised Baseline}{74}{subsection.32.4}%
+\contentsline {section}{\numberline {1}NeVAE}{8}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Encoder}{8}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Decoder}{9}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Training}{10}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Property Oriented Mol. Gen.}{10}{subsection.1.4}%
+\contentsline {section}{\numberline {2}Seminar on Self/Un-Supervised Learning @ 2020/9/16}{11}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Self-Learning @ Video Learning}{11}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Transformation Equivariance vs. Invariance @ Visial Repr. Learning}{13}{subsection.2.2}%
+\contentsline {section}{\numberline {3}AET, AVT: Autoencoding Transformations}{15}{section.3}%
+\contentsline {section}{\numberline {4}Flow-Based Generative Models}{17}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Outline \& Basics}{17}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}MoFlow}{18}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}GCF/Graph Conditional Flow}{20}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Validity Correction \& Misc}{21}{subsubsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.3}GraphNVP}{22}{subsection.4.3}%
+\contentsline {section}{\numberline {5}WGAN}{22}{section.5}%
+\contentsline {section}{\numberline {6}GMMN+AE}{23}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Structure \& Idea}{23}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Training}{24}{subsection.6.2}%
+\contentsline {section}{\numberline {7}FoldingNet - An AntoEncoder}{24}{section.7}%
+\contentsline {section}{\numberline {8}PointFlow: Flow-based Generative Model on Point Clouds}{25}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Continuous Normalizing Flow(CNF)}{25}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Variational Auto-Encoder}{25}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Model}{26}{subsection.8.3}%
+\contentsline {section}{\numberline {9}FFJORD}{28}{section.9}%
+\contentsline {subsection}{\numberline {9.1}CNF}{28}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Backpropagation through ODE Solutions with Adjoint Method}{28}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}Unbiased Linear-Time Log-Density Estimation}{28}{subsection.9.3}%
+\contentsline {section}{\numberline {10}Dequantization to Learn Discrete Distribution}{29}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Dequantization as Latent Variable Model}{29}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Variational Dequantization}{30}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}Importance-Weighted Dequantization}{30}{subsection.10.3}%
+\contentsline {subsection}{\numberline {10.4}Renyi Dequantization}{31}{subsection.10.4}%
+\contentsline {subsection}{\numberline {10.5}Dequantization Distribution}{31}{subsection.10.5}%
+\contentsline {subsection}{\numberline {10.6}(Choice of) Continuous Distribution}{32}{subsection.10.6}%
+\contentsline {section}{\numberline {11}DGI: Deep Graph Infomax}{32}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Backgrounds, Approach, Math}{32}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}Algorithm}{33}{subsection.11.2}%
+\contentsline {section}{\numberline {12}GraphSAGE: Inductive Representation Learning on Graph}{34}{section.12}%
+\contentsline {subsection}{\numberline {12.1}Embedding Generation/FP}{34}{subsection.12.1}%
+\contentsline {subsection}{\numberline {12.2}Aggragator Selection}{34}{subsection.12.2}%
+\contentsline {section}{\numberline {13}SGC: Simplified Graph Convolution}{35}{section.13}%
+\contentsline {section}{\numberline {14}FastGCN}{35}{section.14}%
+\contentsline {subsection}{\numberline {14.1}Method}{35}{subsection.14.1}%
+\contentsline {subsection}{\numberline {14.2}Variance Reduction}{36}{subsection.14.2}%
+\contentsline {section}{\numberline {15}GWNN: Wavelet Transform on Graph}{37}{section.15}%
+\contentsline {subsection}{\numberline {15.1}Supplementary Math: Real and Complex Wavelets}{37}{subsection.15.1}%
+\contentsline {subsection}{\numberline {15.2}Graph Wavelets}{38}{subsection.15.2}%
+\contentsline {subsection}{\numberline {15.3}GWNN}{39}{subsection.15.3}%
+\contentsline {subsubsection}{\numberline {15.3.1}Details}{39}{subsubsection.15.3.1}%
+\contentsline {section}{\numberline {16}Graph Wavelets}{39}{section.16}%
+\contentsline {subsection}{\numberline {16.1}经典小波变换/CWT}{39}{subsection.16.1}%
+\contentsline {subsection}{\numberline {16.2}谱小波变换/SGWT}{40}{subsection.16.2}%
+\contentsline {subsubsection}{\numberline {16.2.1}Scaling Functions}{41}{subsubsection.16.2.1}%
+\contentsline {subsection}{\numberline {16.3}SGWT的性质}{41}{subsection.16.3}%
+\contentsline {subsubsection}{\numberline {16.3.1}Inverse SGWT}{41}{subsubsection.16.3.1}%
+\contentsline {subsubsection}{\numberline {16.3.2}局域性}{41}{subsubsection.16.3.2}%
+\contentsline {subsubsection}{\numberline {16.3.3}Spectral Wavelet Frames}{42}{subsubsection.16.3.3}%
+\contentsline {subsection}{\numberline {16.4}Fast SGWT Approximation by Polynomials}{42}{subsection.16.4}%
+\contentsline {subsubsection}{\numberline {16.4.1}Fast Approximation of Adjoint}{43}{subsubsection.16.4.1}%
+\contentsline {subsubsection}{\numberline {16.4.2}Inverse Calculation}{44}{subsubsection.16.4.2}%
+\contentsline {subsection}{\numberline {16.5}Implementations and Details}{44}{subsection.16.5}%
+\contentsline {section}{\numberline {17}GMNN: Graph Markov Neural Network}{45}{section.17}%
+\contentsline {subsection}{\numberline {17.1}Psedolikelihood Variaional EM}{45}{subsection.17.1}%
+\contentsline {subsection}{\numberline {17.2}Inference}{46}{subsection.17.2}%
+\contentsline {subsection}{\numberline {17.3}Learning}{47}{subsection.17.3}%
+\contentsline {subsection}{\numberline {17.4}Optimization}{47}{subsection.17.4}%
+\contentsline {section}{\numberline {18}ClusterGCN: Fast Deep \& Large GCNs}{48}{section.18}%
+\contentsline {subsection}{\numberline {18.1}Vanilla ClusterGCN: Cluster For Batch}{48}{subsection.18.1}%
+\contentsline {subsection}{\numberline {18.2}Stochastic Multiple Partitions}{49}{subsection.18.2}%
+\contentsline {subsection}{\numberline {18.3}Analysis of Deeper Networks}{49}{subsection.18.3}%
+\contentsline {section}{\numberline {19}GAT: Graph Attention Network}{50}{section.19}%
+\contentsline {section}{\numberline {20}Note on Probalistic Graphical Models}{50}{section.20}%
+\contentsline {subsection}{\numberline {20.1}Bayesian Networks}{50}{subsection.20.1}%
+\contentsline {subsection}{\numberline {20.2}Undirected Networks}{51}{subsection.20.2}%
+\contentsline {subsection}{\numberline {20.3}Local Probablistic Models | i.e. Specific Models Corresponds to Last 2 Sections}{53}{subsection.20.3}%
+\contentsline {subsection}{\numberline {20.4}Temporal Models}{54}{subsection.20.4}%
+\contentsline {section}{\numberline {21}RSCNN(CVPR 19')}{54}{section.21}%
+\contentsline {subsection}{\numberline {21.1}Architecture}{54}{subsection.21.1}%
+\contentsline {subsection}{\numberline {21.2}Details \& Implementation}{55}{subsection.21.2}%
+\contentsline {section}{\numberline {22}SimpleView(ICLR 21' Candidate)}{55}{section.22}%
+\contentsline {subsection}{\numberline {22.1}Simple Review of Existing Protocols}{55}{subsection.22.1}%
+\contentsline {subsection}{\numberline {22.2}Model: SimpleView}{55}{subsection.22.2}%
+\contentsline {section}{\numberline {23}OT-Flow}{56}{section.23}%
+\contentsline {subsection}{\numberline {23.1}Idea \& Formulations}{56}{subsection.23.1}%
+\contentsline {subsection}{\numberline {23.2}Parametrization of Model}{56}{subsection.23.2}%
+\contentsline {subsection}{\numberline {23.3}Exact Hessian of Multilayer NN}{57}{subsection.23.3}%
+\contentsline {section}{\numberline {24}Node2vec: Unsupervised Feature Learning}{57}{section.24}%
+\contentsline {subsection}{\numberline {24.1}Basics}{57}{subsection.24.1}%
+\contentsline {subsection}{\numberline {24.2}Biased Random Walk}{58}{subsection.24.2}%
+\contentsline {subsection}{\numberline {24.3}Edge Feature}{59}{subsection.24.3}%
+\contentsline {section}{\numberline {25}DeepWalk: Online Representation Learning}{59}{section.25}%
+\contentsline {subsection}{\numberline {25.1}DeepWalk}{59}{subsection.25.1}%
+\contentsline {subsection}{\numberline {25.2}SkipGram}{60}{subsection.25.2}%
+\contentsline {subsection}{\numberline {25.3}Hierachichal Softmax}{60}{subsection.25.3}%
+\contentsline {subsection}{\numberline {25.4}Parallelization}{61}{subsection.25.4}%
+\contentsline {subsection}{\numberline {25.5}Variants}{61}{subsection.25.5}%
+\contentsline {section}{\numberline {26}DAGNN: Towards Deeper GNN}{61}{section.26}%
+\contentsline {subsection}{\numberline {26.1}Smoothness Metrics}{62}{subsection.26.1}%
+\contentsline {subsection}{\numberline {26.2}Convergence of Propagation}{62}{subsection.26.2}%
+\contentsline {subsection}{\numberline {26.3}DAGNN: Deep Adaptive GNN}{62}{subsection.26.3}%
+\contentsline {section}{\numberline {27}t-SNE(t-Distributed Stochastic Neighbor Embedding)}{63}{section.27}%
+\contentsline {subsection}{\numberline {27.1}SNE}{63}{subsection.27.1}%
+\contentsline {subsection}{\numberline {27.2}UNI-SNE}{63}{subsection.27.2}%
+\contentsline {subsection}{\numberline {27.3}t-SNE}{63}{subsection.27.3}%
+\contentsline {subsection}{\numberline {27.4}Barnes-Hut-SNE}{64}{subsection.27.4}%
+\contentsline {subsubsection}{\numberline {27.4.1}Approximating Input Simularities by Vantage-point Tree}{64}{subsubsection.27.4.1}%
+\contentsline {subsubsection}{\numberline {27.4.2}Approximating t-SNE Gradients}{64}{subsubsection.27.4.2}%
+\contentsline {section}{\numberline {28}Autoregressive Flows}{65}{section.28}%
+\contentsline {subsection}{\numberline {28.1}Autoregressive Transformation}{65}{subsection.28.1}%
+\contentsline {subsection}{\numberline {28.2}MAF: Masked Autoregressive Flow}{66}{subsection.28.2}%
+\contentsline {subsection}{\numberline {28.3}IAF: Inverse Autoregressive Flow}{66}{subsection.28.3}%
+\contentsline {subsection}{\numberline {28.4}Sylvester NF(UAI 18')}{66}{subsection.28.4}%
+\contentsline {subsubsection}{\numberline {28.4.1}Idea}{66}{subsubsection.28.4.1}%
+\contentsline {subsubsection}{\numberline {28.4.2}Parametrization of A \& B}{67}{subsubsection.28.4.2}%
+\contentsline {subsubsection}{\numberline {28.4.3}Preserving Orthogonality of Q}{67}{subsubsection.28.4.3}%
+\contentsline {section}{\numberline {29}Contrastive Multi-view Representation Learning/MVRLG(ICML 20')}{68}{section.29}%
+\contentsline {subsection}{\numberline {29.1}Augmentations}{68}{subsection.29.1}%
+\contentsline {subsection}{\numberline {29.2}Encoders}{68}{subsection.29.2}%
+\contentsline {subsection}{\numberline {29.3}Training}{68}{subsection.29.3}%
+\contentsline {section}{\numberline {30}GCC: Graph Contrastive Coding for GNN Pre-Training(KDD 20')}{70}{section.30}%
+\contentsline {subsection}{\numberline {30.1}GCC Pre-Training}{70}{subsection.30.1}%
+\contentsline {subsection}{\numberline {30.2}Finetuning GCC}{71}{subsection.30.2}%
+\contentsline {section}{\numberline {31}GIN: Graph Isomorphism Network(ICLR 19')}{71}{section.31}%
+\contentsline {subsection}{\numberline {31.1}Weisfeiler-Lehman Test}{71}{subsection.31.1}%
+\contentsline {subsection}{\numberline {31.2}Math Intuitions}{72}{subsection.31.2}%
+\contentsline {subsection}{\numberline {31.3}GIN}{72}{subsection.31.3}%
+\contentsline {subsection}{\numberline {31.4}Graph Readout of GIN}{72}{subsection.31.4}%
+\contentsline {section}{\numberline {32}GraphLoG: Self-Supervised Represtation Learning with Local \& Global Structure}{73}{section.32}%
+\contentsline {subsection}{\numberline {32.1}Preliminaries}{73}{subsection.32.1}%
+\contentsline {subsection}{\numberline {32.2}Local-Inst. Stru. Learning}{73}{subsection.32.2}%
+\contentsline {subsection}{\numberline {32.3}Global-Semantic Repr. Learning}{74}{subsection.32.3}%
+\contentsline {subsubsection}{\numberline {32.3.1}Init. of HP(Hirechichal Prototypes)}{74}{subsubsection.32.3.1}%
+\contentsline {subsubsection}{\numberline {32.3.2}Maintainance of HP}{74}{subsubsection.32.3.2}%
+\contentsline {subsection}{\numberline {32.4}Sup-GraphLoG: A Supervised Baseline}{75}{subsection.32.4}%
+\contentsline {section}{\numberline {33}Orthogonal Weights in DNNs}{75}{section.33}%
+\contentsline {subsection}{\numberline {33.1}Formulation \& Good Properties}{75}{subsection.33.1}%
+\contentsline {subsection}{\numberline {33.2}OWN: Orthogonal Weight Normalization}{75}{subsection.33.2}%
+\contentsline {subsubsection}{\numberline {33.2.1}Backpropagation}{76}{subsubsection.33.2.1}%
+\contentsline {subsubsection}{\numberline {33.2.2}As Convolution}{76}{subsubsection.33.2.2}%
+\contentsline {subsubsection}{\numberline {33.2.3}Group Based Orthogonalization: Divided Filters}{77}{subsubsection.33.2.3}%
+\contentsline {section}{\numberline {34}OrthDNNs: Orthogonal DNNs(TPAMI 19')}{77}{section.34}%
+\contentsline {subsection}{\numberline {34.1}GE Analysis in a Robustness and Isomeric Mapping Perspecitve}{77}{subsection.34.1}%
+\contentsline {subsection}{\numberline {34.2}GE Analysis of DNN}{78}{subsection.34.2}%
+\contentsline {subsection}{\numberline {34.3}OrthDNN by SVB(Singular Value Bound)}{78}{subsection.34.3}%
+\contentsline {subsubsection}{\numberline {34.3.1}BN Compatibility}{79}{subsubsection.34.3.1}%
+\contentsline {subsubsection}{\numberline {34.3.2}On CNN: OrthDNN as Convolution}{79}{subsubsection.34.3.2}%
+\contentsline {section}{\numberline {35}SimCLR: A Simple Framework for Contrastive Learning of Visual Representations}{79}{section.35}%
+\contentsline {subsection}{\numberline {35.1}Ideas \& Basics}{79}{subsection.35.1}%
+\contentsline {section}{\numberline {36}BYOL: Build Your Own Latent}{80}{section.36}%
+\contentsline {subsection}{\numberline {36.1}Ideas \& Method}{80}{subsection.36.1}%
+\contentsline {section}{\numberline {37}MoCo: Momentum Contrast for Unsupervised Visual Representation Learning}{81}{section.37}%
+\contentsline {subsection}{\numberline {37.1}Ideas \& Method}{81}{subsection.37.1}%
+\contentsline {section}{\numberline {38}SimSiam: Exploring Simple Siamese Representation Learning}{82}{section.38}%
+\contentsline {subsection}{\numberline {38.1}Intuitions}{82}{subsection.38.1}%
+\contentsline {subsection}{\numberline {38.2}Method}{82}{subsection.38.2}%
