@@ -2697,7 +2697,10 @@ $$
 
 \subsection{GE Analysis of DNN}
 
-\footnote{TO READ AND MAKE NOTES}
+\footnote{
+    TO READ AND MAKE NOTES
+    % TODO
+}
 
 \subsection{OrthDNN by SVB(Singular Value Bound)}
 
@@ -2871,6 +2874,25 @@ BYOL既没有使用negative samples, 但是使用了momentum encoder+不对称�
     \item Pred. Head: 2FCN of 2048-512-2048-d.
 \end{itemize}
 
+\section{Graph Layouts by t-SNE}
+
+\subsection{Backgrounds}
+
+\bt{Dimension Reduction}
+
+投影高维数据到低维, 可分为distance-preserving方法, 最小化(aggregated normalized) stress
+\begin{equation}
+    \sigma=\sum_{i, j}\left(\frac{d\left(\mathbf{x}_{i}, \mathbf{x}_{j}\right)-\left\|\mathbf{y}_{i}-\mathbf{y}_{j}\right\|}{d\left(\mathbf{x}_{i}, \mathbf{x}_{j}\right)}\right)^{2}
+\end{equation}
+以及neighborhood-preserving方法, 最大化kNN的重叠. distance-preserving方法在特别高维时失效很严重(由于高维空间的各种奇性).
+
+\subsection{Method}
+% !TODO
+\subsection{tsNET}
+
+\section{细粒度图像数据分类}
+
+\subsection{1}
 
 
 \end{document}
