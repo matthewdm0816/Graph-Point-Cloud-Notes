@@ -2908,5 +2908,122 @@ BYOL既没有使用negative samples, 但是使用了momentum encoder+不对称�
 
 Future: 大规模细粒度图像分类, 细粒度视觉推理, 图像到跨媒体迁移
 
+\section{Dirac Operator for Extrinstic Shape Analysis}
+
+为什么需要微分算子? 他们提供了一组流形上的基函数(Hilbert空间的基), 以及对应特征值. 流形上的函数可以在这些基上展开, 并且提供了傅立叶变换和卷积. 在紧流形上, 一个算子有离散的特征基, 若他是自伴和椭圆算子(矩阵为对称的和正定的). 然而很多微分算子并不满足这些条件:
+\begin{itemize}
+    \item Laplace-Beltrami Op., i.e. $\Delta$, 一种曲面光滑性的度量. 
+    \item Hessian矩阵, 和modified Dirichlet能量. $\sum_i E_D(N^i\phi)$
+    \item 各项异性Laplacian $\Delta_A=\operatorname{div} A \nabla$
+\end{itemize}
+对于曲面M, L算子可以看做Dirichlet能量的Hessian. 我们提出Dirac Op.
+
+\subsection{Math}
+
+使用四元数来表示曲面(的一个嵌入$f: M\mapsto \Im \mathbb H$). 假设这个嵌入是共形(conformal)的. 使用$\kappa_1, \kappa_2$代表两个主曲率, 有高斯曲率$K=\kappa_1\kappa_2$和平均曲率$H:=\frac{1}{2}\left(\kappa_{1}+\kappa_{2}\right)$. $|df|^2$代表嵌入f诱导的体积元.
+
+对于实值函数, L算子是最低阶非平凡自伴椭圆算子. 对于复变函数, 则存在1-order微分算子: Dirac算子. 经典例子是Cauchy-Riemann(Poincare)算子$\bar \partial$, 以及微分形式上的Hodge-Dirac算子$\star d+d \star$.
+
+我们使用的是extrinstic D-Op.
+\begin{equation}
+    D\psi := -\frac{df\wedge d\psi}{|df|^2}
+\end{equation}
+其中$|df|^2$的除法为应用2-形式的Hodge star算子.
+
+平方, 有
+\begin{equation}
+    D^{2} \psi=\Delta \psi+\frac{d N \wedge d \psi}{|d f|^{2}}
+\end{equation}
+
+相对微分算子
+\begin{equation}
+    D_{f_{1}, f_{2}} \psi:=-\frac{d f_{2} \wedge d \psi}{\left|d f_{1}\right|^{2}}
+\end{equation}
+
+单参数内插
+\begin{equation}
+    L(\tau):=(1-\tau) \Delta+\tau D_{N}
+\end{equation}
+
+算子$D_N$只是半正定的. 但是增加一些L算子的部分就能成为强正定的. 这些算子和曲率也有一定关系, $\Delta=\Delta_{\R^2}e^{-2u}$, $u$是对数共形尺度因子, 且满足Yamabe方程$\Delta u=K$. 由于要最小化$\langle\langle\Delta \varphi, \varphi\rangle\rangle$, $\Delta \varphi$在有很大高斯曲率的地方会很小.
+
+MDE(modified Dirichlet energy)也可写成
+\begin{equation}
+    E_{M D E}(\varphi)=\langle\langle\Delta \varphi, \varphi\rangle\rangle+\int_{M} \varphi^{2}\left(\kappa_{1}^{2}+\kappa_{2}^{2}\right) d A
+\end{equation}
+这意味着它的Hessian是$\Delta + U$, 后者是Willmore势能$U=\kappa_1^2+\kappa_2^2$, 这鼓励特征函数在曲率很大地方有小的方差.
+
+\subsection{离散化}
+
+对以一个2-流形的三角mesh $K=(V, E, F)$, 不同于连续的情况, 使用法向量N代替f. 对于任何mesh上的三角$ijk\in F$,$\psi:V\mapsto \mathbb H$ 有
+\begin{equation}
+    \left(D_{N} \psi\right)_{i j k}:=-\frac{1}{2 \mathcal{A}_{i j k}} \sum_{p q r \in \mathcal{C}(i j k)}\left(N_{r}-N_{q}\right) \psi_{p}
+\end{equation}
+其中$\mathcal A_{ijk}$是三角面积, $\mathcal C({ijk})$是轮换. 这个算子可以写成张量$D\in \mathbb H^{|F|\times |V|}$
+\begin{equation}
+    \mathrm{D}_{i j k, p}=-\left(N_{r}-N_{q}\right) / 2 \mathcal{A}_{i j k}
+\end{equation}
+
+\subsection{实值表示}
+用4x4矩阵代替四元数运算. 为了找到典型表示, 需要找到乘积常数q,使得某个特征向量范数接近1.近似的有
+\begin{equation}
+    q:=\sum_{i=1}^{|V|} \mathcal{A}_{i} \phi_{i}^{-1}
+\end{equation}
+其中$A_i$是对偶区域的面积.
+
+\subsection{有界区域: 边界条件}
+
+边界条件可以是Dirichlet/Neumann条件. 这里提出无限势阱边界. 增加一个势能项U, 并且在有界区域之外迅速趋向无穷, 使得优化$\langle\{(\Delta+U) \psi, \psi\rangle\rangle$让波函数迅速在区域外收敛到0.
+\begin{equation}
+    U(p):=\frac{c}{1+\left(e^{-(d(p, q)-\beta)}\right)^{\gamma}}
+\end{equation}
+q是质心, c是大常数.
+
+为了使用这个罚函数, 在算子中加入对角矩阵$U_{ii}=A_i U(p_i)$
+
+\section{Mesh-Based Simulation with GNNs}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{meshsim.png}
+\end{figure}
+
+使用World/Mesh两种空间的输入. 预测物理体系的时间序列. 使用$M^t=(V, E^M)$描述t时间的系统状态. 每个结点都有mesh-space坐标$\bm u_i$和是动量/速度坐标$\bm q_i$. 对于欧拉系统, 建模的是固定的mesh上的速度场, 对于Lagrange系统, mesh是动态移动的, 并且包含了绝对世界坐标$\bm x_i$. 
+
+\subsection{结构}
+
+Encoder: 把$M^t$编码成多重图$G=(V,E^M, E^W)$, 并且增加了世界坐标下的边$E^W$. 这里使用简单的rNN采样, 选取半径为最短的mesh边长$r_W$. 并且mesh图边权为相对坐标$\mathbf{u}_{i j}=\mathbf{u}_{i}-\mathbf{u}_{j}$ , 同理世界坐标图中也为相对坐标. 
+
+Processor: GNN. 其中
+\begin{align}
+    \bs {e'}^{X}_{ij}=f^X(\bs e^{X}_{ij}, \bs v_i, \bs v_j)
+\end{align}
+
+Decoder: 使用在结点feature上的MLP. 得到输出向量$\bs p_i$
+
+Updater: 对于一阶系统, $\mathbf{q}_{i}^{t+1}=\mathbf{p}_{i}+\mathbf{q}_{i}^{t}$, 二阶系统: $\mathbf{q}_{i}^{t+1}=\mathbf{p}_{i}+2 \mathbf{q}_{i}^{t}-\mathbf{q}^{t-1}$. 输出向量的额外维度也用于预测附加属性(压力/张力 etc.)
+
+\subsection{Adaptive Remeshing}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{sizing.png}
+\end{figure}
+在需要的地方增加mesh数量.(有限元那味儿) 使用sizing filed方法. 定义sizing field张量$\mathbf{S}(\mathbf{u}) \in \mathbb{R}^{2 \times 2}$, 同时一条边是合理的iff. $\mathbf{u}_{i j}^{\mathrm{T}} \mathbf{S}_{i} \mathbf{u}_{i j} \leq 1$, 否则需要拆分这条边.
+
+使用动态的remeshing. 使用如上文的GNN的结构来学习sizing张量场. 每一步, 我们都计算动量信息和resizing张量场, 再用remesher计算下一步的mesh.
+
+给定了sizing张量场$\bs S_i$, 对于每条边, \begin{itemize}
+    \item 需要分割, 若$\mathbf{u}_{i j}^{\mathrm{T}} \mathbf{S}_{i j} \mathbf{u}_{i j}>1$, $\mathbf{S}_{i j}=\frac{1}{2}\left(\mathbf{S}_{i}+\mathbf{S}_{j}\right)$
+    \item 需要collapse, 若collapse不会产生新的无效边
+    \item 需要flip, 若满足各项异性Delaunay条件\begin{equation}
+        \left(\mathbf{u}_{j k} \times \mathbf{u}_{i k}\right) \mathbf{u}_{i l}^{T} \mathbf{S}_{A} \mathbf{u}_{j l}<\mathbf{u}_{j k}^{T} \mathbf{S}_{A} \mathbf{u}_{i k}\left(\mathbf{u}_{i l} \times \mathbf{u}_{j l}\right), \quad \mathbf{S}_{A}=\frac{1}{4}\left(\mathbf{S}_{i}+\mathbf{S}_{j}+\mathbf{S}_{k}+\mathbf{S}_{l}\right)
+    \end{equation}
+\end{itemize}
+顺序上, 先尽可能split所有边, 再尽可能collapse所有边, 再尽可能flip所有边
+
+若没有能估计sizing field的数据, 我们从mesh序列中估计之. 我们要找到能诱导出下一时刻mesh的sizing field. 假设remesher几乎是最优的, 所有结果边都有效, 那么最大化度规$\bm S$下的边长
+\begin{equation}
+    \mathbf{S}_{i}=\operatorname{argmax} \sum_{j \in \mathcal{N}_{i}} \mathbf{u}_{i j}^{\mathrm{T}} \mathbf{S}_{i} \mathbf{u}_{i j}, \quad \text { s.t. } \forall j \in \mathcal{N}_{i}: \mathbf{u}_{i j}^{\mathrm{T}} \mathbf{S}_{i} \mathbf{u}_{i j} \leq 1
+\end{equation}
+这是简单的凸优化(找到最小面积, 0-中心的包含$\bm u_{ij}$的椭圆).
 
 \end{document}
