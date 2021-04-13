@@ -2375,7 +2375,7 @@ $$
 \end{definition}
 GCC把不同r-ego net.作为不相似实例.
 
-在CV中,两个经过不同aug.的图片作为了相似inst. pair, GCC中,同样考虑同个r-ego net. 的不同数据增强作为相似实例对, 并且使用图采样作为数据增强. 具体上讲, GCC使用三步: 带重启的随机游走, 子图诱导, 匿名化. 前两步的结果即ISRW(Induced Subgraph Random Walk Sampling). 最后一步匿名化把节点重新标号. 最后,两个经过如此图采样的方法被认为是相似实例对.
+在CV中,两个经过不同aug.的图片作为了相似inst. pair, GCC中,同样考虑同个r-ego net. 的不同数据增强作为相似实例对, 并且使用图采样作为数据增强. 具体上讲, GCC使���三步: 带重启的随机游走, 子图诱导, 匿名化. 前两步的结果即ISRW(Induced Subgraph Random Walk Sampling). 最后一步匿名化把节点重新标号. 最后,两个经过如此图采样的方法被认为是相似实例对.
 
 GCC理论上使用任何GNN都可以(作为encoder), 本文使用GIN(Graph Isomophism Net.), 当前的SOTA GNN. 由于大多数GNN使用节点feature作为输入, 使用generalized positional embedding(*GPE abbr.)
 
@@ -3193,7 +3193,81 @@ $M^{l}=\left[M_{1}^{l}, M_{2}^{l}, . ., M_{C}^{l}f\right] \in \mathbb{R}^{K \tim
 \end{equation}
 使用标准的AT技术. 也可使用TRADES/MART.
 
-\section{Resisting Adversarial Attacks by $k$-Winner-Takes-All}
+\section{Resisting Adversarial Attacks by $k$-Winners-Takes-All}
+\newcommand{\kwta}{$k$-Winners-Takes-All}
+不使用梯度信息. 试图使用$C^0$不连续函数, 即\kwta(kWTA)激活函数(代替ReLU). kWTA激活函数的优势是, 具有\bt{稠密}的不连续点, 使得难以利用小的pertubation可控地改变结果, 因为这会经过不连续的部分, 导致梯度信息失效. 可以证明, 即使是无穷小位移也会导致神经元激活模式彻底改变!
+
+* k-WTA可以看作是ReLU和max-pool的结合.
+
+\subsection{Related Work: Obfuscated Gradients}
+
+一种类型是利用随机性: 在输入前进行随机变换/增加随机化的计算层. 然而梯度仍然可以使用MC估计来得到, 仍然不是很robust. 另一种是shattered gradient, 它们让梯度对于攻击者不存在或者不正确, 通过故意离散化输入/人工地提高梯度数值不稳定性. 这些方法仍然vulnerable, 可以通过backward pass differentiable approx.(BPDA)来估计梯度. 假设$f=f_{1} \circ f_{2} \circ \cdots \circ f_{n}$, 其中$f_{i}(\boldsymbol{x})$是不连续的函数组分, 可以使用smooth delegate function $g$来近似这些不连续函数!
+
+对于k-WTA, 他们没找到任何平滑的近似函数.
+
+\subsection{\kwta}
+
+\kwta Module:
+\begin{equation}
+    \phi_{k}(\boldsymbol{y})_{j}=\left\{\begin{array}{ll}
+    y_{j}, & y_{j} \in\{k \text { largest elements of } \boldsymbol{y}\} \\
+    0, & \text { Otherwise }
+    \end{array}\right.
+\end{equation}
+
+接着显然要决定k的大小. 使用自适应的大小: 定义$\gamma \in (0, 1)$作为比例系数, 称为稀疏度比例. 并且对所有层都固定. k-WTA可以在每个channel上进行, 但是计算最有效/最简单的是直接在整个tensor上进行.
+
+渐进时间复杂度$O(N)$\footnote{
+    Problem: How to impl. in CUDA?
+}
+
+\subsection{Training}
+小的$\gamma$是preferrable的, 但是越小训练越难以收敛. 所以使用一种迭代finetune的方法. 使用线性退火降低稀疏系数, 每次降低后训练两个epoch.
+
+\subsection{Theory Understand of the Discontinuity}
+
+定义activation pattern
+\begin{equation}
+    \mathcal{A}(\boldsymbol{x}):=\left\{i \in[l] \mid x_{i} \text { is one of the } k \text { largest values in } \boldsymbol{x}\right\} \subseteq[l]
+\end{equation}
+可以证明, 极小的输入变化也会导致$\mathcal{A}(\boldsymbol{x})$的变化. 整个网络是一个分段linear的映射.
+
+注意$\phi_{k}(W x+b)$的act. pat.对于正定线性变换不变, 应该衡量垂直于输入$x$的分量的距离$\mathrm{d}\left(\boldsymbol{x}, \boldsymbol{x}^{\prime}\right)$，且$\boldsymbol{x}^{\prime}=c \cdot\left(\boldsymbol{x}+\mathrm{d}\left(\boldsymbol{x}, \boldsymbol{x}^{\prime}\right) \boldsymbol{x}_{\perp}\right)$
+\footnote{
+    i.e., $\mathrm{d}\left(\boldsymbol{x}, \boldsymbol{x}^{\prime}\right)=(x-x'/c)/x_\perp$
+}， 
+那么若权值矩阵$W_{ij} \sim \mathcal N(0, 1/l)$，$\bs b=0$初始化, 有以下定理
+\begin{theorem}
+    (Dense discontinuities). Given any input $x \in \mathbb{R}^{m}$ and some $\beta$, and $\forall x^{\prime} \in \mathbb{R}^{m}$ such that $\frac{\mathrm{d}^{2}\left(\boldsymbol{x}, \boldsymbol{x}^{\prime}\right)}{\|\boldsymbol{x}\|_{2}^{2}} \geq \beta$, if the following condition
+    $$
+    l \geq \Omega\left(\left(\frac{m}{\gamma} \cdot \frac{1}{\beta}\right) \cdot \log \left(\frac{m}{\gamma} \cdot \frac{1}{\beta}\right)\right)
+    $$
+    is satisfied, then with a probability at least $1-\cdot 2^{-m}$, we have $\mathcal{A}(\mathrm{W} \boldsymbol{x}+\boldsymbol{b}) \neq \mathcal{A}\left(\mathrm{W} \boldsymbol{x}^{\prime}+\boldsymbol{b}\right) .$
+\end{theorem}
+此处$l$是层宽.
+
+为什么k-WTA可以被训练? 即使那么不连续.
+
+\begin{theorem}
+    Consider $N$ data points $\boldsymbol{x}_{1}, \boldsymbol{x}_{2}, \cdots, \boldsymbol{x}_{N} \in \mathbb{R}^{m}$. Suppose $\forall i \neq j, \frac{\boldsymbol{x}_{i}}{\left\|\boldsymbol{x}_{i}\right\|_{2}} \neq \frac{\boldsymbol{x}_{j}}{\left\|\boldsymbol{x}_{j}\right\|_{2}} .$ If
+    is sufficiently large, then with a high probability, we have $\forall i \neq j, \mathcal{A}\left(\mathrm{W} \boldsymbol{x}_{i}+\boldsymbol{b}\right) \cap \mathcal{A}\left(\mathrm{W} \boldsymbol{x}_{j}+\boldsymbol{b}\right)=\varnothing$.
+\end{theorem}
+所以网络对于不同的输入可以独立的训练, 实际上这些act. pat.往往是弱相关的.
+
+实际上, 这些性质在ReLU中也有体现
+
+\subsection{Related Works}
+
+White-box attack model: PDG, Deep-fool, C\&W Attack, Momentum Iterative Method(MIM).
+
+Black-box(BB) attacks (Papernot et al.,2017).基于transfer.
+
+Adversarial Training: AT, TRADES, free adversarial training(FAT).
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{kwta-facts.png}
+\end{figure}
+
 
 
 \end{document}
