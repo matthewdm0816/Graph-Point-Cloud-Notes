@@ -3102,4 +3102,95 @@ Squeeze-and-Excitation Module.
 
 子后, 还可以采取其他策略, 如STDP, Synaptic Scaling etc.
 
+\section{Towards Deep Learning Models Resistant to Advsarial Attacks}
+
+从优化的角度来看, 这是个robust-optimization的问题. 给出empirical loss$\mathbb{E}_{(x, y) \sim \mathcal{D}}[J(x, y, \theta)]$, 我们可以适用robust optimization模型
+\begin{equation}
+    \begin{array}{c}
+    \min _{\theta} \rho(\theta) \\
+    \text { where } \rho(\theta)=\mathbb{E}_{(x, y) \sim \mathcal{D}}\left[\max _{\delta \in \mathcal{S}} J(\theta, x+\delta, y)\right]
+    \end{array}
+\end{equation}
+其中pertubation set可以是$l_\infty$-球. 当然也可以基于别的视觉相似度.
+
+\subsection{Inner Maxmize Prob. :如何提出好的对抗样本}
+关于对抗样本和攻击, 存在两个问题:
+\begin{enumerate}
+    \item 如何获得强的对抗样本
+    \item 如何训练一个没有/难以获得对抗样本的网络.
+\end{enumerate}
+
+Fast Gradient Sign Method(FGSM)是一个如下获得$l_\infty$-有界对抗样本的
+\begin{equation}
+    x+\varepsilon \operatorname{sgn}\left(\nabla_{x} J(\theta, x, y)\right)
+\end{equation}
+一个更强大的方法可以进行多步:FGSM$^k$, 基本上就是多步Projected GD
+\begin{equation}
+    x^{t+1}=\Pi_{x+\mathcal{S}}\left(x^{t}+\alpha \operatorname{sgn}\left(\nabla_{x} J(\theta, x, y)\right)\right)
+\end{equation}
+
+实验证明, $l_\infty$-球中包含了很多有着相似loss值的local maxima. 具体上讲, 
+\begin{enumerate}
+    \item PGD导致的loss上升具有同种趋势(曲线形状)
+    \item PGD导致的最终loss非常密集
+    \item 计算了这些最终点的距离, 都和平均距离相差不大, 且趋向于成90°.
+\end{enumerate}
+这说明了PGD是泛用的一阶对抗方法. 
+
+猜想: PGD对抗样本不会比其他一阶样本的loss小. 那么, 就是用PGD来最大化内部最大化问题.
+
+\subsection{最小化问题}
+
+SGD, 使用perturbed points来进行最小化的输入. Danskin定理说对于连续可微函数\footnote{待补充}, 此时的梯度确实是saddle/minmax optimization 的一个下降梯度. 虽然ReLU/max-pooling并不是连续可微的, 但是大概用也行.
+
+\subsection{网络能力 \& 对抗健壮性}
+
+对抗健壮性和网络能力相关. high-level的讲, 更强的分类器趋向于有好的健壮性, 因为对抗样本的存在让分类边界更复杂.
+
+一些观察
+\begin{enumerate}
+    \item 网络容量提高了对抗性能. 训练超长时间提高了对抗性能.
+    \item one-step attack也能提高健壮性
+    \item 弱模型可能再saddle opt.中不会收敛
+    \item 更高的容量和强对抗降低trandferred attacks的有效性.
+\end{enumerate}
+
+\section{CAS: Channel-wise Activation Suppressing Module for Adversarial Robustness}
+
+考虑channel-wise的激活强度. 他们发现对抗训练可以显著降低对抗样本的channel-wise act. magnitude, 以至于和自然样本相当近似. 考虑channel-wise激活频率, 可以发现对抗样本的激活频率非常均匀(按照自然样本输入的激活频率排序), 对抗训练可以对齐这两个趋势, CAS可以直接大大减少activation频率.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{cas-arch.PNG}
+\end{figure}
+
+假设第l层的网络输出是$\bs f^l$, 考虑in-channel average
+\begin{equation}
+    \hat{\boldsymbol{f}}_{k}^{l}=\frac{1}{H \times W} \sum_{i=1}^{H} \sum_{j=1}^{W} \boldsymbol{f}_{k}^{l}(i, j)
+\end{equation}
+这被送进一个辅助MLP(FC) classifier
+\begin{equation}
+    \hat{\boldsymbol{p}}^{l}=\operatorname{softmax}\left(\hat{\boldsymbol{f}}^{l} M^{l}\right) \in \mathbb{R}^{C}
+\end{equation}
+其中每个类别的参数可以写成
+$M^{l}=\left[M_{1}^{l}, M_{2}^{l}, . ., M_{C}^{l}f\right] \in \mathbb{R}^{K \times C}$
+用GT的label分量去按通道乘(在test set上直接用classifier的结果来计算)act. map
+\begin{equation}
+    \tilde{\boldsymbol{f}}^{l}=\left\{\begin{array}{ll}
+    \boldsymbol{f}^{l} \otimes M_{y}^{l}, & (\text { training phase }) \\
+    \boldsymbol{f}^{l} \otimes M_{\hat{y}^{l}}^{l}, & \text { (test phase) }
+    \end{array}\right.
+\end{equation}
+
+模型训练基于两个loss, 其中每个CAS loss为
+\begin{equation}
+    \mathcal{L}_{\mathrm{CAS}}\left(\hat{\boldsymbol{p}}^{l}\left(\boldsymbol{x}^{\prime}, \theta, M\right), y\right)=-\sum_{c=1}^{C} \mathbb{1}\{c=y\} \cdot \log \hat{\boldsymbol{p}}_{c}^{l}\left(\boldsymbol{x}^{\prime}\right)
+\end{equation}
+注意这就是在辅助分类器上的CE loss.
+同时还有主Loss
+\begin{equation}
+    \mathcal{L}\left(\boldsymbol{x}^{\prime}, y ; \theta, M\right)=\mathcal{L}_{\mathrm{CE}}\left(\boldsymbol{p}\left(\boldsymbol{x}^{\prime}, \theta\right), y\right)+\frac{\beta}{S} \cdot \sum_{s=1}^{S} \mathcal{L}_{\mathrm{CAS}}^{s}\left(\hat{\boldsymbol{p}}^{s}\left(\boldsymbol{x}^{\prime}, \theta, M\right), y\right)
+\end{equation}
+使用标准的AT技术. 也可使用TRADES/MART.
+
 \end{document}
