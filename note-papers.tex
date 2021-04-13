@@ -810,7 +810,9 @@
     \end{equation}
     这是一个凸优化问题,可以通过二阶方法或者SGD来求解.
 
-    回顾ChebNet, 
+    回顾Ch
+    
+    Net, 
     \begin{align}
         &\mathbf{U} \hat{\mathbf{G}} \mathbf{U}^{\top} \mathbf{x} \approx \sum_{i=0}^{k} \theta_{i} \boldsymbol{\Delta}^{i} \mathbf{x}=\mathbf{U}\left(\sum_{i=0}^{k} \theta_{i} \mathbf{\Lambda}^{i}\right) \mathbf{U}^{\top} \mathbf{x}\\
     \end{align}
@@ -3025,5 +3027,79 @@ Updater: 对于一阶系统, $\mathbf{q}_{i}^{t+1}=\mathbf{p}_{i}+\mathbf{q}_{i}
     \mathbf{S}_{i}=\operatorname{argmax} \sum_{j \in \mathcal{N}_{i}} \mathbf{u}_{i j}^{\mathrm{T}} \mathbf{S}_{i} \mathbf{u}_{i j}, \quad \text { s.t. } \forall j \in \mathcal{N}_{i}: \mathbf{u}_{i j}^{\mathrm{T}} \mathbf{S}_{i} \mathbf{u}_{i j} \leq 1
 \end{equation}
 这是简单的凸优化(找到最小面积, 0-中心的包含$\bm u_{ij}$的椭圆).
+
+\section{SENet}
+Squeeze-and-Excitation Module.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{senet.png}
+\end{figure}
+
+计算squeeze变换(单纯的计算每个channel的均值)
+\begin{equation}
+    z_{c}=\mathbf{F}_{s q}\left(\mathbf{u}_{c}\right)=\frac{1}{H \times W} \sum_{i=1}^{H} \sum_{j=1}^{W} u_{c}(i, j)
+\end{equation}
+
+计算excitation, $\sigma$是sigmoid, $\delta$是ReLU
+\begin{equation}
+    \mathbf{s}=\mathbf{F}_{e x}(\mathbf{z}, \mathbf{W})=\sigma(g(\mathbf{z}, \mathbf{W}))=\sigma\left(\mathbf{W}_{2} \delta\left(\mathbf{W}_{1} \mathbf{z}\right)\right)
+\end{equation}
+其中$\mathbf{W}_{1} \in \mathbb{R}^{\frac{C}{r} \times C}$,  $\mathbf{W}_{2} \in \mathbb{R}^{C \times \frac{C}{r}}$维度形成某种bottleneck, 降低模型复杂度.
+
+将excitation乘到channel上
+\begin{equation}
+    \widetilde{\mathbf{x}}_{c}=\mathbf{F}_{\text {scale }}\left(\mathbf{u}_{c}, s_{c}\right)=s_{c} \mathbf{u}_{c}
+\end{equation}\footnote{
+    in matrix-sense, 
+    \begin{align}
+        &\bs z=\frac 1 {HW} u_{ij}1^{ij} \in \R^{C\times 1}\\
+        &\bs s=\bs F_{ex}(\bs z)\in \R^{C\times 1}\\
+        &\widetilde{\bs X}=\bs s^T \odot \bs U \in {\R^{N(=H\times W)\times C}}
+    \end{align}
+}
+
+\section{Continuous-Time Spiking Neural Network}
+
+模拟真实神经元. alternative to Hebb 神经元. 传统的SNN模拟手段涉及时间驱动(time-driven)和事件驱动(event-driven), 前者涉及时间格点上的离散化, 可能带来误差. 采用event-driven来实现连续时间.
+
+\subsection{Neurons}
+\begin{equation}
+    \begin{array}{l}
+    S=S_{p}+P_{r} P_{w}-T_{l}, \text { for } S<S_{t h} \\
+    S=S_{p}+P_{r} P_{w}+T_{r}, \text { for } S \geq S_{t h}
+    \end{array}
+\end{equation}
+\begin{itemize}
+    \item $S_p$, 之前的状态
+    \item $P_r$: presynaptic weight, 受到的刺激
+    \item $P_w$: postsynaptic weight, 神经元连接强度
+    \item $T_l$: 电位leakage ~ $Ld\Delta t$
+    \item $T_r$: $T_{r}=\frac{\left(S_{p}-1\right)^{2} \Delta t}{1-\left(S_{p}-1\right) \Delta t}$
+    \item $t_f$: firing time, obeys firing equation $t_f=\frac 1 {S-1}$
+\end{itemize}
+
+可以有excitatory/inhibitory的输入区别.
+
+\subsection{Network Topology}
+
+一般来说, en比in多, 后者占网络的15-25\%, 这样可以增进网络的稳定性. 没有in-in突触, 这回导致不稳定性, 因为这会让in减少, 进而导致不受控制的激发.
+
+\subsection{突触塑性规则}
+
+"后突触规则": 是相对于同一突触的突触总体模式/时间点控制了后突触效用.
+
+\begin{itemize}
+    \item 对数衰减. 所有后突触权重postsynaptic weight对数衰减. 
+    $$P_{w}=P_{w, \min }+\left(P_{w}-P_{w, \min }\right) \mathrm{e}^{-\frac{\Delta t}{\tau}}$$
+    \item 同突触增强. 当一个spiking event在一个突触上发生, PW增加, 和同神经元+同突触的上一个刺激成函数(在一个时间窗口内).
+    \item 异突触增强. 当一个spiking event在一个突触上发生, PW增加, 和同神经元+其他突触的上一个刺激成函数(在一个时间窗口内).
+\end{itemize}
+
+同/异突触增强使用以下方程控制. 
+\begin{equation}
+    \Delta P_{w}=\eta\left(P_{w, \max }-P_{w}\right)
+\end{equation}
+
+子后, 还可以采取其他策略, 如STDP, Synaptic Scaling etc.
 
 \end{document}

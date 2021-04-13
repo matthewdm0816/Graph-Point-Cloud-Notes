@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2020.10.29)  1 APR 2021 17:52
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2020.10.29)  9 APR 2021 16:42
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -841,7 +841,7 @@ File: gmnn-arch.png Graphic file (type bmp)
 File: gmnn-alg.PNG Graphic file (type bmp)
 <gmnn-alg.PNG>
 
-Overfull \hbox (170.82663pt too wide) detected at line 1355
+Overfull \hbox (170.82663pt too wide) detected at line 1357
 []
  []
 
@@ -855,7 +855,7 @@ File: pgm-1.PNG Graphic file (type bmp)
 File: rscnn-arch.PNG Graphic file (type bmp)
 <rscnn-arch.PNG>
 
-Overfull \hbox (59.75443pt too wide) in paragraph at lines 1680--1681
+Overfull \hbox (59.75443pt too wide) in paragraph at lines 1682--1683
 [][] 
  []
 
@@ -873,24 +873,24 @@ File: deepwalk-skipgram.png Graphic file (type bmp)
 File: dagnn-arch.png Graphic file (type bmp)
 <dagnn-arch.png>
 
-Overfull \hbox (29.87721pt too wide) in paragraph at lines 1989--1990
+Overfull \hbox (29.87721pt too wide) in paragraph at lines 1991--1992
  [][] 
  []
 
 [61]
-Overfull \hbox (0.86905pt too wide) in paragraph at lines 2006--2007
+Overfull \hbox (0.86905pt too wide) in paragraph at lines 2008--2009
 []\TU/lmr/m/n/10.53937 GCN \TU/FandolSong-Regular(0)/m/n/10.53937 随 着 层 数 增 加\TU/lmr/m/n/10.53937 , \TU/FandolSong-Regular(0)/m/n/10.53937 特 征 的 平 滑 度 缓 慢 下 降\TU/lmr/m/n/10.53937 , \TU/FandolSong-Regular(0)/m/n/10.53937 但 准 确 度 迅 速 下 降 \TU/lmr/m/n/10.53937 (\TU/FandolSong-Regular(0)/m/n/10.53937 数 层\TU/lmr/m/n/10.53937 ). \TU/FandolSong-Regular(0)/m/n/10.53937 这 可 能 是 由 于 \TU/lmr/m/n/10.53937 propag.
  []
 
 [62] [63] [64] [65] [66]
-Overfull \hbox (63.25424pt too wide) in paragraph at lines 2294--2294
+Overfull \hbox (63.25424pt too wide) in paragraph at lines 2296--2296
 []\TU/lmr/bx/n/15.05624 Contrastive Multi-view Representation Learning/MVRLG(ICML
  []
 
 File: contrast-graph-alg.png Graphic file (type bmp)
 <contrast-graph-alg.png>
 [67] [68] [69]
-Overfull \hbox (35.38329pt too wide) in paragraph at lines 2354--2354
+Overfull \hbox (35.38329pt too wide) in paragraph at lines 2356--2356
 []\TU/lmr/bx/n/15.05624 GCC: Graph Contrastive Coding for GNN Pre-Training(KDD
  []
 
@@ -917,27 +917,33 @@ File: meshsim.png Graphic file (type bmp)
 File: sizing.png Graphic file (type bmp)
 <sizing.png>
  [87]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 3029.
+File: senet.png Graphic file (type bmp)
+<senet.png>
  [88]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 3029.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 3105.
+ [89]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 3105.
  (./note-papers.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 3029.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 3029.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 3105.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 3105.
 Package rerunfilecheck Info: File `note-papers.out' has not changed.
-(rerunfilecheck)             Checksum: 1DC762CBC6754F4D9FB6C5F20EBB2543;31450.
+(rerunfilecheck)             Checksum: DCA1F7D6A96D89A8A8F7027B2C30A146;32115.
 
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 3029.
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 3105.
  ) 
 Here is how much of TeX's memory you used:
- 19331 strings out of 479819
- 376219 string characters out of 5895845
- 747084 words of memory out of 5000000
- 36038 multiletter control sequences out of 15000+600000
+ 19338 strings out of 479819
+ 376297 string characters out of 5895845
+ 747817 words of memory out of 5000000
+ 36044 multiletter control sequences out of 15000+600000
  548663 words of font info for 130 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  59i,19n,74p,618b,537s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on note-papers.pdf (88 pages).
+Output written on note-papers.pdf (89 pages).
