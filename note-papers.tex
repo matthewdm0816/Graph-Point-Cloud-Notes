@@ -5,7 +5,12 @@
 \author{Matthew Mo}
 \date{\today}
 \input{note_style.tex}
-
+\usepackage{background}
+\backgroundsetup{scale=1, angle=0, opacity = 0.2, contents = {
+    \includegraphics[width=\paperwidth, keepaspectratio]
+    {bg2.jpg}
+    }
+}
 
 \begin{document}
 \maketitle
@@ -28,9 +33,8 @@
 \begin{dedication}
     {
     \mincho
-    世界はこんなに美しいべきが、僕が同じくらい醜い。
-
-    だがこの状況を変わチカラはない。
+    世界がこんなに美しいはずだが、僕は何故か追いつかない。\\
+    あなたと出会い日が来るように。
     }
 
     Dedicated to Amatsukaze and Elaina, Fairies From The Ideal World.
@@ -2375,7 +2379,7 @@ $$
 \end{definition}
 GCC把不同r-ego net.作为不相似实例.
 
-在CV中,两个经过不同aug.的图片作为了相似inst. pair, GCC中,同样考虑同个r-ego net. 的不同数据增强作为相似实例对, 并且使用图采样作为数据增强. 具体上讲, GCC使���三步: 带重启的随机游走, 子图诱导, 匿名化. 前两步的结果即ISRW(Induced Subgraph Random Walk Sampling). 最后一步匿名化把节点重新标号. 最后,两个经过如此图采样的方法被认为是相似实例对.
+在CV中,两个经过不同aug.的图片作为了相似inst. pair, GCC中,同样考虑同个r-ego net. 的不同数据增强作为相似实例对, 并且使用图采样作为数据增强. 具体上讲, GCC使������步: 带重启的随机游走, 子图诱导, 匿名化. 前两步的结果即ISRW(Induced Subgraph Random Walk Sampling). 最后一步匿名化把节点重新标号. 最后,两个经过如此图采样的方法被认为是相似实例对.
 
 GCC理论上使用任何GNN都可以(作为encoder), 本文使用GIN(Graph Isomophism Net.), 当前的SOTA GNN. 由于大多数GNN使用节点feature作为输入, 使用generalized positional embedding(*GPE abbr.)
 
@@ -3268,6 +3272,85 @@ Adversarial Training: AT, TRADES, free adversarial training(FAT).
     \includegraphics[width=\textwidth]{kwta-facts.png}
 \end{figure}
 
+\section{A Survey of Label-noise Representation Learning(LNRL): Past, Present and Future}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{lnrl-taxo.png}
+\end{figure}
+
+\bt{Notations}
+包含了损坏数据集上的训练集和authentic的测试数据集
+$\mathcal{D}=\left\{\mathcal{D}^{\mathrm{tr}}, \mathcal{D}^{\mathrm{te}}\right\}$
+
+
+
+相关问题
+\begin{itemize}
+    \item 半监督学习(SSL)
+    \item 正标签学习(PUL, Positive-unlabeled Learning): 只有positive-label和无标签数据
+    \item 互补学习(CL, Comple. Learning): 带有\bt{不属于}某类的标签
+    \item 无标签学习(UUL, Unlabeled-unl. Learning): 有两个不同prior的数据类, 没有标签.
+\end{itemize}
+
+LN下的风险
+$R_{\ell, D}\left(f_{\theta}\right):=\mathbb{E}_{(x, y) \sim D}\left[\ell\left(f_{\theta}(x), y\right)\right]$
+经验风险
+$\widehat{R}_{\tilde{\ell}, \bar{D}}\left(f_{\theta}\right):=1 / N \sum_{i=1}^{N} \tilde{\ell}\left(f_{\theta}\left(x_{i}\right), \bar{y}_{i}\right)$
+其中$\tilde{\ell}$是LN-robust的损失函数.
+
+理论(玄学)分析
+\begin{enumerate}
+    \item 对于数据, 发现噪声转移模式, 将干净/噪声的类别后验联系. 估计噪声转移矩阵$T$
+    \item 对于loss func., 找到LN-robust的损失函数. 训练一个robust的classifier.
+    \item 对于优化策略, 需要关注
+\end{enumerate}
+
+\subsection{Perspective of Data}
+存在实例无关的噪声分布, e.g. $p(\bar Y \mid Y, X)$, 或者实例相关分布$p(\bar Y \mid Y)$. 若噪声是实例相关, 学习$T(X)$可能是ill-posed的, 噪声转移矩阵可能是不可区分的, 所以只考虑实例无关噪声.
+
+此时噪声转移矩阵T近似建模了label corrupt.的过程. 说$x^i$是anchor point, 若$p(Y=e_i|x^i)=1$, 此时可以得到转移矩阵
+\begin{equation}
+    \begin{aligned}
+    p\left(\bar{Y}=e_{j} \mid x^{i}\right) &=\sum_{k=1}^{C} p\left(\bar{Y}=e_{j} \mid Y=e_{k}, x^{i}\right) p\left(Y=e_{k} \mid x^{i}\right) \\
+    &=p\left(\bar{Y}=e_{j} \mid Y=e_{i}, x^{i}\right) p\left(Y=e_{i} \mid x^{i}\right) \\
+    &=p\left(\bar{Y}=e_{j} \mid Y=e_{i}, x^{i}\right)=T_{i j}
+    \end{aligned}
+\end{equation}
+anchor points肯能难以找到, 使用简单近似$x^{i}=\arg \max _{x} p(\bar{Y}=i \mid x)$
+
+转移矩阵很重要, 可以Jon过来转换noisy/clean 类别后验
+\begin{equation}
+    p(Y \mid x)=T^{-1} p(\bar{Y} \mid x)
+\end{equation}
+
+\subsection{Perspective of Statistics/Learning Theory}
+
+$R^{*}=R_{D}\left(f^{*}\right)$是clean data上的最优分类器的risk, $\hat{f}=\arg \min _{f \in \mathcal{H}} \widehat{R}_{\tilde{\ell}, \bar{D}}(f)$是找到的最好分类器, $L_\rho$是$\tilde{\ell}$的Lipschitz常数. 假设权值矩阵的F范数分别不超过$M_{1}, \ldots, M_{d}$, 且$\|x\| \le B,\forall x$, 存在不减函数$\xi_{\ell}$, $\xi_{\ell}(0)=0$, s.t.
+以$1-\delta$的概率, 若$\ell$是classification-caliberated\footnote{?}
+\begin{equation}
+    \begin{array}{l}
+    R_{D}(\hat{f})-R^{*} \leq \xi_{\ell}\left(\min _{f \in \mathcal{H}} R_{\ell, D}(f)-\min _{f} R_{\ell, D}(f)\right. \\
+    \left.\quad+4 L_{\rho} \mathcal{R}(\mathcal{H})+2 \sqrt{\log (1 / \delta) / 2 N}\right) \\
+    \leq \xi_{\ell}\left(\min _{f \in \mathcal{H}} R_{\ell, D}(f)-\min _{f} R_{\ell, D}(f)+4 L_{\rho} C+2 \sqrt{\log (1 / \delta) / 2 N}\right)
+    \end{array}
+\end{equation}
+其中
+where $C=B(\sqrt{2 d \log 2}+1) \prod_{i=1}^{d} M_{i} / \sqrt{N}$ 
+and 
+$R_{D}(f)=$
+$\mathbb{E}_{(x, y) \sim D}\left[1_{\{\operatorname{sign}(\hat{f}(x)) \neq y\}}\right]$ denotes the risk of $\hat{f}$ w.r.t. the $0-1$ loss.
+注意对于DNN, Rademancher复杂度$\mathcal R(\mathcal H)$被上界C限制.
+
+\begin{remark}
+    这个结论说明了给出足够复杂的假设空间和足够多的数据(i.e. N), 可以让有噪声的学到的$\hat f$趋近于统计最优分类器. \footnote{
+        然而存在不减函数$\xi_{\ell}$, $\xi_{\ell}(0)=0$这一外部包装显然让这个conclusion不那么convicing.
+    }
+\end{remark}
 
 
 \end{document}
+
+
+
+

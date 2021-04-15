@@ -187,3 +187,6 @@
 \contentsline {subsection}{\numberline {47.3}Training}{94}{subsection.47.3}%
 \contentsline {subsection}{\numberline {47.4}Theory Understand of the Discontinuity}{94}{subsection.47.4}%
 \contentsline {subsection}{\numberline {47.5}Related Works}{94}{subsection.47.5}%
+\contentsline {section}{\numberline {48}A Survey of Label-noise Representation Learning(LNRL): Past, Present and Future}{95}{section.48}%
+\contentsline {subsection}{\numberline {48.1}Perspective of Data}{96}{subsection.48.1}%
+\contentsline {subsection}{\numberline {48.2}Perspective of Statistics/Learning Theory}{96}{subsection.48.2}%
