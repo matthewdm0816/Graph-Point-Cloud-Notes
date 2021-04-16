@@ -3405,7 +3405,65 @@ $\left[\begin{array}{cccc}1-\tau & \frac{\tau}{n-1} & \ldots & \frac{\tau}{n-1} 
 \end{figure}
 使用end-to-end模型估计转移矩阵T.
 
-(Sukhbattar, 2015)提出了在网络输出之后增加一个由T参数化的adapt. layer, 
+线性模块:(Sukhbattar, 2015)提出了在网络输出之后增加一个由T参数化的adapt. layer. 单独用CE优化两个不同的模块并不能达到optimal的T. 他们又增加了一个T的正则化项, trace norm/ridge regression.
+
+非线性模块: (Goldberger et al., 2017)使用了base model param. by $\omega$, 以及噪声模型param. by $\theta$. 既然base model的输出是hidden的, 那么他们用EM算法来估计隐藏输出(E-step), 以及当前的参数(M-step). EM也会导致局部最优和可伸缩性的问题.
+他们还提出了c-model: 使用latent true label和输入特征来训练; s-model: 使用latent true label only训练(noisy label).
+
+\subsection{Loss Correction: Backward/Forward Correction}
+
+(Patrini et al., 2017)前向后向矫正. 后向通过在loss上乘上$T^{-1}$, 前向通过将网络输出乘上T.
+
+\begin{theorem}
+    (后向校正)假设转移矩阵是非奇异的. 后向矫正定义为
+    \begin{equation}
+        \ell^{\leftarrow}(f(x), \bar{y})=\left[T^{-1} \ell_{y \mid f(x)}\right]_{\bar{y}}
+    \end{equation}
+    其中
+    \begin{equation}
+        \ell_{y \mid f(x)}=(\ell(f(x), 1), \ldots, \ell(f(x), k))
+    \end{equation}
+    那么矫正后的loss是unbiased, 即
+    \begin{equation}
+        \mathbb{E}_{\bar{y} \mid x} \ell^{\leftarrow}(f(x), \bar{y})=\mathbb{E}_{y \mid x} \ell(f(x), y), \forall x
+    \end{equation}
+\end{theorem}
+
+\begin{theorem}
+    (前向矫正)
+    假设转移矩阵是非奇异的. 前向矫正定义为
+    \begin{equation}
+        \ell^{\rightarrow}(f(x), \bar{y})=\left[\ell_{y \mid T^{\top}} f(x)\right]_{\bar{y}}
+    \end{equation}
+    那么最小化前向矫正loss和最小化原loss(under clean data)同解
+    \begin{equation}
+        \arg \min _{f} \mathbb{E}_{x, \bar{y}} \ell^{\rightarrow}(f(x), \bar{y})=\arg \min _{f} \mathbb{E}_{x, y} \ell(f(x), y)
+    \end{equation}
+\end{theorem}
+注意这比前一个定理的无偏性弱.
+
+一般来说, T是未知的, 需要被估计.于是Patrini et al提出一个两阶段训练. 首先使用noisy data训练网络, 再获得一个T的估计, 再重新训练网络, 使用T校正的loss.
+
+\subsection{Loss Correction: Gold Correction}
+(Hendrycks et al., 2018)提出了Gold校正来处理严重噪声. 关键思路时, 假设一部分数据是可信的且可用的, 比如有一些专家来得出的trusted set D. 他们使用D来估计T, 再用前向矫正来训练DNN, 这就是GLC.具体来讲
+\begin{equation}
+    \widehat{T}_{i j}=\frac{1}{A_{i}} \sum_{x \in A_{i}} \hat{p}\left(\bar{Y}=e_{j} \mid Y=e_{i}, x\right)
+\end{equation}
+其中$A_i$是label为i的D的子集.
+
+\subsection{Loss Correction: Label Smoothing}
+使用label-smoothing技术. 这也是一种loss correction方法.
+
+\begin{equation}
+    \ell^{\mathrm{SM}}\left(f_{\theta}(X), Y\right)=M \cdot \ell\left(f_{\theta}(X), Y\right)
+\end{equation}
+其中M是smearing matrix.
+
+\begin{itemize}
+    \item $M=I$, 标准训练
+    \item $ M=(1-\alpha) I+\frac{\alpha E}{L}$, label smoothing.
+    \item $\frac{1}{1-\alpha} \cdot\left(I-\frac{\alpha \cdot J}{L}\right)$, 对称噪声下的后向校正. 其中$M\sim T^{-1}$.
+\end{itemize}
 
 \end{document}
 
