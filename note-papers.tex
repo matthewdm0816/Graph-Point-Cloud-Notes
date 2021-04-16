@@ -2379,7 +2379,7 @@ $$
 \end{definition}
 GCC把不同r-ego net.作为不相似实例.
 
-在CV中,两个经过不同aug.的图片作为了相似inst. pair, GCC中,同样考虑同个r-ego net. 的不同数据增强作为相似实例对, 并且使用图采样作为数据增强. 具体上讲, GCC使������步: 带重启的随机游走, 子图诱导, 匿名化. 前两步的结果即ISRW(Induced Subgraph Random Walk Sampling). 最后一步匿名化把节点重新标号. 最后,两个经过如此图采样的方法被认为是相似实例对.
+在CV中,两个经过不同aug.��图片作为了相似inst. pair, GCC中,同样考虑同个r-ego net. 的不同数据增强作为相似实例对, 并且使用图采样作为数据增强. 具体上讲, GCC使������步: 带重启的随机游走, 子图诱导, 匿名化. 前两步的结果即ISRW(Induced Subgraph Random Walk Sampling). 最后一步匿名化把节点重新标号. 最后,两个经过如此图采样的方法被认为是相似实例对.
 
 GCC理论上使用任何GNN都可以(作为encoder), 本文使用GIN(Graph Isomophism Net.), 当前的SOTA GNN. 由于大多数GNN使用节点feature作为输入, 使用generalized positional embedding(*GPE abbr.)
 
@@ -3348,6 +3348,64 @@ $\mathbb{E}_{(x, y) \sim D}\left[1_{\{\operatorname{sign}(\hat{f}(x)) \neq y\}}\
     }
 \end{remark}
 
+\subsection{Perspective of Opt. Policy}
+
+考虑经典的early-stopping策略\footnote{
+    M. Li, M. Soltanolkotabi, and S. Oymak, “Gradient descent withearly stopping is provably robust to label noise for overparame-terized neural networks,” inAISTATS, 2020
+}. 
+假设初始权值矩阵按照标准高斯分布$\mathcal N(0, 1)$初始化, 并且经过学习率为$\eta$的SGD更新$\tau$步, 则有
+若$\varepsilon_{0} \leq \delta \lambda(C)^{2} / K^{2}$
+且$\rho \leq \delta / 8$
+则经过$I \propto\|C\|^{2} / \lambda(C)$步,
+有大概率成立:
+模型$W^{I}$对于关于cluste$\left\{c_{k}\right\}_{k=1}^{K}$所有$\varepsilon_0$邻域中的点, 都会预测相同的label.
+并且若$y(x)=\arg \min _{l} \mid f_{W^{I}}(x)-$
+$\alpha_{l} \mid$, 
+where $\left\{\alpha_{l}\right\}_{t-1}^{K} \in[-1,1]$是每一类的labels.
+那么对于所有训练样本, 有训练后的矩阵关系
+\begin{equation}
+    \left\|W^{\tau}-W^{0}\right\|_{\mathrm{F}} \lesssim\left(\sqrt{K}+\tau \varepsilon_{0} K^{2} /\|C\|^{2}\right)
+\end{equation}
+其中
+$0 \leq \tau \leq I$ and $A \lesssim B$ denotes $A \leq \beta B$ for some $\beta$
+
+\begin{remark}
+    这说明了在early stopping下权值不会离初始值太远. 直觉上, DNN随着epoch增加会overfit数据, early stopping 肯呢个能改善情况. 可能robost的weight离初始权值不远.
+\end{remark}
+
+\subsection{Taxonomy}
+
+\begin{enumerate}
+    \item Data: 给定噪声转移矩阵T(的估计), 给出变换后的损失$\ell \stackrel{T}{\rightarrow} \tilde{\ell}$
+    \item Objective: 可以通过增强项来得到新的目标函数. 比如增加辅助正则项. 隐式正则化(e.g. soft/hard bootstrapping, virtual adversarial training(VAT)). 重新给目标函数分权重.\begin{itemize}
+        \item $\tilde{\ell}=\ell+r$
+        \item $\bar{\ell}=\sum_{i} w_{i} \ell_{i}$
+        \item $\tilde \ell$ has a special format $\ell^{\prime}$ independent of $\ell$
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Data: Noise Trans. Mat.}
+
+\begin{definition}
+    (Noise transition matrix) Suppose that the observed noisy label $\bar{y}$ is drawn independently from a corrupted distribution $p(X, \bar{Y})$, where features are intact. Meanwhile, there exists a corruption process, transition from the latent clean label $y$ to the observed noisy label $\bar{y}$. Such a corruption process can be approximately modeled via a noise transition matrix $T$, where $T_{i j}=p\left(\bar{y}=e_{j} \mid y=e_{i}\right)$
+\end{definition}
+
+两种经典的噪声转移矩阵, 对称flipping/配对flipping
+$\left[\begin{array}{cccc}1-\tau & \frac{\tau}{n-1} & \ldots & \frac{\tau}{n-1} \\ \frac{\tau}{n-1} & 1-\tau & & \frac{\tau}{n-1} \\ \vdots & & \ddots & \vdots \\ \frac{\tau}{n-1} & \frac{\tau}{n-1} & \ldots & 1-\tau\end{array}\right] \quad\left[\begin{array}{cccc}1-\tau & \tau & 0 & 0 \\ 0 & 1-\tau & \tau & 0 \\ \vdots & & \ddots & \vdots \\ 0 & & & \tau \\ \tau & 0 & \ldots & 1-\tau\end{array}\right]$
+(a) Sym-flipping
+(b) Pair-flipping.
+其中$\tau$是噪声比例. 
+在LNL(label-noise learning), 常常使用这些方法来模拟LN. 当然现实中很有可能是不规则的noise(如淘宝衣物数据集Clothing 1M).
+
+\subsection{Data: Adapt. Layer}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{lnrl-adapt.png}
+\end{figure}
+使用end-to-end模型估计转移矩阵T.
+
+(Sukhbattar, 2015)提出了在网络输出之后增加一个由T参数化的adapt. layer, 
 
 \end{document}
 
