@@ -180,23 +180,6 @@
 
     Targets: Non-linear $\bs \rho$, General Transformation(e.g. recoloring)
 
-    % \centerline{\includegraphics[width=0.8\paperwidth]{aet.PNG}}
-    % \centerline{\includegraphics[width=0.8\paperwidth]{aetloss.PNG}}
-    % AET:\begin{itemize}
-    %     \item use autoencoders to learn \bt{transformations}
-    %     \item trans. generated randomly for self-supervised learing
-    %     \item use Siamese net as encoder backbone
-    %     \item AET loss: parameterized, non-parametric, GAN-induced
-    % \end{itemize}
-    
-    % \centerline{\includegraphics[width=0.8\paperwidth]{avt.PNG}}
-    % \centerline{\includegraphics[width=0.8\paperwidth]{avt2.PNG}}
-    % \centerline{\includegraphics[width=0.8\paperwidth]{avt-training.PNG}}
-    % AVT:
-    % \begin{itemize}
-    %     \item minimize $z, x$ mutual info \trarr maxmize $I_\theta(z; \tilde z, t)$
-    % \end{itemize}
-
     \centerline{\includegraphics[width=0.8\paperwidth]{sat.PNG}}
     \centerline{\includegraphics[width=0.8\paperwidth]{sat-loss.PNG}}
     SAT:
@@ -2379,7 +2362,7 @@ $$
 \end{definition}
 GCC把不同r-ego net.作为不相似实例.
 
-在CV中,两个经过不同aug.��图片作为了相似inst. pair, GCC中,同样考虑同个r-ego net. 的不同数据增强作为相似实例对, 并且使用图采样作为数据增强. 具体上讲, GCC使������步: 带重启的随机游走, 子图诱导, 匿名化. 前两步的结果即ISRW(Induced Subgraph Random Walk Sampling). 最后一步匿名化把节点重新标号. 最后,两个经过如此图采样的方法被认为是相似实例对.
+在CV中,两个经过不同aug.��图����作为了相似inst. pair, GCC中,同样考虑同个r-ego net. 的不同数据增强作为相似实例对, 并且使用图采样作为数据增强. 具体上讲, GCC使������步: 带重启的随机游走, 子图诱导, 匿名化. 前两步的结果即ISRW(Induced Subgraph Random Walk Sampling). 最后一步匿名化把节点重新标号. 最后,两个经过如此图采样的方法被认为是相似实例对.
 
 GCC理论上使用任何GNN都可以(作为encoder), 本文使用GIN(Graph Isomophism Net.), 当前的SOTA GNN. 由于大多数GNN使用节点feature作为输入, 使用generalized positional embedding(*GPE abbr.)
 
@@ -3464,6 +3447,362 @@ $\left[\begin{array}{cccc}1-\tau & \frac{\tau}{n-1} & \ldots & \frac{\tau}{n-1} 
     \item $ M=(1-\alpha) I+\frac{\alpha E}{L}$, label smoothing.
     \item $\frac{1}{1-\alpha} \cdot\left(I-\frac{\alpha \cdot J}{L}\right)$, 对称噪声下的后向校正. 其中$M\sim T^{-1}$.
 \end{itemize}
+
+\subsection{Prior Knowledge: Human-in-the-Loop Estimation}
+
+(Han et al., 2018)提出了分离T的结构和具体数值, 通过human-assisted approach "masking". 那么怎么把这些先验结构放到模型中呢, 通过一个生成模型.
+
+$t \sim p(t)$通过生成模型$t_{o} \sim p\left(t_{o}\right)$来获得. 似乎是基于flow的$p\left(t_{o}\right)=\left.p(t) \frac{d t}{d t_{o}}\right|_{t_{o}=f(t)}$. 最终通过evidence lower bound opt. (ELBO)来优化.\footnote{
+    (来自原文)
+    \begin{equation}
+        \ln P(\tilde{y} \mid x) \geq \mathbb{E}_{Q(s)}[\underbrace{\ln \sum_{y} P(\tilde{y} \mid y, s) P(y \mid x)}_{\text {previous model }}-\left.\ln (Q\left(s_{o}\right) / \underbrace{P\left(s_{o}\right)}_{\text {structure prior }})\right|_{s_{o}=f(s)}],
+    \end{equation}
+    使用thresholding binarization中的算子tempered sigmoid
+    \begin{equation}
+        f(s)=\frac{1}{1+\exp \left(-\frac{s-\alpha}{\beta}\right)}, \quad \text { where } \alpha \in(0,1), \beta \ll 1
+    \end{equation}
+}
+\subsection{Prior Knowledge: Fine-tuning Revision}
+
+(Xia et al., 2019) 介绍了transition-revision方法: Reweight T-Revision. 他们首先使用数据里的anchor points的相近点(高混淆概率)来初始化T. 之后把这个初始化的T作为先验, 然后使用松弛变量来进行fine-tune.
+
+具体上讲, 先使用noisy data学习(没有adaptation layer)$\hat{p}(\bar Y \mid X=x)$. 再初始化$\hat T$, 其中anchor points是$\hat{p}\left(\bar{Y}=e_{i} \mid X=x\right)$最高的点.\footnote{
+    注意如果$P(Y=i \mid X=x)=1$,
+    \begin{equation}
+        P(\bar{Y}=j \mid X=x)=\sum_{k=1}^{C} T_{k j} P(Y=k \mid X=x)=T_{i j}
+    \end{equation}
+}
+
+再第二个阶段, 神经网络使用noisy adaptation layer $\hat{T}^{\top}$并且最小化weighted loss. 得到并加上一个松弛变量$\Delta T$. 重复两阶段直到收敛(在验证集上达到最小误差).\footnote{
+    关于loss, 使用的权重为$\hat{P}(Y=y \mid X=x) / \hat{P}(\bar{Y}=y \mid X=x)$
+    最终的loss为
+    \begin{equation}
+        \bar{R}_{n, w}(T, f)=\frac{1}{n} \sum_{i=1}^{n} \frac{g_{\bar{Y}_{i}}\left(X_{i}\right)}{\left(T^{\top} g\right)_{\bar{Y}_{i}}\left(X_{i}\right)} \ell\left(f\left(X_{i}\right), \bar{Y}_{i}\right)
+    \end{equation}
+    其中$f(X)=\arg \max _{j \in\{1, \ldots, C\}} g_{j}(X)$
+}
+
+\begin{remark}
+    某种形式上和EM类似.
+\end{remark}
+
+\subsection{Regularization: Explicit Regularization}
+
+(Azadi et al., 2016)提出了一种正则化项
+$\Omega_{\text {aux }}(w)=\|F w\|_{\mathrm{g}}$
+其中$\|\cdot\|_{g}$是group norm,
+$F^{\top}=\left[X_{1}, \ldots, X_{n}\right], X_i=\operatorname{Diag}(\bs x_i)$,
+鼓励稀疏性. 这会鼓励一小部分clean data来control model.
+
+(Berthelot et al., 2019)提出了MixMatch来进行SSL, 并且达到了SOTA. 其中的一个关键部分是Minimum Ent. Reg.(MER), 也是一种显式正则化. MER提出于(Grandvalet \&  Bengio, 2005), 关键idea是把CE加入一个正则项, 鼓励在unlabeled data上给出high-confidence的输出, 具体地, 最小化在unlabeled数据上的熵.
+
+类似于MER, psedo-label方法(D.-H.   Lee,, 2013)(i.e. lebel guessing)进行隐式的ent.最小化. 具体上讲, 首先计算模型(通过各种augmentation)预测的类型分布, 再通过temperature sharpening func. 来最小化label dist.的熵.
+
+(Miyato et al., 2018)提出了一个virtual adversarial loss, 是一种新的衡量条件标签分布(i.e., $p(y|x)$)的局部平滑度的方法. 具体地, ���们要求输出分布在输入点附近各向同性地平滑, 通过把模型在其最各向异性的方向上选择性地平滑. 使得模型对输入不敏感. 
+为了实现, 设计了virtual adversarial direcition.
+
+定义LDS(local dist. smooth. )
+\begin{equation}
+    \operatorname{LDS}\left(x^{*}, \theta\right):=D\left[p\left(y \mid x^{*}, \hat{\theta}\right), p\left(y \mid x^{*}+r_{\mathrm{vadv}}, \hat \theta\right)\right]
+\end{equation}
+\footnote{
+    注意, 原文中是SSL, 对于有标签的数据可以使用ground truth$q\left(y \mid x_{*}\right)$来进行计算. 对于LNRL显然clean data不是available的, 直接使用模型的输出.
+}\footnote{
+    \bt{Fast Approx. of $r_{vadv}$} 定义
+    $D\left(r, x_{*}, \theta\right) := D\left[p\left(y \mid x_{*}, \hat{\theta}\right), p\left(y \mid x_{*}+r, \theta\right)\right]$
+    由于在$r=0$时, $\left.\nabla_{r} D(r, x, \hat{\theta})\right|_{r=0}=0$, 那么有二阶估计
+    \begin{equation}
+        D(r, x, \hat{\theta}) \approx \frac{1}{2} r^{T} H(x, \hat{\theta}) r
+    \end{equation}
+    那么$r_{vadv}$可以是Hessian的第一个dominant eigenvector具有长度$\epsilon$
+    \begin{equation}
+        \begin{aligned}
+        r_{\mathrm{vadv}} & \approx \arg \max _{r}\left\{r^{T} H(x, \hat{\theta}) r ;\|r\|_{2} \leq \epsilon\right\} \\
+        &=\epsilon \overline{u(x, \hat{\theta})},
+        \end{aligned}
+    \end{equation}
+    接着有$O(I^3)$的找到如此eigenvec. 的算法, 通过幂迭代和有限差分法.
+
+    随机采样一个unit vector$\bt d$, 迭代计算mat-vec prod. 
+    $d \leftarrow \overline{H d}$.
+
+    为了避免直接计算H, 使用有限差分法来估计这个乘积
+    \begin{equation}
+        \begin{aligned}
+        H d & \approx \frac{\left.\nabla_{r} D(r, x, \hat{\theta})\right|_{r=\xi d}-\left.\nabla_{r} D(r, x, \hat{\theta})\right|_{r=0}}{\xi} \\
+        &=\frac{\left.\nabla_{r} D(r, x, \hat{\theta})\right|_{r=\xi d}}{\xi}
+        \end{aligned}
+    \end{equation}
+    i.e.,
+    \begin{equation}
+        d \leftarrow \overline{\left.\nabla_{r} D(r, x, \hat{\theta})\right|_{r=\xi d}}
+    \end{equation}
+    他们发现一步迭代就能达到类似FGSM里的估计精度.
+}
+其中
+$r_{\mathrm{vadv}}:=\arg \max _{\|r\|_{0}<\epsilon} D\left[p\left(y \mid x^{*}, \hat{\theta}\right), p\left(y \mid x^{*}+r\right)\right]$
+是virtual adversarial direction, 然后有
+\begin{equation}
+    R_{\mathrm{vadv}}\left(D_{1}, D_{\mathrm{ul}}, \theta\right):=\frac 1 {N_{l}+N_{u l}} \sum_{x^{*} \in D_{l}, D_{u l}} \operatorname{LDS}\left(x^{*}, \theta\right)
+\end{equation}
+其中$D_{1}, D_{\mathrm{ul}}$分别是有无标签的数据, final loss:
+\begin{equation}
+    \ell\left(D_{l}, \theta\right)+\alpha R_{\mathrm{vadv}}\left(D_{l}, D_{u l}, \theta\right)
+\end{equation}
+
+\subsection{Objdective Regularization: Implicit}
+
+最近出现了很多隐式正则化方法. 
+
+(Reed et al., 2015)的Bootsrapping. 学习器和自己bootstrap, 使用label和模型目前的prediction的凸组合来生成训练目标. 直觉上, 随着learner学习, predictions也变得可信. 进而避免对noise的直接建模. 具体地, 有soft/hard两种bootstrapping. 对于soft bootstrapping, 使用预测的类概率$q$来得到回归目标.
+\begin{equation}
+    \ell_{\text {soft }}(q, t)=\sum_{k=1}^{L}\left[\beta t_{k}+(1-\beta) q_{k}\right] \log \left(q_{k}\right)
+\end{equation}
+这等价于softmax regression + MER.
+
+对于hard bootstrapping, 使用$q$的MAP估计.
+\begin{equation}
+    \ell_{\text {hard }}(q, t)=\sum_{k=1}^{L}\left[\beta t_{k}+(1-\beta) z_{k}\right] \log \left(q_{k}\right)
+\end{equation}
+其中
+$z_{k}=\mathbf{1}\left[k=\arg \max _{i=1, \ldots, L} q_{i}\right]$
+为了能够优化hard版本, 需要使用EM-like算法. E-step中计算凸组合的targets, M-step根据targets进行优化参数.
+
+(Zhang et al., 2018)的Mixup, 启发于vicinal risk minimization(O. Chapelle, J. Weston, L. Bottou, and V. Vapnik, 2000).
+
+(Han et al., 2020)的SIGUA(data-agnostic). 注意到随着网络容量的提升, 网络能逐渐地overfit noisy data. 所以他们提出了Stochastic Integrated Gradient Underweighted Ascent(SIGUA)的一种\bt{训练策略}, 在一个mini-batch中, 线照常使用SGD, 再在bad-data上使用(lr递减的)梯度递增. 在训练哲学上, SIGUA让网络忘记不想要的记忆, 来更好的加强想要的记忆.
+
+\subsection{Objective Reweighting: Importnace Reweighting}
+
+(Liu and Tao, 2015)使用importance reweighting来LNL. 将noisy data作为source domain, clean data作为目标domain. Idea是重写经验风险w.r.t. clean data
+\begin{equation}
+    \begin{array}{l}
+    R(f)=\mathbb{E}_{(X, Y) \sim D}[\ell(f(X), Y)] \\
+    =\int_{x} \sum_{i} p_{D}(X=x, Y=i) \ell(f(x), i) d x \\
+    =\int_{x} \sum_{i} p_{\bar{D}}(X=x, \bar{Y}=i) \frac{p_{D}(X=x, \bar{Y}=i)}{p_{\bar{D}}(X=x, \bar{Y}=i)} \ell(f(x), i) d x \\
+    =\int_{x} \sum_{i} p_{\bar{D}}(X=x, \bar{Y}=i) \frac{p_{D}(\bar{Y}=i \mid X=x)}{p_{\bar{D}}(\bar{Y}=i \mid X=x)} \ell(f(x), i) d x \\
+    =\mathbb{E}_{(X, \bar{Y}) \sim \bar{D}}[\beta(X, \bar{Y}) \ell(f(X), \bar{Y})],
+    \end{array}
+\end{equation}
+倒数第二个方程成立, 因为noise和instance独立. 最后的$\beta(X,\bar Y)=p_{D}(\bar{Y}=i \mid X=x) / p_{\bar{D}}(\bar{Y}=i \mid X=x)$就是IW.
+这可以通过转移矩阵T或者使用小数据集的clean data(like GLC)来学到.
+
+\subsection{Objective Reweighting: Bayesian Methods}
+
+(Wang et al., 2017)的reweighted prob. models(RPM)来应对label noise. Idea在于, 降低bad labels的权重且增加clean labels的权重. 具体地,
+\begin{itemize}
+    \item 定义概率模型$p_{\beta}(\beta)=\prod_{n=1}^{N} \ell\left(y_{n} \mid \beta\right)$
+    \item 给出latent weight的先验分布$p_w(w), w=(w_1,\dots, w_N)$
+    \begin{equation}
+        p(y, \beta, w)=1 / z \cdot p_{\beta}(\beta) p_{w}(w) \prod_{n=1}^{N} \ell\left(y_{n} \mid \beta\right)^{w_{n}}
+    \end{equation}
+    \item 推理$\beta, w$, 通过后验分布$p(\beta, w| y)$. 先验分布$p_w(w)$可以是Beta分布, scaled Dirichlet分布, Gamma分布. 不同的选择trade off小概率的cases.
+\end{itemize}
+
+(Arazo et al., 2019)使用了两组分beta mixture model(BMM), 视为clean-noisy的混合, 使用了一个bootstrapping loss. 具体地, 使用dyn-w. 的boostrapping loss.数学上, 定义loss上的pdf
+\begin{equation}
+    p(\ell)=\sum_{k=1}^{K} \lambda_{k} p(\ell \mid k)
+\end{equation}
+并且$p(\ell \mid k)$可以使用Beta分布建模.
+\begin{equation}
+    p(\ell \mid \alpha, \beta)=\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha) \Gamma(\beta)} \ell^{\alpha-1}(1-\ell)^{\beta-1}
+\end{equation}
+上述问题可以使用EM算法来解决.
+
+更具体地, 引入
+$\gamma_{k}(\ell)=p(k \mid \ell)$, 
+E-step中固定$\lambda, \alpha, \beta$, 计算$\gamma$.
+M-step中固定$\gamma$, 使用带权动量估计$\alpha, \beta$, 动态权重则使用简单的方法来得到$\lambda_{k}=\frac{1}{N} \sum_{i=1}^{N} \gamma_{k}\left(\ell_{i}\right)$. 基于这个BMM模型, 他们还提出了动态hard/soft bootstrapping loss, 其中每个sample的weight动态的设置为$p\left(k=1 \mid \ell_{i}\right)$(sample为clean的概率).
+
+\subsection{Objective Reweighting: NNs}
+
+(Shu et al., 2019)使用Meta-Weight-Net(MW-Net)来学习显示的weighting function. w. func. 是一个单层MLP, 从loss到weight. 数学上
+\begin{equation}
+    w^{*}(\theta)=\arg \min _{w} \ell^{\operatorname{tr}}(w ; \theta)=1 / N \sum_{i=1}^{N} \mathcal{V}\left(t_{i}^{\operatorname{tr}}(w) ; \theta\right) \ell_{i}^{\mathrm{tr}}(w)
+\end{equation}
+这里, 可以使用\bt{元学习}来优化MW-Net: 给出一些clean, balanced元数据
+$\left\{x_{i}^{(\text {meta })}, y_{i}^{(\text {meta })}\right\}_{i=1}^{M}$
+, 最小化meta-loss
+\begin{equation}
+    \theta^{*}=\arg \min _{\theta} \ell^{\text {meta }}\left(w^{*}(\theta)\right)=1 / M \sum_{i=1}^{M} \ell_{i}^{\text {meta }}\left(w^{*}(\theta)\right) \text { . }
+\end{equation}
+使用SGD迭代的分别更新$w$和$\theta$
+
+\subsection{Objective Redesigning}
+
+这些方法常常是scenario-specific的.
+
+\subsection{Objective Redesigning: Loss Redesign}
+
+最近有许多新的对抗label noise的loss. 基于诸如梯度裁剪/课程学习的原则.
+
+(Zhang et al., 2018)提出了推广的CE, 使用MAE(mean absolute error/l1-norm)+CCE(categorical CE). 数学上, 他们使用Box-Cox变换作为$\ell_q$loss func.
+\begin{equation}
+    \ell_{q}\left(f(x), e_{j}\right)=\left(1-f_{j}(x)^{q}\right) / q
+\end{equation}
+注意$q\to 0$为CCE, $q\to1$为MAE.
+并且引入了截断$\ell_q$损失的估计
+\begin{equation}
+    \ell_{\text {trunc }}\left(f(x), e_{j}\right)=\left\{\begin{array}{ll}
+    \ell_{q}(k) & \text { if } f_{j}(x) \leq k, \\
+    \ell_{q}\left(f(x), e_{j}\right) & \text { otherwise }
+    \end{array}\right.
+\end{equation}
+并且$\ell_{q}(k)=1-k^{q} / q$
+
+(Charoenphakdee et al., 2019) 分析了对称loss. Idea是设计loss并不一定是对称的, 同时给不对称的区域的惩罚, i.e.,$\ell(z)+\ell(-z)=C$. 
+所以他们给出了一个barrier hinge loss
+\begin{equation}
+    \ell(z)=\max (-b(r+z)+r, \max (b(z-r), r-z))
+\end{equation}
+不对称, 并且在对称区外给出惩罚.
+
+(Thulasidasan et al., 2019)提出了放弃一些confusing data的方法. 他们的网络DAC(deep abstaining classi.) 有一个额外输出$p_{k+1}$, 是放弃概率. 具体的loss是
+\begin{equation}
+    \ell\left(x_{j}\right)=-\tilde{p}_{k+1} \sum_{i=1}^{k} t_{i} \log \left(p_{i} / \tilde{p}_{k+1}\right)-\alpha \log \tilde{p}_{k+1}
+\end{equation}
+其中$\tilde{p}_{k+1}=1-p_{k+1}$
+他们使用了一个动态的调整$\alpha$的算法. 
+DAC可以作为data cleaner使用在不论有无结构的噪声上.
+
+(Aditya et al., 2020)使用梯度裁剪来设计loss. 直觉上, 这防止了过于自信的递降. 基于梯度裁剪, 他们设计了部分Huberized loss
+\begin{equation}
+    \tilde{\ell}_{\theta}(x, y)=\left\{\begin{array}{ll}
+    -\tau p_{\theta}(x, y)+\log \tau+1 & \text { if } p_{\theta}(x, y) \leq \frac{1}{\tau} \\
+    -\log p_{\theta}(x, y) & \text { otherwise }
+    \end{array}\right.
+\end{equation}
+
+(Lyu et al. 2020)提出curriculum loss. 是0-1 loss更紧的上界. 此外, CL可以动态地选择samples. 对于任何base loss是0-1 loss的上界
+$\ell(u)\ge \mathbf{1}(u<0), u \in \mathbb{R}$
+, CL定义为
+\begin{equation}
+    Q(\mathbf{u})=\max \left(\min _{\mathbf{v} \in\{0,1\}^{n}} f_{1}(\mathbf{v}), \min _{\mathbf{v} \in\{0,1\}^{n}} f_{2}(\mathbf{v})\right)
+\end{equation}
+其中
+\begin{equation}
+    f_{1}(\mathbf{v})=\sum_{i=1}^{n} v_{i} \ell\left(u_{i}\right) \text { and } f_{2}(\mathbf{v})=n-\sum_{i=1}^{n} v_{i}+\sum_{i=1}^{n} \mathbf{1}\left(u_{i}<0\right) .
+\end{equation}
+为了在DL中使用CL, 进一步他们提出了noise pruned CL.
+
+\subsection{Label Ensemble}
+
+(Laine \& Aila, 2017)引入了SSL中的self-ensembling, 包括$\pi$-model和时序聚合, 也可用于noise净化. self-ensembling的idea是, 使用网络的输出对位置标签形成共识. 具体上, $\pi$-model是让不同的dropout模式下对同一个输入得到相容的输出. 除了$\pi$-model, 多个epochs的时序聚合也被考虑.
+
+$\pi$-model的loss是
+\begin{equation}
+    \ell=-1 / B \sum_{i} \log z_{i}\left[y_{i}\right]+w(t) / C|B| \sum_{i}\left\|z_{i}-\tilde{z}_{i}\right\|^{2}
+\end{equation}
+其中第一项是batch的CE, 后一项处理无标签数据. 其中$z_i,\tilde z_i$分别是不同dropout下的输出. 第二项也被时间相关函数$w(t)$加权.
+
+这个方法的时序集成使用了几次之前的网络求值来进行一个集成预测, 具体上, 在$\pi$-model
+中的$\tilde z$是前几次的输出的moving average
+\begin{align}
+    &Z_{i} \leftarrow \alpha Z_{i}+(1-\alpha) z_{i}\\
+    &\tilde z_i = \frac{Z_i}{1-\alpha ^t}
+\end{align}
+
+\begin{remark}
+    既然kWTA是更高级的Dropout, 那么...
+\end{remark}
+
+(Nguyen et al., 2020)提出了self-ensemble label filtering(SELF)的方法来在训练中逐渐地去除错误labels. 使用网络在不同训练迭代时的不同输出来得到一个预测的共识, 用于去除bad labels. 假设$L_{i}=\left\{(y, x) \mid \hat{y}_{x}=y ; \forall(y, x) \in L_{0}\right\}$是label y和其最大似然预测, $L_0$是最开始的样本集合. 
+
+根据他们的策略, 模型首先和Mean Teacher进行集成, 后者是一个exponential running average of model(snapshots). 其次, 使用在多个epochs上的预测结果
+$\bar{z}_{j}=\alpha \overline{\bar{z}}_{j-1}+(1-\alpha) \hat{z}_{j}$,
+代表了moving average of predicted labesls.
+
+\begin{remark}
+    这和之前那个时序集成挺类似的. 区别是, 不是用不同dropout来进行集成而是和mean teacher集成.
+\end{remark}
+
+(Ma et al., 2018)研究了训练样本上的深度表示子空间的维度. 提出了基于维度的训练策略, 在训练中检测子空间维度. Key idea是使用local intrinsic dim.(LID), 用于区分noisy/clean labels. 数学上
+\begin{equation}
+    \widehat{\mathrm{LID}}=-\left(1 / k \sum_{i=1}^{k} \log r_{i}(x) / r_{\max }(x)\right)^{-1}
+\end{equation}\footnote{
+    Extract from \textit{Dimensionality-Driven Learning with Noisy Labels}
+
+    原始定义是
+    \begin{equation}
+        \operatorname{LID}_{F}(r) \triangleq \lim _{\epsilon \rightarrow 0} \frac{\ln (F((1+\epsilon) r) / F(r))}{\ln (1+\epsilon)}=\frac{r F^{\prime}(r)}{F(r)},
+    \end{equation}
+    以及在点x的LID
+    \begin{equation}
+        \operatorname{LID}_{F}=\lim _{r \rightarrow 0} \operatorname{LID}_{F}(r) .
+    \end{equation}
+
+    值得注意的是, 对于DNN来说, 应该使用如下in-batch的LID, 使用倒数第二层得到网络输出
+    \begin{equation}
+        \widehat{\operatorname{LID}}\left(x, X_{B}\right)=-\left(\frac{1}{k} \sum_{i=1}^{k} \log \frac{r_{i}\left(g(x), g\left(X_{B}\right)\right)}{r_{\max }\left(g(x), g\left(X_{B}\right)\right)}\right)^{-1}
+    \end{equation}
+    据此, batch size需要比较大.
+
+    据此, 提出dimensionality-driven training, 具体地, 使用LID动态矫正labels
+    \begin{equation}
+        y^{*}=\alpha_{i} y+\left(1-\alpha_{i}\right) \widehat{y}
+    \end{equation}
+    其中
+    \begin{equation}
+        \alpha_{i}=\exp \left(-\frac{i}{T} \frac{\widehat{\operatorname{LID}}_{i}}{\min _{j=0}^{i-1} \widehat{\operatorname{LID}}_{j}}\right)
+    \end{equation}
+    校准因子是递增的, 代表随着训练进行, noisy label变得越来越不可信. 可以直接使用augmented的标签的熵作为loss
+    \begin{equation}
+        \mathcal{L}=-\frac{1}{N} \sum_{n=1}^{N} \sum_{y_{n}^{*}} y_{n}^{*} \log P\left(y_{n}^{*} \mid x_{n}\right)
+    \end{equation}
+
+    技术上, 设置w个epochs的初始化窗口. Turning point是, LID高于前w个epochs的mean两个标准差时. 此时rollback.
+
+    CSR(Arpit et al., 2017)为新的衡量假设空间复杂性的measure.
+}
+其中$r_i(x)$是x到i-th neighbor的距离. 根据他们的观察, 在clean label上训练的时候LID一直下降, 但是在noisy label上训练的时候先下降后上升. 可以据此观察训练动态.
+
+\subsection{Optimization Policies}
+
+一个例子是Early-stopping. 根据记忆效应避免了overfitting. 存在更好的方法: small-loss trick. MentorNet, Learning to Reweight. Co-teaching, Co-teaching+. cross-validation, automated learning, GMMs.
+
+\subsubsection{Memorizaiton Eff.}
+
+记忆效应指出, NNs趋向于先记住容易学习的模式(clean), 再逐渐overfit难以学习的模式(noisy). 这启发了small-loss trick. 具体上, 这是说把small-loss的样本作为clean samples, 并且只在这些样本上进行模型参数更新. 数学上, 等价于建立一个masked loss
+\begin{equation}
+    \tilde{\ell}=\operatorname{sort}(\ell, 1-\tau)
+\end{equation}
+其中$\tau$时noise rate.
+
+\subsubsection{Self-training}
+
+(Jiang et al., 2018)提出了MentorNet, 监督称为StudentNet的基网络. 数学上, MentorNet $g_m$估计一个predefined curriculum
+\begin{equation}
+    \arg \min _{\theta} \sum_{\left(x_{i}, y_{i}\right) \in \mathcal{D}} g_{m}\left(z_{i} ; \theta\right) \ell_{i}+G\left(g_{m}\left(z_{i} ; \theta\right) ; \lambda_{1}, \lambda_{2}\right),
+\end{equation}
+第一项是课程加权的loss, 第二项是正则化惩罚项. 可以得到闭形式解
+\begin{equation}
+    g_{m}\left(z_{i} ; \theta\right)=\left\{\begin{array}{ll}
+    \mathbf{1}\left(\ell_{i} \leq \lambda_{1}\right) & \text { if } \lambda_{2}=0 \\
+    \min \left(\max \left(0,1-\ell_{i}-\lambda_{1} / \lambda_{2}\right), 1\right) & \text { if } \lambda_{2} \neq 0
+    \end{array}\right.
+\end{equation}
+直觉上, 当$\lambda_2 = 0$时, M-Net只会使用losses小于$\lambda_1$的sample. 否则MentorNet不会提供大于$\lambda_1 + \lambda_2$的样本. 同时这也使MNet能够自行发现curriculum.
+
+(Ren et al., 2018)使用meta-learning来给不同的samples不同的权重, 基于他们的梯度方向. 基本上, 小loss数据分配更多权重, 并且他们相信在小的验证集上最小化loss的权重是好的权重, 具体上, 在每个iteration之前在验证集上决定样本权重. 数学上, 最小化带权损失
+\begin{equation}
+    \theta^{*}(w)=\arg \min _{\theta} \sum_{i=1}^{N} w_{i} \ell_{i}(\theta)
+\end{equation}  
+他们在验证机上进行参数选择
+\begin{equation}
+    w^{*}=\arg \min _{w} 1 / M \sum_{i=1}^{M} \ell_{i}^{v}\left(\theta^{*}(w)\right)
+\end{equation}
+具体上有三步
+\begin{enumerate}
+    \item 将noisy data进行前向/后向传播, 得到traininig net.的新的参数$\theta$和梯度$\nabla \theta$
+    \item 梯度$\nabla \theta$影响validation net.
+    \item training net. 使用meta-leanrning来更新$w$, 通过二次求导/二阶导.
+\end{enumerate}
+
+\subsubsection{Co-training}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{cotraining.PNG}
+\end{figure}
 
 \end{document}
 
