@@ -3917,6 +3917,79 @@ $\bar{z}_{j}=\alpha \overline{\bar{z}}_{j-1}+(1-\alpha) \hat{z}_{j}$,
     \item \bt{Demonstration}: 模仿学习(Imitation Learning, IL)的目标时从高质量演示中学到好的策略. 当演示的质量不齐时, 显然导致了diverse-quality demos. 可以使用置信度/ranking scores/小部分高质量demos来估计noise, 来轻松的学习. 但是没有已有expert data时不一定能work. (Tangkaratt et al., 2020)提出了一个模型, 使用概率图模型来VILD建模demo质量. 具体上, 他们通过奖励函数(代表了某种专家决策)来估计质量, 使用了变分法来处理大的s-a空间, 使用importance sampling.
 \end{enumerate}
 
+\section{Multimodal Research in Vision and Language: A Review of Currentand Emerging Trends}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{vl-tasks.png}
+\end{figure}
+
+VisLang任务包括分类, 归纳, (retrieval), 导航. 有很多困难的人物: Vision-Language Navigation作为对环境的详尽理解. Visual Captioning是生成视觉信息的语言描述.
+
+\subsection{Tasks}
+
+\subsubsection{归纳任务}
+
+\bt{Visual Question Ansewering, VQA}
+视觉输入+问题+回答triplet 
+$<\mathcal{I}_{i}, \mathcal{Q}_{i}, \mathcal{A}_{i}>$
+目标是学习视觉和问题输入到回答的映射
+$\hat{\mathcal{A}}_{i}=f\left(\mathcal{V}_{i}, \mathcal{Q}_{i}\right)$
+模型的输出可以属于一些答案的集合~MCQ,
+也可以是没有限制的~free form. 
+我们认为free form是归纳任务, 而MCQ VQA是分类任务.
+
+\bt{Visual Captioning (VC)}
+VC是给视觉输入一个合理的描述. 一般从输入学习一个semantic repr., 再获得一个好的输出序列.
+
+\bt{Visual Commonsense Reasoning (VCR)}
+对图像推理一个commonsense understanding. 需要机器回答VQA, 并且给出一个相关的理由. 相比VQA多了
+$\left\{<\mathcal{A}_{i}, \mathcal{R}_{i}>\right\}$
+输出常常建模为, 给出多选题来回答. 所以VCR可以分为question answering和answer justification.
+
+NLVR(Natural Language for Visual Reasoning), 在于决定关于输入的一个statement是true/false. 常常有更长的文本长度.
+
+\bt{Visual Generation (VG).}
+通过文字生成视觉输出.
+
+\subsubsection{分类任务}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{vl-class.png}
+\end{figure}
+
+\bt{Multimodal Affective Computing (MAC)}
+情感计算涉及对情感现象的归因.
+
+\subsubsection{Retrieval 任务}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{vl-retrieval.png}
+\end{figure}
+
+\bt{Visual Retrieval}
+根据文字描述, 在一个视觉pools中找到一个最match的视觉数据. 常见于各种搜索引擎.
+
+\subsubsection{其他任务}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{vl-other.png}
+\end{figure}
+
+\bt{Vision-Language Navigation (VLN)}
+根据语言指令, 一个agent根据视觉输入行动. 常看做seq2seq的transcoding, 类似VQA. 但是VLN常常有相对长的多的序列.
+
+\bt{Multimodal Machine Translation (MMT)}
+包含了两部分: 翻译和描述生成. 涉及翻译一个描述到另一个语言, 给出多模态信息(视频/音频).
+
+\subsection{任务相关Trends in VisLang}
+
+\subsubsection{VC}
+
+\bt{Image Captioning, IC}
 
 
 \end{document}
