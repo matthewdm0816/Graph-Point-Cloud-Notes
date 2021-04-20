@@ -3904,4 +3904,19 @@ $\bar{z}_{j}=\alpha \overline{\bar{z}}_{j-1}+(1-\alpha) \hat{z}_{j}$,
 
 同时(Zhang et al., 2020)也考虑了同样的问题: 对抗训练中的错分类问题. 提出了friendly adversarial training(FAT), 在训练DNN时使用错分类对抗样本最小化loss, 使用正确分类对抗样本最大化loss. 使用了early-stopped PGD, 一旦对抗样本被错分类就停止PGD.
 
+\subsubsection{Beyond Labels: Noisy Data}
+
+除了noisy labels, 下面介绍noisy data的领域.
+
+\begin{enumerate}
+    \item \bt{Feature}: 对抗样本是一种特殊的feature noise. 可以表示为$p(\bar{X} \mid Y)$. 对抗训练显然是一种主要办法. 注意随机扰动是另一种噪声. (Zhang et al., 2019)提出了一种robust ResNet, 启发于动力系统. 使用显示Euler法的step factor来研究问题, 他们证明了, 小step factor有利于泛化健壮性.
+    \item \bt{Preference}: ranking中的preference噪声问题, 常见于各种推荐系统/在线排序/评分系统. (Han et al., 2018)提出了POPAL模型, 使用集成了一个denoising vector的Plackett-Luce模型. 基于Kendall-tau距离, 这个向量用确定的概率校正k-ary noisy preferences. 然而POPAL不能处理k-ary noisy preferences 的动态长度, 于是(Pan et al., 2018)提出了COUPLE, 使用stagewise training. 使用了online Bayesian inference来优化两个模型.
+    \item \bt{Domain}: Domain Adaptation(DA)是一个ML的基本问题. 传统DA认为source domain的有标签数据是clean的, 但不一定为真. 当source domain的label是noisy的, 称为wild domain adaptation(WDA). (Liu et al., 2019)提出了Butterfly框架, 同时维护四个DNNs, 可以迭代地获得DIR(domain-specific repr.), 和TSR(target-specific repr.). (Yu et al.,  2020)提出了Denoising Conditional Invariant Component(DCIC)框架, 可证明保证能提取不变表示, 并且无偏地估计target domain的数据分布.
+    \item \bt{Similarity}: 基于相似度的学习是weak-supervised learning的问题, 可用的是无标签数据和相似数据(挺像Graph ULL).(Wu et al., 2020)使用一个噪声转移模型来建模相似性噪声.
+    \item \bt{Graph}: 图结构是否对噪声(node/edge feature/label, noisy links)健壮? (Wang  et  al., 2020)提出了健壮和无监督的框架Cross-Graph, 可以处理图中的结构损坏. (Hu et al., 2019)是pre-training GNNs, 可能能够提高健壮性.
+    \item \bt{Demonstration}: 模仿学习(Imitation Learning, IL)的目标时从高质量演示中学到好的策略. 当演示的质量不齐时, 显然导致了diverse-quality demos. 可以使用置信度/ranking scores/小部分高质量demos来估计noise, 来轻松的学习. 但是没有已有expert data时不一定能work. (Tangkaratt et al., 2020)提出了一个模型, 使用概率图模型来VILD建模demo质量. 具体上, 他们通过奖励函数(代表了某种专家决策)来估计质量, 使用了变分法来处理大的s-a空间, 使用importance sampling.
+\end{enumerate}
+
+
+
 \end{document}
