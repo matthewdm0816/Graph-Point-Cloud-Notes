@@ -3801,11 +3801,107 @@ $\bar{z}_{j}=\alpha \overline{\bar{z}}_{j-1}+(1-\alpha) \hat{z}_{j}$,
 \subsubsection{Co-training}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.7\textwidth]{cotraining.PNG}
+    \includegraphics[width=0.7\paperwidth]{cotraining.PNG}
 \end{figure}
 
+(Han et al., 2018)提出了co-teaching, 让两个DNN在每个batch上互相teach. 具体地, 每个网络前向传播所有数据, 然后选出clean data, 再根据peer net. 选出的clean data来进行参数更新. 在MentorNet中误差会不断累积, 但是在co-teaching中, 两个模型能够学到不同类型的noise, 降低误差的累积, 最终达到一个共识. 注意集成学习中关键的一点是让两个学习器有差异.
+
+(Yu  et  al., 2019)提出了co-teaching+, "通过不同意来更新", 来保持coteaching中两个网络的的差异性. 包含disaggrement-upd. + cross-upd. steps. 在disaggr.-upd. 中两个网络分别预测, 然后只保留预测不同意的数据(对称差?). cross-upd.和Co-teaching一样. 两个网络对于big-loss有相同的drop-rate.
+
+(Chen et al., 2019)使用noisy dataset上的随机分割作为cross-validation. 意味着认为大多数样本是correct labeled的. 他们提出了Iterative Noisy Cross-Validation(INCV), 来选择一个噪声很小的数据子集. 然后他们在这个子集上使用Co-teaching来训练, 并且逐步去除big-loss样本.
+
+(Yao et al., 2020)使用AutoML来探索记忆效应. 注意Co-teaching(+)两个网络的drop-rate相同且都是人工选择的. 他们使用Domain-specific search, 并且用一种牛顿法来估计最优的drop-rate, 数学上可建模为bi-level opt. 
+\begin{equation}
+    \begin{array}{l}
+    R^{*}=\arg \min _{R(\cdot) \in \mathcal{F}} \mathcal{L}_{\text {val }}\left(f\left(w^{*} ; R\right), \mathcal{D}_{\text {val }}\right) \\
+    \text { s.t. } w^{*}=\arg \min _{w} \mathcal{L}_{\text {tr }}\left(f\left(w^{*} ; R\right), \mathcal{D}_{\operatorname{tr}}\right)
+    \end{array}
+\end{equation}
+
+(Li et al., 2020)启发与MixMatch, 提出了DivideMix, 使用SSL技术. 它使用了GMM来动态地分割训练数据为labeled clean data + unlabeled noisy data. 在SSL部分, 他们使用了Co-training 的一个变体 Co-refinement在有标签数据上, 并且在无标签数据上使用Co-guessing. 具体上讲, Co-refinement把ground-truth和网络预测结合, 得到refined label; Co-guessing把两个网络的预测输出平均. 使用MixMatch中的方法来合并数据.
+
+\subsubsection{Beyond Memorizaiton}
+
+(Hendrycks et al., 2019)展示了, pre-training技术可以提高模型健壮性和不确定性, 包括对抗健壮性和标签噪声. 
+
+一般来说, pre-training设计在更大的数据集上进行训练, 再使用fine-tuning来再小数据集上进行训练. Pre-traninig展示了多种健壮性, 包括标签噪声, 对抗样本, 分布外检测和校准.
+
+(Bahri et al., 2020)提出了Deep k-NN方法, 作为base DNN的中间层来滤除噪声. 具体上由两步组成, 首先具有结构$\mathcal A$的模型$\mathcal M$通过kNN被训练来得到噪声数据$\mathcal {D}_{noise}$, 通过去除和其邻居数据label不同的样本. 接着在$\mathcal{D}_{\text {filtered }} \cup \mathcal{D}_{\text {clean }}$上重新训练结构$\mathcal A$.
+
+\subsection{Future}
+
+\subsubsection{Build Up New Datasets}
+
+从合成数据集(MNIST, CIFAR)到真实噪声数据集(Clothing1M). 到更新更大的数据集("web-label noise", Jiang et al., 2020). 需要NLP的噪声数据集.
+
+\subsubsection{Instance-Dependent LNRL}
+
+显然CCN(instance independent noise)是一个经典的假设, 但是实际场景中这只是一个近似. 我们应该考虑IDN模型. 直觉上这是显然的, 因为模糊或者低质量的样本显然有更高概率被mislabel. 但是和输入feature相关的noise显然大大提高了体系维度, 增加了复杂度. 并且如果没有额外的假设/信息, IDN是不可区分的(Cheng et al., 2020).
+
+(Menon  et  al., 2018)提出了一个边界相容的IDN, 考虑在分类边界附近的样本具有更大的噪声. 但是这个方法仅限于二元分类, 并且无法估计噪声函数.
+
+(Cheng et al., 2020)研究了一种特殊的IDN, 其中噪声函数是有上界的. 同样他们的方法也限于二分类, 并且只在小数据集上进行了测试.
+
+(Berthon et al., 2020)考虑了使用每个instance的置信度: confidence-scored IDN. 基于此, 他们提出了instance-level的前向矫正.
+
+\subsubsection{Adversarial LNRL}
+
+(Wang  et  al., 2020)提出了新的defense algorithm MART, 将错误/正确分类的样本分别微分. 具体上讲, 使用了Misclassification-Aware-Regularization 
+\begin{equation}
+    1 / n \sum_{i=1}^{n} \mathbf{1}\left(h_{\theta}\left(x_{i}\right) \neq h_{\theta}\left(\hat{x}_{i}^{\prime}\right)\right) \cdot \mathbf{1}\left(h_{\theta}\left(x_{i}\right) \neq y_{i}\right)
+\end{equation}
+其中$\hat{x}_{i}^{\prime}$是某种对抗样本
+\footnote{
+    Namely,
+    $\hat{\mathbf{x}}_{i}^{\prime}=\underset{\mathbf{x}_{i}^{\prime} \in \mathcal{B}_{\epsilon}\left(\mathbf{x}_{i}\right)}{\arg \max } \mathbb{1}\left(h_{\boldsymbol{\theta}}\left(\mathbf{x}_{i}^{\prime}\right) \neq y_{i}\right)$
+
+    具体上,对于错分类样本
+    \begin{equation}
+        \mathcal{R}^{-}\left(h_{\boldsymbol{\theta}}, \mathbf{x}_{i}\right):=\mathbb{1}\left(h_{\boldsymbol{\theta}}\left(\hat{\mathbf{x}}_{i}^{\prime}\right) \neq y_{i}\right)+\mathbb{1}\left(h_{\boldsymbol{\theta}}\left(\mathbf{x}_{i}\right) \neq h_{\boldsymbol{\theta}}\left(\hat{\mathbf{x}}_{i}^{\prime}\right)\right)
+    \end{equation}
+    对于正确分类样本
+    \begin{equation}
+        \mathcal{R}^{+}\left(h_{\boldsymbol{\theta}}, \mathbf{x}_{i}\right):=\max _{\mathbf{x}_{i}^{\prime} \in \mathcal{B}_{\epsilon}\left(\mathbf{x}_{i}\right)} \mathbb{1}\left(h_{\boldsymbol{\theta}}\left(\mathbf{x}_{i}^{\prime}\right) \neq y_{i}\right)=\mathbb{1}\left(h_{\boldsymbol{\theta}}\left(\hat{\mathbf{x}}_{i}^{\prime}\right) \neq y_{i}\right)
+    \end{equation}
+    总的对抗经验风险
+    \begin{equation}
+        \begin{aligned}
+        \min _{\boldsymbol{\theta}} \mathcal{R}_{\operatorname{misc}}\left(h_{\boldsymbol{\theta}}\right): &=\frac{1}{n}\left(\sum_{i \in \mathcal{S}_{h_{\boldsymbol{\theta}}}^{+}} \mathcal{R}^{+}\left(h_{\boldsymbol{\theta}}, \mathbf{x}_{i}\right)+\sum_{i \in \mathcal{S}_{h_{\boldsymbol{\theta}}}^{-}} \mathcal{R}^{-}\left(h_{\boldsymbol{\theta}}, \mathbf{x}_{i}\right)\right) \\
+        &=\frac{1}{n} \sum_{i=1}^{n}\left\{\mathbb{1}\left(h_{\boldsymbol{\theta}}\left(\hat{\mathbf{x}}_{i}^{\prime}\right) \neq y_{i}\right)+\mathbb{1}\left(h_{\boldsymbol{\theta}}\left(\mathbf{x}_{i}\right) \neq h_{\boldsymbol{\theta}}\left(\hat{\mathbf{x}}_{i}^{\prime}\right)\right) \cdot \mathbb{1}\left(h_{\boldsymbol{\theta}}\left(\mathbf{x}_{i}\right) \neq y_{i}\right)\right\}
+        \end{aligned}
+    \end{equation}
+
+    0-1 loss并不能直接很好的优化, 使用surruogates, 并且使用PGD来进行部内部极值寻找, 总目标函数为
+    \begin{equation}
+        \mathcal{L}^{\mathrm{MART}}(\theta)=\frac{1}{n} \sum_{i=1}^{n} \ell\left(\mathrm{x}_{i}, y_{i}, \boldsymbol{\theta}\right),
+    \end{equation}
+    其中
+    \begin{equation}
+        \ell\left(\mathbf{x}_{i}, y_{i}, \boldsymbol{\theta}\right):=\operatorname{BCE}\left(\mathbf{p}\left(\hat{\mathbf{x}}_{i}^{\prime}, \boldsymbol{\theta}\right), y_{i}\right)+\lambda \cdot \operatorname{KL}\left(\mathbf{p}\left(\mathbf{x}_{i}, \boldsymbol{\theta}\right) \| \mathbf{p}\left(\hat{\mathbf{x}}_{i}^{\prime}, \boldsymbol{\theta}\right)\right) \cdot\left(1-\mathbf{p}_{y_{i}}\left(\mathbf{x}_{i}, \boldsymbol{\theta}\right)\right) .
+    \end{equation}
+    其中BCE是boosted CE
+    \begin{equation}
+        \operatorname{BCE}\left(\mathbf{p}\left(\hat{\mathbf{x}}_{i}^{\prime}, \boldsymbol{\theta}\right), y_{i}\right)=-\log \left(\mathbf{p}_{y_{i}}\left(\hat{\mathbf{x}}_{i}^{\prime}, \boldsymbol{\theta}\right)\right)-\log \left(1-\max _{k \neq y_{i}} \mathbf{p}_{k}\left(\hat{\mathbf{x}}_{i}^{\prime}, \boldsymbol{\theta}\right)\right)
+    \end{equation}
+
+    对于SSL场景可以如下定义
+    \begin{equation}
+        \mathcal{L}(\theta)=\mathcal{L}_{\text {sup }}(\theta)+\gamma \cdot \mathcal{L}_{\text {unsup }}(\theta)
+    \end{equation}
+    使用UAT++的无监督对抗loss
+    \begin{equation}
+        \ell_{\text {sup }}^{\mathrm{UAT}++}(\mathrm{x}, y ; \boldsymbol{\theta})=\ell_{\mathrm{unsup}}^{\mathrm{UAT}++}(\mathrm{x}, y ; \boldsymbol{\theta})=\max _{\mathbf{x}^{\prime} \in \mathcal{B}_{\epsilon}} \operatorname{CE}\left(\mathbf{p}\left(\mathrm{x}^{\prime}, \boldsymbol{\theta}\right), y\right)+\lambda \cdot \max _{\mathbf{x}^{\prime} \in \mathcal{B}_{\epsilon}} \mathrm{KL}\left(\mathbf{p}(\mathbf{x}, \boldsymbol{\theta}) \| \mathbf{p}\left(\mathbf{x}^{\prime}, \boldsymbol{\theta}\right)\right)
+    \end{equation}
+    同时一个工作也提出了RST loss
+    \begin{equation}
+        \ell_{\mathrm{sup}}^{\mathrm{RST}}(\mathrm{x}, y ; \boldsymbol{\theta})=\ell_{\mathrm{unsup}}^{\mathrm{RST}}(\mathrm{x}, y ; \boldsymbol{\theta})=\mathrm{CE}(\mathrm{p}(\mathrm{x}, \boldsymbol{\theta}), y)+\lambda \cdot \max _{\mathbf{x}^{\prime} \in \mathcal{B}_{\epsilon}} \mathrm{KL}\left(\mathbf{p}(\mathbf{x}, \boldsymbol{\theta}) \| \mathbf{p}\left(\mathbf{x}^{\prime}, \boldsymbol{\theta}\right)\right)
+    \end{equation}
+    MART的SSL loss
+    \begin{equation}
+        \mathcal{L}_{\mathrm{semi}}^{\operatorname{MART}}(\theta)=\sum_{i \in \mathcal{S}_{\text {sup }}} \ell_{\text {sup }}^{\text {MART }}\left(\mathbf{x}_{i}, y_{i} ; \boldsymbol{\theta}\right)+\gamma \cdot \sum_{i \in \mathcal{S}_{\text {unsup }}} \ell_{\text {unsup }}^{\text {MART }}\left(\mathbf{x}_{i}, y_{i} ; \boldsymbol{\theta}\right)
+    \end{equation}
+}
+
+同时(Zhang et al., 2020)也考虑了同样的问题: 对抗训练中的错分类问题. 提出了friendly adversarial training(FAT), 在训练DNN时使用错分类对抗样本最小化loss, 使用正确分类对抗样本最大化loss. 使用了early-stopped PGD, 一旦对抗样本被错分类就停止PGD.
+
 \end{document}
-
-
-
-
