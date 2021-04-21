@@ -3550,7 +3550,7 @@ $r_{\mathrm{vadv}}:=\arg \max _{\|r\|_{0}<\epsilon} D\left[p\left(y \mid x^{*}, 
     \ell\left(D_{l}, \theta\right)+\alpha R_{\mathrm{vadv}}\left(D_{l}, D_{u l}, \theta\right)
 \end{equation}
 
-\subsection{Objdective Regularization: Implicit}
+\subsection{Objective Regularization: Implicit}
 
 最近出现了很多隐式正则化方法. 
 
@@ -3982,6 +3982,7 @@ NLVR(Natural Language for Visual Reasoning), 在于决定关于输入的一个st
 \bt{Vision-Language Navigation (VLN)}
 根据语言指令, 一个agent根据视觉输入行动. 常看做seq2seq的transcoding, 类似VQA. 但是VLN常常有相对长的多的序列.
 
+
 \bt{Multimodal Machine Translation (MMT)}
 包含了两部分: 翻译和描述生成. 涉及翻译一个描述到另一个语言, 给出多模态信息(视频/音频).
 
@@ -3990,6 +3991,24 @@ NLVR(Natural Language for Visual Reasoning), 在于决定关于输入的一个st
 \subsubsection{VC}
 
 \bt{Image Captioning, IC}
+% TODO: Finish this survey notes
 
+\section{Answering Questions about Data Visualizations using Efficient Bimodal Fusion}
+
+PReFIL(Parallel Recurrent Fusion of Image and Language)算法. 
+CQA是一个VQA, 涉及回答关于图表的问题. Chart中很小的变更会导致回答的巨大改变, 所以适合作为研究推理机制的平台. CQA常常需要OCR和关于给定视觉对象独特地分析词语.
+
+Contributions
+\begin{enumerate}
+    \item DVQA的标注.
+    \item PReFIL达到了超越人的性能. 开源.
+    \item 使用迭代QA来从图重建表.
+\end{enumerate}
+
+Datasets
+\begin{enumerate}
+    \item DVQA, 仅有条状图. Test-Familiar/Test-Novel: 后者是training中没有见过的例子. Open-ended.
+    \item FigureQA, 条状图(横竖), 饼图, 点线图, 线图. 提供了Val1/Test1和Val2|Test2, 后者颜色不存在于训练集. 所有问题都是二元yes/no.
+\end{enumerate}
 
 \end{document}
