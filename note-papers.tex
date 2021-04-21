@@ -4007,8 +4007,41 @@ Contributions
 
 Datasets
 \begin{enumerate}
-    \item DVQA, 仅有条状图. Test-Familiar/Test-Novel: 后者是training中没有见过的例子. Open-ended.
+    \item DVQA, 仅有条状图. Test-Familiar/Test-Novel: 后者是training中没有见过的例子. Open-ended. 需要考虑OOV问题, FigureQA不需要,
     \item FigureQA, 条状图(横竖), 饼图, 点线图, 线图. 提供了Val1/Test1和Val2|Test2, 后者颜色不存在于训练集. 所有问题都是二元yes/no.
 \end{enumerate}
+它们都是合成数据集, 所以缺少真实世界的数据演示.
+
+已有方法
+\begin{enumerate}
+    \item SANDY(SAN(stacked attention network) with DYnamic encoding). SAN是VQA中广泛使用的框架. SAN使用问题(文本/表示)来在卷积特征上cast attention. 无法处理OOV问题. 为此, SANDY使用了现有的OCR模块来识别任何OOV单词, 并且使用dyn. encoding来代表OOV/chart-specific 单词. 这个dyn. enc.模块可以用到所有基于分类的VQA方法.
+    \item RN(relation network)是FigureQA的创建者使用的. 编码任何两个图像中的object的二元作用. 每个object是卷积特征的一个cell! RN在compositional reasoing (CLEVR)上很有效.
+    \item FigureNet是一个多步FigureQA算法. Spectral Segreagator识别chart中的元素和颜色. Extract. Mod. 量化每个元素的值. 最后使用NN来预测答案. 它使用FigureQA里的具体标注来pretrain每个module. 所以无法应用在饼图/线图.
+\end{enumerate}
+
+\subsection{Architecture}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{prefil-arch.png}
+\end{figure}
+
+PReFIL具有两个平行的Q+I融合分支. 每个分支从LSTM和DenseNet的不同层级拿特征. 每个融合分支concat问题特征到每个卷积feature map的每个元素上. 然后通过1*1卷积(i.e., MLPs) 来得到question-specific的双模态嵌入. recurrently aggregated(BiGRU), 送进分类器.
+
+\subsubsection{Image Encoder}
+
+使用DenseNet. Dense-block,\dots . Transition-block更改特征尺寸(conv/pooling). 同时使用high-level/low-level表示.
+
+\subsubsection{Parallel Fusion of I+L}
+
+首先concat 语言feature到卷积feature的每个元素. 然后1*1 卷积. 这个模型很像早期VQA模型中concat CNN表示和question表示. 
+
+\subsubsection{Recurrent Aggr. of bi-modal feat.}
+
+传统CNN的方法包括max/mean-pooling, 另一个方法时直接flatten(i.e., concat每一维). 新的方法包括注意力加权和. 这些方法可能难以捕捉features之间的互动, 特别是对于QA这样的高阶任务. 我们使用BiGRU来集成, 具体上讲, $F\in \R^{M\times N\times D}$, 使用MN个$D$维向量作为输入. 同样也测试了sum-pooling.
+
+\subsubsection{OCR Integration for DVQA}
+
+
 
 \end{document}
