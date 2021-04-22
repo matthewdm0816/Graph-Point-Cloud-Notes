@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2020.10.29)  22 APR 2021 15:11
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2020.10.29)  22 APR 2021 21:20
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -766,84 +766,84 @@ Package: afterpage 2014/10/28 v1.08 After-Page Package (DPC)
 )) (./note-papers.aux)
 \openout1 = `note-papers.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 15.
-LaTeX Font Info:    ... okay on input line 15.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 22.
+LaTeX Font Info:    ... okay on input line 22.
  ABD: EverySelectfont initializing macros
-LaTeX Info: Redefining \selectfont on input line 15.
+LaTeX Info: Redefining \selectfont on input line 22.
 
 Package fontspec Info: Adjusting the maths setup (use [no-math] to avoid
 (fontspec)             this).
 
 \symlegacymaths=\mathgroup9
 LaTeX Font Info:    Overwriting symbol font `legacymaths' in version `bold'
-(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 15.
-LaTeX Font Info:    Redeclaring math accent \acute on input line 15.
-LaTeX Font Info:    Redeclaring math accent \grave on input line 15.
-LaTeX Font Info:    Redeclaring math accent \ddot on input line 15.
-LaTeX Font Info:    Redeclaring math accent \tilde on input line 15.
-LaTeX Font Info:    Redeclaring math accent \bar on input line 15.
-LaTeX Font Info:    Redeclaring math accent \breve on input line 15.
-LaTeX Font Info:    Redeclaring math accent \check on input line 15.
-LaTeX Font Info:    Redeclaring math accent \hat on input line 15.
-LaTeX Font Info:    Redeclaring math accent \dot on input line 15.
-LaTeX Font Info:    Redeclaring math accent \mathring on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Delta on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Theta on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Xi on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Pi on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Phi on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Psi on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \Omega on input line 15.
-LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 15.
-LaTeX Font Info:    Redeclaring symbol font `operators' on input line 15.
+(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 22.
+LaTeX Font Info:    Redeclaring math accent \acute on input line 22.
+LaTeX Font Info:    Redeclaring math accent \grave on input line 22.
+LaTeX Font Info:    Redeclaring math accent \ddot on input line 22.
+LaTeX Font Info:    Redeclaring math accent \tilde on input line 22.
+LaTeX Font Info:    Redeclaring math accent \bar on input line 22.
+LaTeX Font Info:    Redeclaring math accent \breve on input line 22.
+LaTeX Font Info:    Redeclaring math accent \check on input line 22.
+LaTeX Font Info:    Redeclaring math accent \hat on input line 22.
+LaTeX Font Info:    Redeclaring math accent \dot on input line 22.
+LaTeX Font Info:    Redeclaring math accent \mathring on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Delta on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Theta on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Xi on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Pi on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Phi on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Psi on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \Omega on input line 22.
+LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 22.
+LaTeX Font Info:    Redeclaring symbol font `operators' on input line 22.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `normal' on input line 15.
+(Font)              `operators' in the math version `normal' on input line 22.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  OT1/cmr/m/n --> TU/lmr/m/n on input line 15.
+(Font)                  OT1/cmr/m/n --> TU/lmr/m/n on input line 22.
 LaTeX Font Info:    Encoding `OT1' has changed to `TU' for symbol font
-(Font)              `operators' in the math version `bold' on input line 15.
+(Font)              `operators' in the math version `bold' on input line 22.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  OT1/cmr/bx/n --> TU/lmr/m/n on input line 15.
+(Font)                  OT1/cmr/bx/n --> TU/lmr/m/n on input line 22.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  TU/lmr/m/n --> TU/lmr/m/n on input line 15.
+(Font)                  TU/lmr/m/n --> TU/lmr/m/n on input line 22.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
-(Font)                  OT1/cmr/m/it --> TU/lmr/m/it on input line 15.
+(Font)                  OT1/cmr/m/it --> TU/lmr/m/it on input line 22.
 LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
-(Font)                  OT1/cmr/bx/n --> TU/lmr/b/n on input line 15.
+(Font)                  OT1/cmr/bx/n --> TU/lmr/b/n on input line 22.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
-(Font)                  OT1/cmss/m/n --> TU/lmss/m/n on input line 15.
+(Font)                  OT1/cmss/m/n --> TU/lmss/m/n on input line 22.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
-(Font)                  OT1/cmtt/m/n --> TU/lmtt/m/n on input line 15.
+(Font)                  OT1/cmtt/m/n --> TU/lmtt/m/n on input line 22.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  TU/lmr/m/n --> TU/lmr/b/n on input line 15.
+(Font)                  TU/lmr/m/n --> TU/lmr/b/n on input line 22.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
-(Font)                  OT1/cmr/bx/it --> TU/lmr/b/it on input line 15.
+(Font)                  OT1/cmr/bx/it --> TU/lmr/b/it on input line 22.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
-(Font)                  OT1/cmss/bx/n --> TU/lmss/b/n on input line 15.
+(Font)                  OT1/cmss/bx/n --> TU/lmss/b/n on input line 22.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
-(Font)                  OT1/cmtt/m/n --> TU/lmtt/b/n on input line 15.
+(Font)                  OT1/cmtt/m/n --> TU/lmtt/b/n on input line 22.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: xetex
@@ -887,7 +887,7 @@ Package: lscape 2000/10/22 v3.01 Landscape Pages (DPC)
 )
 Package pdflscape Info: Auto-detected driver: dvipdfm (xetex) on input line 98.
 )
-Package hyperref Info: Link coloring OFF on input line 15.
+Package hyperref Info: Link coloring OFF on input line 22.
  (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
  (/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty
@@ -897,19 +897,19 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count331
 )
-LaTeX Info: Redefining \ref on input line 15.
-LaTeX Info: Redefining \pageref on input line 15.
-LaTeX Info: Redefining \nameref on input line 15.
+LaTeX Info: Redefining \ref on input line 22.
+LaTeX Info: Redefining \pageref on input line 22.
+LaTeX Info: Redefining \nameref on input line 22.
  (./note-papers.out) (./note-papers.out)
 \@outlinefile=\write4
 \openout4 = `note-papers.out'.
 
  ABD: EveryShipout initializing macros
-LaTeX Font Info:    Trying to load font information for U+msa on input line 17.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 24.
  (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 17.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 24.
  (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (./note-papers.toc
@@ -968,7 +968,7 @@ Package fontspec Info: Font family 'IPAexMincho(0)' created for font
 
 
 LaTeX Font Warning: Font shape `TU/IPAexMincho(0)/m/it' undefined
-(Font)              using `TU/IPAexMincho(0)/m/n' instead on input line 36.
+(Font)              using `TU/IPAexMincho(0)/m/n' instead on input line 43.
 
 File: bg2.jpg Graphic file (type bmp)
 <bg2.jpg>
@@ -990,7 +990,7 @@ File: bg2.jpg Graphic file (type bmp)
 File: nevae-alg1.PNG Graphic file (type bmp)
 <nevae-alg1.PNG>
 
-Overfull \hbox (10.2272pt too wide) detected at line 111
+Overfull \hbox (10.2272pt too wide) detected at line 118
 []
  []
 
@@ -1091,12 +1091,12 @@ File: dgi-arch.png Graphic file (type bmp)
 File: bg2.jpg Graphic file (type bmp)
 <bg2.jpg>
  [34]
-Overfull \hbox (34.71805pt too wide) in paragraph at lines 713--714
+Overfull \hbox (34.71805pt too wide) in paragraph at lines 720--721
 []\TU/FandolSong-Regular(0)/m/n/10.53937 获 得 正 负 样 本 的 \TU/lmr/m/n/10.53937 patch node-repr.,$[] \OT1/cmr/m/n/10.53937 = \OMS/cmsy/m/n/10.53937 E\OT1/cmr/m/n/10.53937 ([]\OML/cmm/m/it/10.53937 ; []\OT1/cmr/m/n/10.53937 ) = []$\TU/lmr/m/n/10.53937 , $[] \OT1/cmr/m/n/10.53937 = \OMS/cmsy/m/n/10.53937 E\OT1/cmr/m/n/10.53937 ([]\OML/cmm/m/it/10.53937 ; []\OT1/cmr/m/n/10.53937 ) = []$ 
  []
 
 
-Overfull \hbox (12.48483pt too wide) in paragraph at lines 745--745
+Overfull \hbox (12.48483pt too wide) in paragraph at lines 752--752
 []\TU/lmr/bx/n/15.05624 GraphSAGE: Inductive Representation Learning on Graph 
  []
 
@@ -1167,7 +1167,7 @@ File: bg2.jpg Graphic file (type bmp)
 File: gmnn-alg.PNG Graphic file (type bmp)
 <gmnn-alg.PNG>
 
-Overfull \hbox (170.82663pt too wide) detected at line 1344
+Overfull \hbox (170.82663pt too wide) detected at line 1351
 []
  []
 
@@ -1199,7 +1199,7 @@ File: bg2.jpg Graphic file (type bmp)
 File: rscnn-arch.PNG Graphic file (type bmp)
 <rscnn-arch.PNG>
 
-Overfull \hbox (59.75443pt too wide) in paragraph at lines 1669--1670
+Overfull \hbox (59.75443pt too wide) in paragraph at lines 1676--1677
 [][] 
  []
 
@@ -1235,14 +1235,14 @@ File: bg2.jpg Graphic file (type bmp)
 File: dagnn-arch.png Graphic file (type bmp)
 <dagnn-arch.png>
 
-Overfull \hbox (29.87721pt too wide) in paragraph at lines 1978--1979
+Overfull \hbox (29.87721pt too wide) in paragraph at lines 1985--1986
  [][] 
  []
 
 File: bg2.jpg Graphic file (type bmp)
 <bg2.jpg>
 [63]
-Overfull \hbox (0.86905pt too wide) in paragraph at lines 1995--1996
+Overfull \hbox (0.86905pt too wide) in paragraph at lines 2002--2003
 []\TU/lmr/m/n/10.53937 GCN \TU/FandolSong-Regular(0)/m/n/10.53937 随 着 层 数 增 加\TU/lmr/m/n/10.53937 , \TU/FandolSong-Regular(0)/m/n/10.53937 特 征 的 平 滑 度 缓 慢 下 降\TU/lmr/m/n/10.53937 , \TU/FandolSong-Regular(0)/m/n/10.53937 但 准 确 度 迅 速 下 降 \TU/lmr/m/n/10.53937 (\TU/FandolSong-Regular(0)/m/n/10.53937 数 层\TU/lmr/m/n/10.53937 ). \TU/FandolSong-Regular(0)/m/n/10.53937 这 可 能 是 由 于 \TU/lmr/m/n/10.53937 propag.
  []
 
@@ -1261,7 +1261,7 @@ File: bg2.jpg Graphic file (type bmp)
 File: bg2.jpg Graphic file (type bmp)
 <bg2.jpg>
  [68]
-Overfull \hbox (63.25424pt too wide) in paragraph at lines 2283--2283
+Overfull \hbox (63.25424pt too wide) in paragraph at lines 2290--2290
 []\TU/lmr/bx/n/15.05624 Contrastive Multi-view Representation Learning/MVRLG(ICML
  []
 
@@ -1276,7 +1276,7 @@ File: bg2.jpg Graphic file (type bmp)
 File: bg2.jpg Graphic file (type bmp)
 <bg2.jpg>
  [71]
-Overfull \hbox (35.38329pt too wide) in paragraph at lines 2343--2343
+Overfull \hbox (35.38329pt too wide) in paragraph at lines 2350--2350
 []\TU/lmr/bx/n/15.05624 GCC: Graph Contrastive Coding for GNN Pre-Training(KDD
  []
 
@@ -1298,215 +1298,4 @@ File: bg2.jpg Graphic file (type bmp)
 <bg2.jpg>
 [72]
 File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [73]
-File: graphlog-alg.png Graphic file (type bmp)
-<graphlog-alg.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [74]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [75]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [76]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [77]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [78]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [79]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [80]
-File: simclr-alg.png Graphic file (type bmp)
-<simclr-alg.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [81]
-File: byol-fig.png Graphic file (type bmp)
-<byol-fig.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [82]
-File: byol-fig.png Graphic file (type bmp)
-<byol-fig.png>
-File: simsiam-comp.png Graphic file (type bmp)
-<simsiam-comp.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [83]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [84]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [85]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [86]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [87]
-File: meshsim.png Graphic file (type bmp)
-<meshsim.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [88]
-File: sizing.png Graphic file (type bmp)
-<sizing.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [89]
-File: senet.png Graphic file (type bmp)
-<senet.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [90]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [91]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [92]
-File: cas-arch.PNG Graphic file (type bmp)
-<cas-arch.PNG>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [93]
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 3183.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 3183.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 3195.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 3195.
-
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
-[94]
-File: kwta-facts.png Graphic file (type bmp)
-<kwta-facts.png>
-File: lnrl-taxo.png Graphic file (type bmp)
-<lnrl-taxo.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [95]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [96]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [97]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [98]
-File: lnrl-adapt.png Graphic file (type bmp)
-<lnrl-adapt.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [99]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [100]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [101]
-Missing character: There is no � in font [lmroman10-regular]:mapping=tex-text;!
-Missing character: There is no � in font [lmroman10-regular]:mapping=tex-text;!
-Missing character: There is no � in font [lmroman10-regular]:mapping=tex-text;!
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [102]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [103]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [104]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [105]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [106]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [107]
-File: cotraining.PNG Graphic file (type bmp)
-<cotraining.PNG>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [108]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [109]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [110]
-File: vl-tasks.png Graphic file (type bmp)
-<vl-tasks.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [111]
-File: vl-class.png Graphic file (type bmp)
-<vl-class.png>
-File: vl-retrieval.png Graphic file (type bmp)
-<vl-retrieval.png>
-File: vl-other.png Graphic file (type bmp)
-<vl-other.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [112]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [113]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [114]
-File: prefil-arch.png Graphic file (type bmp)
-<prefil-arch.png>
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [115]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [116]
-File: bg2.jpg Graphic file (type bmp)
-<bg2.jpg>
- [117]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4081.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 4081.
- (./note-papers.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 4081.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4081.
-Package rerunfilecheck Info: File `note-papers.out' has not changed.
-(rerunfilecheck)             Checksum: D33BFF36F35D9C9CC6C1A4BAE7B94F63;44285.
-
-
-LaTeX Font Warning: Some font shapes were not available, defaults substituted.
-
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4081.
- ) 
-Here is how much of TeX's memory you used:
- 29941 strings out of 479819
- 607306 string characters out of 5895845
- 959022 words of memory out of 5000000
- 46386 multiletter control sequences out of 15000+600000
- 553650 words of font info for 155 fonts, out of 8000000 for 9000
- 1348 hyphenation exceptions out of 8191
- 73i,19n,90p,620b,933s stack positions out of 5000i,500n,10000p,200000b,80000s
-
-Output written on note-papers.pdf (117 pages).
+<b

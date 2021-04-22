@@ -12,6 +12,13 @@
     }
 }
 
+\newcommand{\cfig}[1]{
+    \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{#1}
+\end{figure}
+}
+
 \begin{document}
 \maketitle
 \section*{ }
@@ -4042,6 +4049,7 @@ PReFIL具有两个平行的Q+I融合分支. 每个分支从LSTM和DenseNet的不
 
 \subsubsection{OCR Integration for DVQA}
 
+DVQA需要OCR, 有很多哦OOV词汇.使用SANDY中同样的动态编码scheme. 具体上, dyn. enc. 创建了一个image-specific的词典, 保存了elemnts的spatial pos.. 在进行训练前, 预先进行OCR来得到这个词典. 接着如果问题中一个词在词典中出现, 则相应元素设为1. 对于答案, 一部分分类层被用语dyn. enc. 输出.
 
 
 \section{Seminar on CVPR2021}
@@ -4071,11 +4079,78 @@ AdCo: 利用对抗样本作为负样本.
 
 图像侧的信息利用不充分(自监督中).
 
-Kaleido Patch Generation/KPG. saliency Net提取前后景. 多尺度patch送到ResNet.
+Kaleido Patch Generation/KPG. saliency Net提取前后景. 多尺度patch送到ResNet. Ablation Study显示, 这是最有效的提升.
 
 Attention-based Align. Generation/AAG. 预训练图像patch-词语token的对应. 根据这个对应来mask(Alignment Guided Matching/AGM)
 
 Aligned Kaleido Path Modeling: 对patch重拍/隐藏etc.来自监督
+
+
+\section{OSCAR: Object-Semantics Aligned Pre-trainingfor Vision-Language Tasks}
+
+研究指出, VLP(Vision Langage Pretraining)可以给出SoTA. 之前的VLP基于多层Transformer, concat image region feature到文本特征, 使用注意力来学习文本到图片区域的对齐. 缺少显式监督的随其信息导致这成为了一个弱监督学习任务.
+
+启发于, 现代物体检测框架可以非常准确, 并且这些对象很有可能在文本中出现. 在6.5M对V+L上pretrain. 本工作是第一个使用anchor point在VLP的.
+
+\cfig{OSCAR-pipeline.png}
+
+\cfig{OSCAR-arch.png}
+
+\cfig{OSCAR-net.png}
+
+典型地, VLP使用多层自注意力Transformer来学习跨模态表示. 依赖于自注意力机制来学习图片-文本对应. 缺点:
+\begin{itemize}
+    \item Ambiguity. 常常使用Faster RCNN提取出的特征. overlapping.
+    \item 缺少因果/信息.
+\end{itemize}
+
+\subsection{OSCAR}
+
+输入为词-标签-图像triplet$(\boldsymbol{w}, \boldsymbol{q}, \boldsymbol{v})$. 使用pretrained-BERT得到$\bs q, \bs w$之间的对齐, 作为OSCAR的初始化; 被检测出tag的图像区域也有高的初始注意力权重.
+
+具体上, $\bs v, \bs q$如下生成, 给定有K个对象区域的图片, Faster RCNN用于提取图像特征$(v',z), v\in \R^P$, 而z是一个4/6维向量(左上/右下坐标 and/or 长宽), concat 二者. 使用线性映射来保证和词嵌入有相同的维度. 同时Faster RCNN用于检测一组高准确度的对象标签, $\bs q$是这些标签的词嵌入.
+
+\begin{equation}
+    \boldsymbol{x} \triangleq[\underbrace{\boldsymbol{w}}_{\text {language }}, \underbrace{\boldsymbol{q}, \boldsymbol{v}}_{\text {image }}]=[\underbrace{\boldsymbol{w}, \boldsymbol{q}}_{\text {language }}, \underbrace{\boldsymbol{v}}_{\text {image }}] \triangleq \boldsymbol{x}^{\prime}
+\end{equation}
+用两种方式interpret triplet
+
+从字典角度看$\mapsto$ Masked Token Loss(MTL). 定义$\boldsymbol{h} \triangleq[\boldsymbol{w}, \boldsymbol{q}]$. 每次迭代, mask掉15\%的token, 用特殊的MASK token代替. MTL的目标时预测masked token. 于是MTL为
+\begin{equation}
+    \mathcal{L}_{\text {MTL }}=-\mathbb{E}_{(\boldsymbol{v}, \boldsymbol{h}) \sim \mathcal{D}} \log p\left(h_{i} \mid \boldsymbol{h}_{\backslash i}, \boldsymbol{v}\right)
+\end{equation}
+这和BERT类似.
+
+从模态角度看: Contrastive Loss. 考虑图像模态$\boldsymbol{h}^{\prime} \triangleq[\boldsymbol{q}, \boldsymbol{v}]$和语言模态$\bs w$. 在$\bs q$中50\%堆积替换tag. 在encoder输出后面加上一个FC层来预测tag是否包含了任何被替换的tag(y=0), 或者没有变化(y=0).
+
+在跨模态预训练中, 使用对象标签来调整BERT的词嵌入. 总体objective是
+\begin{equation}
+    \mathcal{L}_{\text {Pre-training }}=\mathcal{L}_{\mathrm{MTL}}+\mathcal{L}_{\mathrm{C}}
+\end{equation}
+
+Reason: 虽然简单, 但是性能好. 简单地表现了两种perspective.
+
+Pretraining dataset: COCO, Conceptual Captions, SBU captions, flicker30k, GQA etc. 4.1M images, 6.5M triplets. $\text{OSCAR}_B$使用BERT base, AdamW, 1.0M steps, 5e-5 lr, BS 768.
+
+\subsection{Adapting to V+L Tasks}
+
+\bt{Image-Text Retrieval} 
+看作二分类. 对于任何aligned text-image pair, 使用一个不同的image/caption来形成unaligned pair. 没有使用ranking loss, 二分类loss效果更好.测试阶段, 输出的prob. score用来得出ranking.
+
+\bt{Image Captioning} 
+使用seq2seq objective. 随机mask 15\%的caption tokens然后预测对应token id. 类似VLP, 使用了仅仅使用之前的token feature的自注意力来模拟单方向生成. 推理阶段, 把image regions, obj. tags 和特殊token[CLS]作为输入, 并且模型的生成通过追加[MASK] token, 然后输出的token替代[MASK]token, 再追加etc.. 模型输出[STOP]时则停止. 使用beam search.
+
+\bt{Novel Obj. Captioning(NoCaps)} 
+从Open Images dataset中找到图像, 测试模型的novel objects的描述能力. 使用预测的VG/Open Images标签来生成tag seq., 并且在COCO上训练OSCAR.
+
+\bt{VQA}
+VQA是多选回答. 使用VQA 2.0, 给予MSCOCO. 对于每个问题, 模型挑选3129个回答中的一个. 使用[CLS]的输出来作为特征, 并且送到线性分类器里. 视为multi-label 分类问题, 给每个输出一个soft target score, 取决于和human answer的相近度. 最后使用CE, 使用预测分数和soft-target分数.
+
+\bt{GQA}
+需要提供额外理由. 对于每个问题, 模型从1852个candidate里选择.
+
+\bt{Natural  Language  Visual  Reasoning  for  Real, NLVR2}
+选择一对图片/自然语言. 目标是决定这个自然语言语句是否为真.
 
 
 \end{document}
