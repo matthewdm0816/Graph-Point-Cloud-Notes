@@ -4044,4 +4044,38 @@ PReFIL具有两个平行的Q+I融合分支. 每个分支从LSTM和DenseNet的不
 
 
 
+\section{Seminar on CVPR2021}
+
+Deep Animation Interpolation: Segmentation-guided 光流matching + RNN refinement + Synthesis
+
+StableNet: 解决伪关系(T->X, T->Y, 导致看似X->Y | 或者由于数据bias). 试图给sample加上重加权, Correlation => Casuality. 在DNN中, 使用RFF(随机傅立叶特征). 特征域到RFF域时候的好性质: 在后者线性独立, 则在前者非线性独立.
+
+AdCo: 利用对抗样本作为负样本.
+
+\subsection{Subspace learning, Self-Expressive Model}
+设计两步: 使用Self-Expressive Model得到亲和矩阵, 然后使用谱聚类.
+
+自表达模型: 把数据点表示为其他数据的线性组合.
+若只有和本数据点相同子空间的对应系数为非0, 则说这是subspace preserving的.
+试图找到某种好的reg.来获得这种表示系数. l1范数SSC.
+
+\subsection{Kaleido-BERT, Fashion Domain VisLang Pre-training.} 
+
+经典方法: 单流,VL-BERT/Fashion-BERT, 图像token/patch特征送到BERT.
+双流BERT/Transformer: ViLBERT.
+三流V,L,V+L. MMFT-BERT.
+
+通用RoI检测器不太使用与Fashion领域.
+
+传统Masking-预测的自监督(填空).
+
+图像侧的信息利用不充分(自监督中).
+
+Kaleido Patch Generation/KPG. saliency Net提取前后景. 多尺度patch送到ResNet.
+
+Attention-based Align. Generation/AAG. 预训练图像patch-词语token的对应. 根据这个对应来mask(Alignment Guided Matching/AGM)
+
+Aligned Kaleido Path Modeling: 对patch重拍/隐藏etc.来自监督
+
+
 \end{document}
