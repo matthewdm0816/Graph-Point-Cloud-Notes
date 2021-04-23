@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2020.10.29)  22 APR 2021 21:20
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2020.10.29)  23 APR 2021 15:56
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1499,29 +1499,49 @@ File: bg2.jpg Graphic file (type bmp)
 File: bg2.jpg Graphic file (type bmp)
 <bg2.jpg>
  [119]
+File: gridfeat-comp.png Graphic file (type bmp)
+<gridfeat-comp.png>
 File: bg2.jpg Graphic file (type bmp)
 <bg2.jpg>
  [120]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4156.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 4156.
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 4187.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\times' on input line 4187.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 4187.
+
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+[121]
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [122]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4213.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 4213.
  (./note-papers.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 4156.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4156.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 4213.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4213.
 Package rerunfilecheck Info: File `note-papers.out' has not changed.
-(rerunfilecheck)             Checksum: 22A1584A9CBE28FCFD98FC8695E8A71D;44952.
+(rerunfilecheck)             Checksum: EF857E2011824B7130AFB2E61C19EDEB;46773.
 
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4156.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4213.
  ) 
 Here is how much of TeX's memory you used:
- 29969 strings out of 479819
- 607782 string characters out of 5895845
- 959915 words of memory out of 5000000
- 46409 multiletter control sequences out of 15000+600000
+ 29981 strings out of 479819
+ 608015 string characters out of 5895845
+ 961912 words of memory out of 5000000
+ 46420 multiletter control sequences out of 15000+600000
  553650 words of font info for 155 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  73i,19n,90p,620b,933s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on note-papers.pdf (120 pages).
+Output written on note-papers.pdf (122 pages).

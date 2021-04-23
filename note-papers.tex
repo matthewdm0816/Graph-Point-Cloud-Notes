@@ -4153,4 +4153,61 @@ VQA是多选回答. 使用VQA 2.0, 给予MSCOCO. 对于每个问题, 模型挑�
 选择一对图片/自然语言. 目标是决定这个自然语言语句是否为真.
 
 
+\section{In Defense of Grid Features for Visual Question Answering}
+
+最近基于region的方法逐渐流行并超过了基于grid的方法. 
+为啥region方法好? 更好的对象定域性. 容易同时得到high+low level的信息?. 我们发现使用obj. detectors的grid feature而不是region feature性能不变, 小修改还能提高性能. 相容实验发现主要影响性能的是pre-training的数据集质量 + 输入图像的高分辨率, grid/region只是小问题.
+
+\subsection{Related Work}
+
+现代VQA框架的性能依赖于视觉特征的提取, VGG$\mapsto$ ResNet $\mapsto$ bottom-up attention(Transformer, BERT?).
+
+很多VQA方法都包含了pre-training, 视觉模型在ImageNet+VG, 语言模型在词嵌入. 一些方法提出了共同的训练V+L, 特别是利用BERT(Linear Transformer variants etc.)来把regions/words看作token, 用于masked prediction.
+
+R-CNN(基于region refinement) vs. 一阶段对象检测器
+
+\subsection{From Regions to Grids}
+
+\cfig{gridfeat-comp.png}
+
+\subsubsection{Bottom-Up Attention w/ Regions}
+
+一般使用Faster R-CNN, 在cleaned ver. VG上训练. 对于这些方法, 要获得自底向上注意力特征, 进行如下两步
+\begin{enumerate}
+    \item Region Selection. 通过一个Region Proposal Net., 提出候选region(Regions of Interst, RoIs), 接着通过一个score comp., 选择top-N的区域, 并且两步都使用NMS.
+    \item 给出了上述步骤的regions, 使用RoIPool来得到region-feature.
+\end{enumerate}
+
+由于VG数据集的复杂性和Faster R-CNN, 这两步计算上都很昂贵. 
+
+\subsubsection{Grid Features from the Same Layer}
+
+Faster R-CNN是c4模型w/ 属性分类分支的变种. 首先使用ResNet的$C_4$blocks来得到feature map, 接着per-region feature先$14\times 14$ RoIPool, 再应用$C_5$, 最后avg-pool来得到每个region的F. 我们直接使用$C_5$在grids来得到特征.
+
+\subsubsection{$1\times 1$ RoIPool for Improved Grid F.}
+
+这意味着用一个一维向量来表示一个region, 而不是Faster RCNN里的HWC三维 .使用$1\times 1$ RoIPool会降低物体检测的性能, 对于VQA, 这要求这个特征尽可能单独地编码信息. 由于预训练的$C_5$输入不适用, 使用最近的直接使用整个$C_5$的ResNet的工作\footnote{
+    Xizhou Zhu, Han Hu, Stephen Lin, and Jifeng Dai.  De-formable convnets v2: More deformable, better results. InCVPR, 2019.
+}.
+
+\subsection{Comparison: Region v. Grids}
+
+具体的VQA模型使用的是co-attention model\footnote{
+    Zhou Yu, Jun Yu, Chenchao Xiang, Jianping Fan, andDacheng Tao.  Beyond bilinear: Generalized multimodal factorized high-order pooling for visual question answering.TNNLS, 2018.
+}
+
+推理速度远快于基于regions的方法.
+
+\subsection{Why Work?}
+
+发现使用更大的图像, 更高的精度.
+
+不同的预训练任务上, detection w/ attr. > detection w/o attr. > classification w/ tag > cls. w/ label.
+
+\subsection{Generalization}
+
+使用Res-NeXt改进了性能. 在别的framework上使用R/G特征也提高了性能.
+
+
+
 \end{document}
