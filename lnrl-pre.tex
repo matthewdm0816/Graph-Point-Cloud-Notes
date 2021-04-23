@@ -31,6 +31,9 @@
 \end{figure}
 }
 
+\newcommand{\bt}[1]{\textbf{#1}}
+
+
 \newenvironment{remark}[1][Remark]{\begin{trivlist}
     \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
 \newcommand{\bs}[1]{\boldsymbol{#1}}
@@ -136,9 +139,6 @@
         可以证明前向矫正loss和clean label loss上有相同的极小值.
     \end{definition}
     
-
-    
-    
 \end{frame}
 
 \begin{frame}
@@ -152,6 +152,17 @@
     \end{enumerate}
 
 \end{frame}
+
+\begin{frame}
+    \frametitle{Estimate Noise by Adaptation Layer}
+
+    (Sukhbattar, 2015)提出了在网络输出之后增加一个参数化T的adapt. layer. 单独用CE优化两个不同的模块并不能达到optimal的T. 他们又增加了一个T的正则化项 trace norm.
+
+    (Goldberger et al., 2017)使用了base model param. by $\omega$, 以及噪声模型param. by $\theta$. 既然base model的输出是hidden的, 那么他们用EM算法来估计隐藏输出(E-step), 以及当前的参数(M-step). EM也会导致局部最优和可伸缩性的问题.
+
+\end{frame}
+
+\section{Regularization: Explicit}
 
 \begin{frame}
     \frametitle{Regularization: Explicit}
@@ -171,7 +182,132 @@
 \begin{frame}
     \frametitle{Regularization: Explicit}
 
-    (Miyato et al., 2018)提出了一个virtual adversarial loss, 是一种新的衡量条件标签分布(i.e., $p(y|x)$)的局部平滑度的方法. 具体地, 他们要求输出分布在输入点附近各向同性地平滑, 通过把模型在其最各向异性的方向上选择性地平滑. 使得模型对输入不敏感. 使用VA direction, 类似FGSM/PGD但利用了二阶梯度的估计.
+    (Miyato et al., 2018)提出了一个virtual adversarial loss, 使用VA direction, 一种无标签的对抗样本生成法, 类似FGSM/PGD但利用了二阶梯度的估计.
+
+    定义
+    $D\left(r, x_{*}, \theta\right) := D\left[p\left(y \mid x_{*}, \hat{\theta}\right), p\left(y \mid x_{*}+r, \theta\right)\right]$
+    由于在$r=0$时, $\left.\nabla_{r} D(r, x, \hat{\theta})\right|_{r=0}=0$, 那么有二阶估计
+    \begin{equation}
+        D(r, x, \hat{\theta}) \approx \frac{1}{2} r^{T} H(x, \hat{\theta}) r
+    \end{equation}
+    那么$r_{vadv}$可以是Hessian的第一个dominant eigenvector具有长度$\epsilon$
+    \begin{equation}
+        \begin{aligned}
+        r_{\mathrm{vadv}} & \approx \arg \max _{r}\left\{r^{T} H(x, \hat{\theta}) r ;\|r\|_{2} \leq \epsilon\right\} \\
+        &=\epsilon \overline{u(x, \hat{\theta})},
+        \end{aligned}
+    \end{equation}
+    
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Regularization: Explicit}
+
+    为了避免直接计算H, 使用有限差分法来估计这个乘积, 
+    随机采样一个unit vector$\bs d$, 迭代计算mat-vec prod. 
+    $d \leftarrow \overline{H d}$.
+    \begin{equation}
+        \begin{aligned}
+        H d & \approx \frac{\left.\nabla_{r} D(r, x, \hat{\theta})\right|_{r=\xi d}-\left.\nabla_{r} D(r, x, \hat{\theta})\right|_{r=0}}{\xi} \\
+        &=\frac{\left.\nabla_{r} D(r, x, \hat{\theta})\right|_{r=\xi d}}{\xi}
+        \end{aligned}
+    \end{equation}
+    i.e.,
+    \begin{equation}
+        d \leftarrow \overline{\left.\nabla_{r} D(r, x, \hat{\theta})\right|_{r=\xi d}}
+    \end{equation}
+    他们发现一步迭代就能达到类似FGSM里的估计精度.
+
+\end{frame}
+
+\section{Regularization: Implicit}
+
+\begin{frame}
+    \frametitle{Regularization: Implicit}
+
+    (Reed et al., 2015)的Bootsrapping. 学习器和自己bootstrap, 使用label和模型目前的prediction的凸组合来生成训练目标. 直觉上, 随着learner学习, predictions也变得可信. 进而避免对noise的直接建模. 具体地, 有soft/hard两种bootstrapping. 对于soft bootstrapping, 使用预测的类概率$q$来得到回归目标.
+    \begin{equation}
+        \ell_{\text {soft }}(q, t)=\sum_{k=1}^{L}\left[\beta t_{k}+(1-\beta) q_{k}\right] \log \left(q_{k}\right)
+    \end{equation}
+    这等价于softmax regression + MER.
+
+    对于hard bootstrapping, 使用$q$的MAP估计.
+    \begin{equation}
+        \ell_{\text {hard }}(q, t)=\sum_{k=1}^{L}\left[\beta t_{k}+(1-\beta) z_{k}\right] \log \left(q_{k}\right)
+    \end{equation}
+    其中
+    $z_{k}=\mathbf{1}\left[k=\arg \max _{i=1, \ldots, L} q_{i}\right]$
+    为了能够优化hard版本, 需要使用EM-like算法. E-step中计算凸组合的targets, M-step根据targets进行优化参数.
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Regularization: Implicit}
+
+    (Zhang et al., 2018)的Mixup. 这显然也是一种label regularization.
+
+    (Han et al., 2020)的SIGUA(data-agnostic). 注意到随着网络容量的提升, 网络能逐渐地overfit noisy data. 所以他们提出了Stochastic Integrated Gradient Underweighted Ascent(SIGUA)的一种\bt{训练策略}, 在一个mini-batch中, 线照常使用SGD, 再在bad-data上使用(lr递减的)梯度递增. 在训练哲学上, SIGUA让网络忘记不想要的记忆, 来更好的加强想要的记忆.
+
+\end{frame}
+
+\section{Objective Reweighting}
+
+\begin{frame}
+    \frametitle{Objective Reweighting: Importance Reweighting, Bayesian Methods}
+
+    (Liu and Tao, 2015)使用importance reweighting来LNL. 将noisy data作为source domain, clean data作为目标domain. Idea是重写经验风险w.r.t. clean data, 可以得到
+    \begin{equation}
+        \beta(X,\bar Y)=p_{D}(\bar{Y}=i \mid X=x) / p_{\bar{D}}(\bar{Y}=i \mid X=x)
+    \end{equation}
+    就是IW. 这可以通过转移矩阵T或者使用小数据集的clean data(like GLC)来学到.
+
+    (Wang et al., 2017)的reweighted prob. models(RPM)来应对label noise. Idea在于, 降低bad labels的权重且增加clean labels的权重. 具体地,
+    \begin{itemize}
+        \item 定义概率模型$p_{\beta}(\beta)=\prod_{n=1}^{N} \ell\left(y_{n} \mid \beta\right)$
+        \item 给出latent weight的先验分布$p_w(w), w=(w_1,\dots, w_N)$
+        \begin{equation}
+            p(y, \beta, w)=1 / z \cdot p_{\beta}(\beta) p_{w}(w) \prod_{n=1}^{N} \ell\left(y_{n} \mid \beta\right)^{w_{n}}
+        \end{equation}
+        \item 推理$\beta, w$, 通过后验分布$p(\beta, w| y)$. 先验分布$p_w(w)$可以是Beta分布, scaled Dirichlet分布, Gamma分布. 不同的选择trade off小概率的cases.
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Objective Reweighting: Bayesian Methods}
+
+    (Arazo et al., 2019)使用了两组分beta mixture model(BMM), 视为clean-noisy的混合, 使用了一个bootstrapping loss. 具体地, 使用dynamic weighted boostrapping loss.数学上, 定义loss上的pdf
+    \begin{equation}
+        p(\ell)=\sum_{k=1}^{K} \lambda_{k} p(\ell \mid k)
+    \end{equation}
+    并且$p(\ell \mid k)$可以使用Beta分布建模.
+    \begin{equation}
+        p(\ell \mid \alpha, \beta)=\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha) \Gamma(\beta)} \ell^{\alpha-1}(1-\ell)^{\beta-1}
+    \end{equation}
+    上述问题可以使用EM算法来解决.
+
+    更具体地, 引入
+    $\gamma_{k}(\ell)=p(k \mid \ell)$, 
+    E-step中固定$\lambda, \alpha, \beta$, 计算$\gamma$.
+    M-step中固定$\gamma$, 使用带权动量估计$\alpha, \beta$, 动态权重则使用简单的方法来得到$\lambda_{k}=\frac{1}{N} \sum_{i=1}^{N} \gamma_{k}\left(\ell_{i}\right)$. 基于这个BMM模型, 他们还提出了动态hard/soft bootstrapping loss, 其中每个sample的weight动态的设置为$p\left(k=1 \mid \ell_{i}\right)$(sample为clean的概率).
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Objective Reweighting: NNs}
+
+    (Shu et al., 2019)使用Meta-Weight-Net(MW-Net)来学习显示的weighting function. w. func. 是一个单层MLP, 从loss到weight. 数学上
+    \begin{equation}
+        w^{*}(\theta)=\arg \min _{w} \ell^{\operatorname{tr}}(w ; \theta)=1 / N \sum_{i=1}^{N} \mathcal{V}\left(t_{i}^{\operatorname{tr}}(w) ; \theta\right) \ell_{i}^{\mathrm{tr}}(w)
+    \end{equation}
+    这里, 可以使用\bt{元学习}来优化MW-Net: 给出一些clean, balanced元数据
+    $\left\{x_{i}^{(\text {meta })}, y_{i}^{(\text {meta })}\right\}_{i=1}^{M}$
+    , 最小化meta-loss
+    \begin{equation}
+        \theta^{*}=\arg \min _{\theta} \ell^{\text {meta }}\left(w^{*}(\theta)\right)=1 / M \sum_{i=1}^{M} \ell_{i}^{\text {meta }}\left(w^{*}(\theta)\right) \text { . }
+    \end{equation}
+    使用SGD迭代的分别更新$w$和$\theta$
 
 \end{frame}
 
