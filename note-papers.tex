@@ -3505,8 +3505,8 @@ $F^{\top}=\left[X_{1}, \ldots, X_{n}\right], X_i=\operatorname{Diag}(\bs x_i)$,
 
 类似于MER, psedo-label方法(D.-H.   Lee,, 2013)(i.e. lebel guessing)进行隐式的ent.最小化. 具体上讲, 首先计算模型(通过各种augmentation)预测的类型分布, 再通过temperature sharpening func. 来最小化label dist.的熵.
 
-(Miyato et al., 2018)提出了一个virtual adversarial loss, 是一种新的衡量条件标签分布(i.e., $p(y|x)$)的局部平滑度的方法. 具体地, ���们要求输出分布在输入点附近各向同性地平滑, 通过把模型在其最各向异性的方向上选择性地平滑. 使得模型对输入不敏感. 
-为了实现, 设计了virtual adversarial direcition.
+(Miyato et al., 2018)提出了一个virtual adversarial loss, 是一种新的衡量条件标签分布(i.e., $p(y|x)$)的局部平滑度的方法. 具体地, 他们要求输出分布在输入点附近各向同性地平滑, 通过把模型在其最各向异性的方向上选择性地平滑. 使得模型对输入不敏感. 
+为了实现, 设计了virtual adversarial direction.
 
 定义LDS(local dist. smooth. )
 \begin{equation}

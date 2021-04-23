@@ -1,0 +1,179 @@
+\documentclass{beamer}
+%\documentclass[UTF8]{ctexbeamer} % Chines Version
+
+\usepackage[utf8]{inputenc}
+\usepackage{utopia}            % font utopia imported
+\usepackage{amsmath}
+\usepackage{latexsym}
+\usepackage{calc}              % support command '\widthof'
+\usepackage{xcolor}            % support multiple color 
+\usepackage{arydshln}
+\usepackage{amssymb}  
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{bookmark}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{bbold}
+\usepackage{extarrows}
+\usepackage{ctex, xeCJK, zxjatype}
+
+
+%--------
+\usepackage{listings}
+\usepackage{xcolor}
+
+\newcommand{\cfig}[1]{
+    \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{#1}
+\end{figure}
+}
+
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+    \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+
+\usefonttheme{professionalfonts} 
+
+\makeatletter
+\let\@@magyar@captionfix\relax
+\makeatother
+
+\usetheme{Madrid}
+%\usetheme{Singapore}
+%\usetheme{Pittsburgh}
+%\usecolortheme{default,beaver,lily,orchid,seahorse} 
+\usecolortheme{default}
+%default、albatross、beaver、beetle、crane、dolphine、dove、fly、lily、orchid、rose、seagull、seahorse、sidebartab、structure、whale、wolverine
+
+%======================================================================%
+\title[PKUAI]{Label Noisy Representation Learning}
+
+%\subtitle{(To throw out a brick to attract a jade)}
+
+\author[Wentao Mo]
+{Wentao Mo\inst{1}}  
+
+\institute[AI@PKU] 
+{
+    \inst{1}%
+    Department of Machine Intelligence\\
+    Peking University
+}
+
+\date[PKU]{\today}
+%======================================================================
+
+%======================================================================
+% \AtBeginSection[]
+% {
+% \begin{frame}
+%     \frametitle{Outline}
+%     \tableofcontents[currentsection]
+% \end{frame} 
+% }
+%======================================================================
+
+\begin{document}
+%======================================================================
+\frame{\titlepage}
+%======================================================================
+
+%======================================================================
+\begin{frame}
+    \frametitle{Outline}
+    \tableofcontents
+\end{frame}
+%======================================================================
+
+\begin{frame}
+    \frametitle{LNRL in Chart}
+
+    \cfig{lnrl-taxo.png}
+
+\end{frame}
+
+\section{Noise Transition Matrix, Forward/Backward Correction}
+
+\begin{frame}
+    \frametitle{Noise Transition Matrix, Forward/Backward Correction}
+
+    \begin{definition}
+        (Noise transition matrix) Suppose that the observed noisy label $\bar{y}$ is drawn independently from a corrupted distribution $p(X, \bar{Y})$, where features are intact. Meanwhile, there exists a corruption process, transition from the latent clean label $y$ to the observed noisy label $\bar{y}$. Such a corruption process can be approximately modeled via a noise transition matrix $T$, where $T_{i j}=p\left(\bar{y}=e_{j} \mid y=e_{i}\right)$
+    \end{definition}
+
+    两种经典的(合成)噪声转移矩阵, 对称flipping/配对flipping
+    $\left[\begin{array}{cccc}1-\tau & \frac{\tau}{n-1} & \ldots & \frac{\tau}{n-1} \\ \frac{\tau}{n-1} & 1-\tau & & \frac{\tau}{n-1} \\ \vdots & & \ddots & \vdots \\ \frac{\tau}{n-1} & \frac{\tau}{n-1} & \ldots & 1-\tau\end{array}\right] \quad\left[\begin{array}{cccc}1-\tau & \tau & 0 & 0 \\ 0 & 1-\tau & \tau & 0 \\ \vdots & & \ddots & \vdots \\ 0 & & & \tau \\ \tau & 0 & \ldots & 1-\tau\end{array}\right]$\\
+    实际中噪声不一定形式这么好/对称.
+    \begin{remark}
+        在合成噪声和实际噪声之间存在domain gap.
+    \end{remark}
+
+\end{frame}
+
+
+\section{Estimate Noise Transition Matrix $T$}
+
+\begin{frame}
+    \frametitle{Estimate Noise Transition Matrix $\bm T$}
+    
+    \begin{definition}
+        后向矫正
+        \begin{equation}
+            \ell^{\leftarrow}(f(x), \bar{y})=\left[T^{-1} \ell_{y \mid f(x)}\right]_{\bar{y}}
+        \end{equation}
+        可以证明后向矫正loss是clean label loss的无偏估计.
+    \end{definition}
+    
+
+    \begin{definition}
+        前向矫正
+        \begin{equation}
+            \ell^{\rightarrow}(f(x), \bar{y})=\left[\ell_{y \mid T^{\top}} f(x)\right]_{\bar{y}}
+        \end{equation}
+        可以证明前向矫正loss和clean label loss上有相同的极小值.
+    \end{definition}
+    
+
+    
+    
+\end{frame}
+
+\begin{frame}
+    \frametitle{Estimate Noise Transition Matrix $\bm T$}
+
+    \begin{enumerate}
+        \item (Patrini et al., 2017)提出一个两阶段训练. 首先使用noisy data训练网络, 再获得一个T的估计, 再重新训练网络, 使用T校正的loss.
+        \item (Hendrycks et al., 2018)提出了Gold校正来处理严重噪声. 关键思路是, 假设一部分数据是可信的且可用的, 比如有一些专家来得出的trusted set D. 他们使用D来估计T, 再用前向矫正来训练DNN, 这就是GLC.
+        \item 使用Label Smoothing. 本质上是后向矫正, 且
+        $T^{-1}=(1-\alpha) I+\frac{\alpha E}{L}$
+    \end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Regularization: Explicit}
+
+    \begin{enumerate}
+        \item (Azadi et al., 2016)提出了一种正则化项
+        $\Omega_{\text {aux }}(w)=\|F w\|_{\mathrm{g}}$
+        其中$\|\cdot\|_{g}$是group norm,
+        $F^{\top}=\left[X_{1}, \ldots, X_{n}\right], X_i=\operatorname{Diag}(\bs x_i)$,
+        鼓励稀疏性. 这会鼓励一小部分clean data来control model.
+        \item (Berthelot et al., 2019)提出了MixMatch来进行SSL. 其中的一个关键部分是Minimum Ent. Reg.(MER), 也是一种显式正则化. MER提出于(Grandvalet \&  Bengio, 2005), 关键idea是把CE加入一个正则项, 鼓励在unlabeled data上给出high-confidence的输出, 具体地, 最小化在unlabeled数据上的熵.
+        \item 类似于MER, psedo-label方法(D.-H.   Lee,, 2013)(i.e. lebel guessing)进行隐式的ent.最小化. 具体上讲, 首先计算模型(通过各种augmentation)预测的类型分布, 再通过temperature sharpening func. 来最小化label dist.的熵.
+    \end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Regularization: Explicit}
+
+    (Miyato et al., 2018)提出了一个virtual adversarial loss, 是一种新的衡量条件标签分布(i.e., $p(y|x)$)的局部平滑度的方法. 具体地, 他们要求输出分布在输入点附近各向同性地平滑, 通过把模型在其最各向异性的方向上选择性地平滑. 使得模型对输入不敏感. 使用VA direction, 类似FGSM/PGD但利用了二阶梯度的估计.
+
+\end{frame}
+
+
+\end{document}
