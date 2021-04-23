@@ -1476,4 +1476,101 @@ File: bg2.jpg Graphic file (type bmp)
 File: bg2.jpg Graphic file (type bmp)
 <bg2.jpg>
  [114]
-File: bg2.jpg Graphic file (
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [115]
+File: prefil-arch.png Graphic file (type bmp)
+<prefil-arch.png>
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [116]
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [117]
+File: OSCAR-pipeline.png Graphic file (type bmp)
+<OSCAR-pipeline.png>
+File: OSCAR-arch.png Graphic file (type bmp)
+<OSCAR-arch.png>
+File: OSCAR-net.png Graphic file (type bmp)
+<OSCAR-net.png>
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [118]
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [119]
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [120]
+File: gridfeat-comp.png Graphic file (type bmp)
+<gridfeat-comp.png>
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [121]
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 4187.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\times' on input line 4187.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `math shift' on input line 4187.
+
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+[122]
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [123]
+File: mfb-arch.png Graphic file (type bmp)
+<mfb-arch.png>
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [124]
+File: vqa-arch.png Graphic file (type bmp)
+<vqa-arch.png>
+File: vqa-fullarch.png Graphic file (type bmp)
+<vqa-fullarch.png>
+File: uniter-arch.png Graphic file (type bmp)
+<uniter-arch.png>
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [125]
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [126]
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [127]
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [128]
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [129]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4403.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 4403.
+ (./note-papers.aux)
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 4403.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4403.
+Package rerunfilecheck Info: File `note-papers.out' has not changed.
+(rerunfilecheck)             Checksum: ED2E7C0308F95A8BD75248F59A19723F;48789.
+
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4403.
+ ) 
+Here is how much of TeX's memory you used:
+ 30021 strings out of 479819
+ 608732 string characters out of 5895845
+ 964351 words of memory out of 5000000
+ 46456 multiletter control sequences out of 15000+600000
+ 553650 words of font info for 155 fonts, out of 8000000 for 9000
+ 1348 hyphenation exceptions out of 8191
+ 73i,19n,90p,649b,933s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+Output written on note-papers.pdf (129 pages).
