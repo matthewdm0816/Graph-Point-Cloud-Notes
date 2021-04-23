@@ -4208,6 +4208,25 @@ Faster R-CNN是c4模型w/ 属性分类分支的变种. 首先使用ResNet的$C_4
 
 使用Res-NeXt改进了性能. 在别的framework上使用R/G特征也提高了性能.
 
+\section{Beyond Bilinear: Generalized Multimodal Factorized High-order Pooling for Visual Question Answering}
+
+要进行VQA, 需要解决三个问题: 提取两边特征, 结合特征, 用来预测答案. 
+
+直觉上, 使用注意力机制是很自然的. 所以他们使用co-attention模块来同时学习两边的attention.
+
+很多模型直接使用线性特征融合(concat/add), 显然不好. 最近bilinear pooling似乎用来聚合不同的CNN特征, 但是对与V+L表示可能输出维度太高. 于是有Multi-modal Compact Bilinear(MCB) pooling, Multi-model Low-rank Bilinear(MLB) pooling. 然而MCB需要非常高的特征维度来保证性能, 同时MLB需要非常多的迭代数来收敛. 他们提出MFB(Multi-modal Factorized Bilinear), 以及使用高阶设置来得到Multi-modalFactorized High-order pooling (MFH).
+
+\subsection{Related Work: Multi-modal Bilinear Models for VQA}
+
+(Fukui et al., 2016)提出了MCB, 使用特征向量的外积来得到非常高维的二次融合特征. 为了减少计算代价, 使用了一个基于采样的估计, 基于事实: 向量的可以表示为卷积. (Kim et al., 2017)使用了MLB, 基于向量的Hadamard积, 在一个共同的low-rank空间里:
+\begin{equation}
+    z=\operatorname{MLB}(x, y)=\left(U^{T} x\right) \circ\left(V^{T} y\right)
+\end{equation}
+为了提供非线性, z后面接上activation(like tanh).
+实验说明MLB可能有非常低的收敛速度(250k its/140 epochs, 200 bs)
+
+\subsection{Generalized Multi-modal Factorized High-order Pooling}
+
 
 
 \end{document}
