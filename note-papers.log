@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2020.10.29)  23 APR 2021 15:56
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2020.10.29)  23 APR 2021 17:26
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1522,26 +1522,41 @@ File: bg2.jpg Graphic file (type bmp)
 File: bg2.jpg Graphic file (type bmp)
 <bg2.jpg>
  [122]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4213.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 4213.
+File: mfb-arch.png Graphic file (type bmp)
+<mfb-arch.png>
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [123]
+File: vqa-arch.png Graphic file (type bmp)
+<vqa-arch.png>
+File: vqa-fullarch.png Graphic file (type bmp)
+<vqa-fullarch.png>
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [124]
+File: bg2.jpg Graphic file (type bmp)
+<bg2.jpg>
+ [125]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4297.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 4297.
  (./note-papers.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 4213.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4213.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 4297.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4297.
 Package rerunfilecheck Info: File `note-papers.out' has not changed.
-(rerunfilecheck)             Checksum: EF857E2011824B7130AFB2E61C19EDEB;46773.
+(rerunfilecheck)             Checksum: C4C479EC7E5FCFEE7F9C69630F618EFE;48150.
 
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4213.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4297.
  ) 
 Here is how much of TeX's memory you used:
- 29981 strings out of 479819
- 608015 string characters out of 5895845
- 961912 words of memory out of 5000000
- 46420 multiletter control sequences out of 15000+600000
+ 30006 strings out of 479819
+ 608438 string characters out of 5895845
+ 963479 words of memory out of 5000000
+ 46442 multiletter control sequences out of 15000+600000
  553650 words of font info for 155 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 73i,19n,90p,620b,933s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 73i,19n,90p,649b,933s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on note-papers.pdf (122 pages).
+Output written on note-papers.pdf (125 pages).

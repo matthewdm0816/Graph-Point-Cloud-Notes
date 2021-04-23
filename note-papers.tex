@@ -4227,6 +4227,71 @@ Faster R-CNN是c4模型w/ 属性分类分支的变种. 首先使用ResNet的$C_4
 
 \subsection{Generalized Multi-modal Factorized High-order Pooling}
 
+对于视觉特征$x \in \mathbb{R}^{m}$
+和语言特征$y \in \mathbb{R}^{n}$
+最基本的bilinear fusion
+\begin{equation}
+    z_{i}=x^{T} W_{i} y
+\end{equation}
+同时带来了巨大数量的参数.
 
+\cfig{mfb-arch.png}
+
+启发于单模态问题中的矩阵分解技巧, 使用low-rank approx.
+\begin{equation}
+    \begin{aligned}
+    z_{i} &=x^{T} U_{i} V_{i}^{T} y=\sum_{d=1}^{k} x^{T} u_{d} v_{d}^{T} y \\
+    &=1^{T}\left(U_{i}^{T} x \circ V_{i}^{T} y\right)
+    \end{aligned}
+\end{equation}
+其中
+\begin{equation}
+    U_{i}=\left[u_{1}, \ldots, u_{k}\right] \in \mathbb{R}^{m \times k}
+\end{equation}
+并且令
+$V=\left[V_{1}, \ldots, V_{o}\right] \in \mathbb{R}^{n \times k \times o}$
+编程上, 写成
+\begin{equation}
+    z=\operatorname{SumPool}\left(\tilde{U}^{T} x \circ \tilde{V}^{T} y, k\right)
+\end{equation}
+之后接上dropput, power norm.$z \leftarrow \operatorname{sign}(z)|z|^{0.5}$
+和l2 norm.$(z \leftarrow z /\|z\|)$.
+
+接着MFH. 设MFB里的中间表示为
+\begin{equation}
+    z_{\exp }=\operatorname{MFB}_{\exp }(x, y)=\operatorname{Dropout}\left(\tilde{U}^{T} x \circ \tilde{V}^{T} y\right) \in \mathbb{R}^{k o}
+\end{equation}
+以及
+\begin{equation}
+    z=\mathrm{MFB}_{s q z}\left(z_{\exp }\right)=\operatorname{Norm}\left(\operatorname{SumPool}\left(z_{\exp }\right)\right) \in \mathbb{R}^{o}
+\end{equation}
+
+使用多层cascade结构
+\begin{equation}
+    z_{e x p}^{i}=\mathrm{MFB}_{e x p}^{i}(x, y)=z_{e x p}^{i-1} \circ\left(\operatorname{Dropout}\left(\tilde{U}^{i^{T}} x \circ \tilde{V}^{i^{T}} y\right)\right)
+\end{equation}
+其中第0层$z_{e x p}^{0} \in \mathbb{1}^{k o}$
+concat所有层的特征
+\begin{equation}
+    z=\mathrm{MFH}^{p}=\left[z^{1}, z^{2}, \ldots, z^{p}\right] \in \mathbb{R}^{o p}
+\end{equation}
+
+\subsection{Net Architecture}
+
+\cfig{vqa-arch.png}
+
+对于baseline模型, 
+CNN骨架是ImageNet上预训练的ResNet-152, $448\times 448$输入, 2048d $C_5$特征.
+词语tokenize后吧one-hot embedding送进embedding层后, 送入1024d LSTM. 对于分类器, 直接使用top-N 最常出现的类别, 因为类别服从长尾分布.
+
+\cfig{vqa-fullarch.png}
+
+MFH/MFB+CoAtt模型! LSTM生成特征, 使用自注意力得到Question Att. Feat., 用于和Image Feat.进行MFB/MFH, 再得到Image Att. Coeff., 在得到带注意力的Image Feat., Image Att. Feat.和Question Att. Feat. MFB/MFH融合送到FC来进行分类.
+
+具体上, 取到$N=3000$(对于VQAv1/v2). 
+相容实验中的发现:\begin{enumerate}
+    \item 缺少l2 norm降低了性能(-3\%), power norm影响并不大.
+    \item l2 norm明显让neuron value变得稳定, 让模型更稳定.
+\end{enumerate}
 
 \end{document}

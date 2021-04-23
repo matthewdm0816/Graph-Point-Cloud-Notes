@@ -246,3 +246,7 @@
 \contentsline {subsection}{\numberline {53.3}Comparison: Region v. Grids}{122}{subsection.53.3}%
 \contentsline {subsection}{\numberline {53.4}Why Work?}{122}{subsection.53.4}%
 \contentsline {subsection}{\numberline {53.5}Generalization}{122}{subsection.53.5}%
+\contentsline {section}{\numberline {54}Beyond Bilinear: Generalized Multimodal Factorized High-order Pooling for Visual Question Answering}{122}{section.54}%
+\contentsline {subsection}{\numberline {54.1}Related Work: Multi-modal Bilinear Models for VQA}{122}{subsection.54.1}%
+\contentsline {subsection}{\numberline {54.2}Generalized Multi-modal Factorized High-order Pooling}{123}{subsection.54.2}%
+\contentsline {subsection}{\numberline {54.3}Net Architecture}{124}{subsection.54.3}%
