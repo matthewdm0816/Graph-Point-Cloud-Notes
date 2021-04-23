@@ -4334,8 +4334,70 @@ Pre-trained语言模型大大改进了NLP的能力(ELMo, BERT, GPT-2, XLNet, RoB
     相较之下BN$\bs f\in \R^{B\times C \times N}\mapsto \R^{1\times C \times 1}$.
 }
 
+\subsection{Pre-training Tasks}
 
+\bt{Masked Language Modeling (MLM)} 图片区域$\left\{\mathbf{v}_{1}, \ldots, \mathbf{v}_{K}\right\}$, 词$\mathbf{w}=\left\{\mathbf{w}_{1}, \ldots, \mathbf{w}_{T}\right\}$, mask 指标$\mathbf{m} \in \mathbb{N}^{M}$. 
+MLM中随机mask 15\%的词, 使用[MASK]\footnote{
+    和BERT一致, 10\%变成随机词, 10\%不变, 80\%变成[MASK]
+}. 目标是用周围的词预测masked words
+\begin{equation}
+    \mathcal{L}_{\mathrm{MLM}}(\theta)=-\mathbb{E}_{(\mathbf{w}, \mathbf{v}) \sim D} \log P_{\theta}\left(\mathbf{w}_{\mathbf{m}} \mid \mathbf{w} \backslash \mathbf{m}, \mathbf{v}\right)
+\end{equation}
 
+\begin{remark}
+    As if OSCAR does.
+\end{remark}
 
+\bt{Image-Text Matching (ITM)} 加入了特殊Token [CLS], 输入的是一些regions和词, 输出是否是匹配的文字/图像对. 具体的, 使用[CLS]对应的输出来作为joint repr., 送到FC+sigmoid里的道[0, 1]的分数. 表示为$s_{\theta}(\mathbf{w}, \mathbf{v})$. 使用二分类CE
+\begin{equation}
+    \left.\mathcal{L}_{\mathrm{ITM}}(\theta)=-\mathbb{E}_{(\mathbf{w}, \mathbf{v}) \sim D}\left[y \log s_{\theta}(\mathbf{w}, \mathbf{v})+(1-y) \log \left(1-s_{\theta}(\mathbf{w}, \mathbf{v})\right)\right]\right)
+\end{equation}
+训练中总是50\%几率送进paired/unpaired的对.
+
+\begin{remark}
+    As if OSCAR does.
+\end{remark}
+
+\bt{Word-Region Alignment (WRA)} 
+使用transport plan$\mathbf{T} \in \mathbb{R}^{T \times K}$来表示w/v的对齐. 这是好的,因为
+\begin{itemize}
+    \item 自正则化, 元素和为1
+    \item 稀疏, 精确解必然只包含2r-1个非0元素
+    \item 效率, 相比linear solvers, 可以通过迭代法求解
+\end{itemize}
+具体的, 把w,v 看作离散分布$\boldsymbol{\mu}, \boldsymbol{\nu}$, 有
+$\boldsymbol{\mu}=\sum_{i=1}^{T} \mathbf{a}_{i} \delta_{\mathbf{w}_{i}}$ and $\boldsymbol{\nu}=\sum_{j=1}^{K} \mathbf{b}_{j} \delta_{\mathbf{v}_{j}}$
+并且权值为单形上的顶点
+$\mathbf{a}=\left\{\mathbf{a}_{i}\right\}_{i=1}^{T} \in \Delta_{T}$ and $\mathbf{b}=\left\{\mathbf{b}_{j}\right\}_{j=1}^{K} \in \Delta_{K}$, 那么定义两个离散分布之间的OT距离
+\begin{equation}
+    \mathcal{L}_{\mathrm{WRA}}(\theta)=\mathcal{D}_{o t}(\boldsymbol{\mu}, \boldsymbol{\nu})=\min _{\mathbf{T} \in \Pi(\mathbf{a}, \mathbf{b})} \sum_{i=1}^{T} \sum_{j=1}^{K} \mathbf{T}_{i j} \cdot c\left(\mathbf{w}_{i}, \mathbf{v}_{j}\right)
+\end{equation}
+其中c是输运cost, 实验中使用的是consine unsim.(cos. dist.) 
+\begin{equation}
+    c\left(\mathbf{w}_{i}, \mathbf{v}_{j}\right)=1-\frac{\mathbf{w}_{i}^{\top} \mathbf{v}_{j}}{\left\|\mathbf{w}_{i}\right\|_{2}\left\|\mathbf{v}_{j}\right\|_{2}}
+\end{equation}
+T的精确求解intractable, 使用IPOT算法进行估计.
+
+\bt{Masked Region Modeling (MRM)} 
+类似MLM, 15\%随机drop feature. 训练来重建缺失的visual feature, 但是由于这些特征是连续和高维的, 使用三个变种, 同一个objective:
+\begin{equation}
+    \mathcal{L}_{\mathrm{MRM}}(\theta)=\mathbb{E}_{(\mathbf{w}, \mathbf{v}) \sim D} f_{\theta}\left(\mathbf{v}_{\mathbf{m}} \mid \mathbf{v}_{\backslash \mathbf{m}}, \mathbf{w}\right)
+\end{equation}
+\begin{enumerate}
+    \item \bt{Masked Region Feature Regression (MRFR)} 使用一个FC层把Transformer输出转换到输入同尺寸的空间上, 再使用l2回归
+    \begin{equation}
+        f_{\theta}\left(\mathbf{v}_{\mathbf{m}} \mid \mathbf{v} \backslash \mathbf{m}, \mathbf{w}\right)=\sum_{i=1}^{M}\left\|h_{\theta}\left(\mathbf{v}_{\mathbf{m}}^{(i)}\right)-r\left(\mathbf{v}_{\mathbf{m}}^{(i)}\right)\right\|_{2}^{2}
+    \end{equation}
+    \item \bt{Masked  Region  Classification  (MRC)} 预测每个masked对象的object semantic class. 使用CE
+    \begin{equation}
+        f_{\theta}\left(\mathbf{v}_{\mathbf{m}} \mid \mathbf{v}_{\backslash \mathbf{m}}, \mathbf{w}\right)=\sum_{i=1}^{M} \operatorname{CE}\left(c\left(\mathbf{v}_{\mathbf{m}}^{(i)}\right), g_{\theta}\left(\mathbf{v}_{\mathbf{m}}^{(i)}\right)\right)
+    \end{equation}
+    \item \bt{Masked  Region  Classification  with  KL-Divergence  (MRC-kl)} 使用soft-label, 即object detector的原始输出来做CE/KL
+    \begin{equation}
+        f_{\theta}\left(\mathbf{v}_{\mathbf{m}} \mid \mathbf{v}_{\backslash \mathbf{m}}, \mathbf{w}\right)=\sum_{i=1}^{M} D_{K L}\left(\tilde{c}\left(\mathbf{v}_{\mathbf{m}}^{(i)}\right) \| g_{\theta}\left(\mathbf{v}_{\mathbf{m}}^{(i)}\right)\right) .
+    \end{equation}
+\end{enumerate}
+
+\section{Vusial Commonsense R-CNN}
 
 \end{document}
