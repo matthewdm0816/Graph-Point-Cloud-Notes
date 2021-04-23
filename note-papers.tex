@@ -4294,4 +4294,48 @@ MFH/MFB+CoAtt模型! LSTM生成特征, 使用自注意力得到Question Att. Fea
     \item l2 norm明显让neuron value变得稳定, 让模型更稳定.
 \end{enumerate}
 
+\section{UNITER UNiversal Image-TExt Representation Learning}
+
+\cfig{uniter-arch.png}
+
+MCB, BAN, DFAF提出了VQA的模态融合方法. SCAN, MAttNet研究了图像和语言的潜在对齐(在Retrieval, Referring Exp. Comprehension). 他们提出一个通用V+L表示学习方法.
+
+使用Transformer, 启发于BERT, 我们使用这些任务pretrain UNITER:
+\begin{enumerate}
+    \item Masked Language Modeling (MLM) conditioned on image
+    \item Masked Region Modeling (MRM) conditioned on Text
+    \subitem Masked Region Classification (MRC)
+    \subitem Masked Region Feature Regression (MRFR)
+    \subitem Masked Region Classification with KL-divergence (MRC-kl)
+    \item Image-Text Match-ing  (ITM)
+    \item Word-Region  Alignment  (WRA).
+\end{enumerate}
+并且使用conditional masking和基于最佳输运(OT)的WRA任务. 具体的, 我们尝试最小化从image regions embed.到 words embed.的最佳输运.
+
+Pre-trained语言模型大大改进了NLP的能力(ELMo, BERT, GPT-2, XLNet, RoBERTa, ALBERT), 特点是在大型数据集上进行预训练, 同时使用了Transformer架构. 同时多模态预训练也有很多工作, VideoBERT, CBT使用BERT同时学习video-text pairs. ViLBERT, LXMERT则使用了双流结构, Transformers分别用于图像和文字, 在使用第三个Transformer来融合. 另一边B2T2, VisualBERT, Unicoder-VL, VL-BERT是单流结构. (Gan et al., 2020)提出了使用多任务和对抗训练来提高性能. VALUE使用了probe tasks来理解预训练模型.
+
+具体上, Image Embedder使用Faster RCNN提取出的特征(ROIPool过), 以及区域位置特征送到两个FC,再相加, 再LN. Text Embedder类似BERT, 将输入句子token成WordPieces. 每个subword的embedding是词嵌入和位置嵌入加和, 再LN.\footnote{
+    \bt{LN, Layer Normalization}
+
+    以MLP为例, feature是$\bs a \in R^{N\times H}$
+    \begin{equation}
+        \mu^{l}=\frac{1}{H} \sum_{i=1}^{H} a_{i}^{l} \quad \sigma^{l}=\sqrt{\frac{1}{H} \sum_{i=1}^{H}\left(a_{i}^{l}-\mu^{l}\right)^{2}}
+    \end{equation}
+    归一化
+    \begin{equation}
+        \hat{\mathbf{a}}^{l}=\frac{\mathbf{a}^{l}-\mu^{l}}{\sqrt{\left(\sigma^{l}\right)^{2}+\epsilon}}
+    \end{equation}
+    增加gain, bias 
+    \begin{equation}
+        \mathbf{h}^{l}=f\left(\mathbf{g}^{l} \odot \hat{\mathbf{a}}^{l}+\mathbf{b}^{l}\right)
+    \end{equation}
+
+    对于NLP/GNN, $\bs f\in \R^{B\times T \times N}\mapsto \R^{B\times T \times 1}$, 对于MLP, $\bs f\in \R^{B\times C \times N}\mapsto \R^{B\times 1\times 1}$,
+    相较之下BN$\bs f\in \R^{B\times C \times N}\mapsto \R^{1\times C \times 1}$.
+}
+
+
+
+
+
 \end{document}
