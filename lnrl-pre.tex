@@ -134,7 +134,7 @@
     \begin{definition}
         前向矫正
         \begin{equation}
-            \ell^{\rightarrow}(f(x), \bar{y})=\left[\ell_{y \mid T^{\top}} f(x)\right]_{\bar{y}}
+            \ell^{\rightarrow}(f(x), \bar{y})=\left[\ell_{y \mid T^{\top}f(x)}\right]_{\bar{y}}
         \end{equation}
         可以证明前向矫正loss和clean label loss上有相同的极小值.
     \end{definition}
@@ -256,6 +256,8 @@
 \begin{frame}
     \frametitle{Objective Reweighting: Importance Reweighting, Bayesian Methods}
 
+    所谓Objective Reweighting, 是指$\ell=\sum_k \lambda_k \ell_k$
+
     (Liu and Tao, 2015)使用importance reweighting来LNL. 将noisy data作为source domain, clean data作为目标domain. Idea是重写经验风险w.r.t. clean data, 可以得到
     \begin{equation}
         \beta(X,\bar Y)=p_{D}(\bar{Y}=i \mid X=x) / p_{\bar{D}}(\bar{Y}=i \mid X=x)
@@ -308,6 +310,302 @@
         \theta^{*}=\arg \min _{\theta} \ell^{\text {meta }}\left(w^{*}(\theta)\right)=1 / M \sum_{i=1}^{M} \ell_{i}^{\text {meta }}\left(w^{*}(\theta)\right) \text { . }
     \end{equation}
     使用SGD迭代的分别更新$w$和$\theta$
+
+\end{frame}
+
+\section{Object Redesigning}
+
+\begin{frame}
+    \frametitle{Objective Redesigning: Loss Redesign}
+
+    \begin{remark}
+        重设计目标函数往往是取决于目标场景的.
+    \end{remark}
+
+    (Zhang et al., 2018)提出了推广的CE, 使用MAE(mean absolute error/l1-norm)+CCE(categorical CE). 数学上, 他们使用Box-Cox变换作为$\ell_q$loss func.
+    \begin{equation}
+        \ell_{q}\left(f(x), e_{j}\right)=\left(1-f_{j}(x)^{q}\right) / q
+    \end{equation}
+    注意$q\to 0$为CCE, $q\to1$为MAE.
+    并且引入了截断$\ell_q$损失的估计
+    \begin{equation}
+        \ell_{\text {trunc }}\left(f(x), e_{j}\right)=\left\{\begin{array}{ll}
+        \ell_{q}(k) & \text { if } f_{j}(x) \leq k, \\
+        \ell_{q}\left(f(x), e_{j}\right) & \text { otherwise }
+        \end{array}\right.
+    \end{equation}
+    并且$\ell_{q}(k)=1-k^{q} / q$
+
+    (Charoenphakdee et al., 2019) 分析了对称loss. Idea是设计loss并不一定是对称的, 同时给不对称的区域的惩罚, i.e.,$\ell(z)+\ell(-z)=C$. 
+    所以他们给出了一个barrier hinge loss
+    \begin{equation}
+        \ell(z)=\max (-b(r+z)+r, \max (b(z-r), r-z))
+    \end{equation}
+    不对称, 并且在对称区外给出惩罚.
+\end{frame}
+
+\begin{frame}
+    \frametitle{Objective Redesigning: Loss Redesign}
+
+    (Thulasidasan et al., 2019)提出了放弃一些confusing data的方法. 他们的网络DAC(deep abstaining classi.) 有一个额外输出$p_{k+1}$, 是放弃概率. 具体的loss是
+    \begin{equation}
+        \ell\left(x_{j}\right)=-\tilde{p}_{k+1} \sum_{i=1}^{k} t_{i} \log \left(p_{i} / \tilde{p}_{k+1}\right)-\alpha \log \tilde{p}_{k+1}
+    \end{equation}
+    其中$\tilde{p}_{k+1}=1-p_{k+1}$
+    他们使用了一个动态的调整$\alpha$的算法. 
+    DAC可以作为data cleaner使用在不论有无结构的噪声上.
+
+    (Aditya et al., 2020)使用梯度裁剪来设计loss. 直觉上, 这防止了过于自信的递降. 基于梯度裁剪, 他们设计了部分Huberized loss
+    \begin{equation}
+        \tilde{\ell}_{\theta}(x, y)=\left\{\begin{array}{ll}
+        -\tau p_{\theta}(x, y)+\log \tau+1 & \text { if } p_{\theta}(x, y) \leq \frac{1}{\tau} \\
+        -\log p_{\theta}(x, y) & \text { otherwise }
+        \end{array}\right.
+    \end{equation}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Objective Redesigning: Loss Redesign}
+
+    (Lyu et al. 2020)提出curriculum loss. 是0-1 loss更紧的上界. 此外, CL可以动态地选择samples. 对于任何base loss是0-1 loss的上界
+    $\ell(u)\ge \mathbf{1}(u<0), u \in \mathbb{R}$
+    , CL定义为
+    \begin{equation}
+        Q(\mathbf{u})=\max \left(\min _{\mathbf{v} \in\{0,1\}^{n}} f_{1}(\mathbf{v}), \min _{\mathbf{v} \in\{0,1\}^{n}} f_{2}(\mathbf{v})\right)
+    \end{equation}
+    其中
+    \begin{equation}
+        f_{1}(\mathbf{v})=\sum_{i=1}^{n} v_{i} \ell\left(u_{i}\right) \text { and } f_{2}(\mathbf{v})=n-\sum_{i=1}^{n} v_{i}+\sum_{i=1}^{n} \mathbf{1}\left(u_{i}<0\right) .
+    \end{equation}
+    为了在DL中使用CL, 进一步他们提出了noise pruned CL.
+
+\end{frame}
+
+\section{Label Ensemble}
+
+\begin{frame}
+    \frametitle{Label Ensemble}
+
+    (Laine \& Aila, 2017)引入了SSL中的self-ensembling, 包括$\pi$-model和时序聚合, 也可用于noise净化. self-ensembling的idea是, 使用网络的输出对位置标签形成共识. 具体上, $\pi$-model是让不同的dropout模式下对同一个输入得到相容的输出. 除了$\pi$-model, 多个epochs的时序聚合也被考虑.
+    $\pi$-model的loss是
+    \begin{equation}
+        \ell=-1 / B \sum_{i} \log z_{i}\left[y_{i}\right]+w(t) / C|B| \sum_{i}\left\|z_{i}-\tilde{z}_{i}\right\|^{2}
+    \end{equation}
+    其中第一项是batch的CE, 后一项处理无标签数据. 其中$z_i,\tilde z_i$分别是不同dropout下的输出. 第二项也被时间相关函数$w(t)$加权.
+
+    这个方法的时序集成使用了几次之前的网络求值来进行一个集成预测, 具体上, 在$\pi$-model
+    中的$\tilde z$是前几次的输出的moving average
+    \begin{align}
+        &Z_{i} \leftarrow \alpha Z_{i}+(1-\alpha) z_{i}\\
+        &\tilde z_i = \frac{Z_i}{1-\alpha ^t}
+    \end{align}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Label Ensemble}
+
+    (Nguyen et al., 2020)提出了self-ensemble label filtering(SELF)的方法来在训练中逐渐地去除错误labels. 使用网络在不同训练迭代时的不同输出来得到一个预测的共识, 用于去除bad labels. 假设$L_{i}=\left\{(y, x) \mid \hat{y}_{x}=y ; \forall(y, x) \in L_{0}\right\}$是label y和其最大似然预测, $L_0$是最开始的样本集合. 
+
+    根据他们的策略, 模型首先和Mean Teacher进行集成, 后者是一个exponential running average of model(snapshots). 其次, 使用在多个epochs上的预测结果
+    $\bar{z}_{j}=\alpha \overline{\bar{z}}_{j-1}+(1-\alpha) \hat{z}_{j}$,
+    代表了moving average of predicted labels.
+
+    \begin{remark}
+        这和之前那个时序集成挺类似的. 区别是, 不是用不同dropout来进行集成而是和mean teacher集成.
+
+        并且Dropout和kWTA某种意义上挺相似的.
+    \end{remark}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Utilizing Representation Space Metrics: LID}
+
+    (Ma et al., 2018)研究了训练样本上的深度表示子空间的维度. 提出了基于维度的训练策略, 在训练中检测子空间维度. Key idea是使用local intrinsic dim.(LID), 用于区分noisy/clean labels. 数学上给出LID的一个估计
+    \begin{equation}
+        \widehat{\mathrm{LID}}=-\left(1 / k \sum_{i=1}^{k} \log r_{i}(x) / r_{\max }(x)\right)^{-1}
+    \end{equation}
+    其中$r_i(x)$是x到i-th neighbor的距离. 根据他们的观察, 在clean label上训练的时候LID一直下降, 但是在noisy label上训练的时候先下降后上升. 可以据此观察训练动态.
+
+    值得注意的是, 对于DNN来说, 应该使用如下in-batch的LID, 使用倒数第二层得到网络输出
+    \begin{equation}
+        \widehat{\operatorname{LID}}\left(x, X_{B}\right)=-\left(\frac{1}{k} \sum_{i=1}^{k} \log \frac{r_{i}\left(g(x), g\left(X_{B}\right)\right)}{r_{\max }\left(g(x), g\left(X_{B}\right)\right)}\right)^{-1}
+    \end{equation}
+    %据此, batch size需要比较大.
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Utilizing Representation Space Metrics: LID}
+
+    据此, 提出dimensionality-driven training, 具体地, 使用LID动态矫正labels
+    \begin{equation}
+        y^{*}=\alpha_{i} y+\left(1-\alpha_{i}\right) \widehat{y}
+    \end{equation}
+    其中
+    \begin{equation}
+        \alpha_{i}=\exp \left(-\frac{i}{T} \frac{\widehat{\operatorname{LID}}_{i}}{\min _{j=0}^{i-1} \widehat{\operatorname{LID}}_{j}}\right)
+    \end{equation}
+    校准因子是递增的, 代表随着训练进行, noisy label变得越来越不可信. 可以直接使用augmented的标签的熵作为loss
+    \begin{equation}
+        \mathcal{L}=-\frac{1}{N} \sum_{n=1}^{N} \sum_{y_{n}^{*}} y_{n}^{*} \log P\left(y_{n}^{*} \mid x_{n}\right)
+    \end{equation}
+
+    技术上, 设置w个epochs的初始化窗口. Turning point是, LID高于前w个epochs的mean两个标准差时. 此时rollback.
+
+\end{frame}
+
+\section{Optimization Policies}
+
+\begin{frame}
+    \frametitle{Memorizaiton Effect}
+
+    记忆效应指出, NNs趋向于先记住容易学习的模式(clean), 再逐渐overfit难以学习的模式(noisy). 这启发了small-loss trick. 具体上, 这是说把small-loss的样本作为clean samples, 并且只在这些样本上进行模型参数更新. 
+
+    数学上, 等价于建立一个masked loss
+    \begin{equation}
+        \tilde{\ell}=\operatorname{sort}(\ell, 1-\tau)
+    \end{equation}
+    其中$\tau$时noise rate.
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Self-training}
+
+    (Jiang et al., 2018)提出了MentorNet, 监督称为StudentNet的基网络. 数学上, MentorNet $g_m$估计一个predefined curriculum
+    \begin{equation}
+        \arg \min _{\theta} \sum_{\left(x_{i}, y_{i}\right) \in \mathcal{D}} g_{m}\left(z_{i} ; \theta\right) \ell_{i}+G\left(g_{m}\left(z_{i} ; \theta\right) ; \lambda_{1}, \lambda_{2}\right),
+    \end{equation}
+    第一项是课程加权的loss, 第二项是正则化惩罚项. 可以得到闭形式解
+    \begin{equation}
+        g_{m}\left(z_{i} ; \theta\right)=\left\{\begin{array}{ll}
+        \mathbf{1}\left(\ell_{i} \leq \lambda_{1}\right) & \text { if } \lambda_{2}=0 \\
+        \min \left(\max \left(0,1-\ell_{i}-\lambda_{1} / \lambda_{2}\right), 1\right) & \text { if } \lambda_{2} \neq 0
+        \end{array}\right.
+    \end{equation}
+    直觉上, 当$\lambda_2 = 0$时, M-Net只会使用losses小于$\lambda_1$的sample. 否则MentorNet不会提供大于$\lambda_1 + \lambda_2$的样本. 同时这也使MNet能够自行发现curriculum.
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Self-training}
+
+    (Ren et al., 2018)使用meta-learning来给不同的samples不同的权重, 基于他们的梯度方向. 基本上, 小loss数据分配更多权重, 并且他们相信在小的验证集上最小化loss的权重是好的权重, 具体上, 在每个iteration之前在验证集上决定样本权重. 数学上, 最小化带权损失
+    \begin{equation}
+        \theta^{*}(w)=\arg \min _{\theta} \sum_{i=1}^{N} w_{i} \ell_{i}(\theta)
+    \end{equation}  
+    他们在验证集上进行参数选择
+    \begin{equation}
+        w^{*}=\arg \min _{w} 1 / M \sum_{i=1}^{M} \ell_{i}^{v}\left(\theta^{*}(w)\right)
+    \end{equation}
+    具体上有三步
+    \begin{enumerate}
+        \item 将noisy data进行前向/后向传播, 得到traininig net.的新的参数$\theta$和梯度$\nabla \theta$
+        \item 梯度$\nabla \theta$影响validation net.
+        \item training net. 使用meta-leanrning来更新$w$, 通过二次求导/二阶导.
+    \end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Co-teaching}
+
+    (Han et al., 2018)提出了co-teaching, 让两个DNN在每个batch上互相teach. 具体地, 每个网络前向传播所有数据, 然后选出clean data, 再根据peer net. 选出的clean data来进行参数更新. 在MentorNet中误差会不断累积, 但是在co-teaching中, 两个模型能够学到不同类型的noise, 降低误差的累积, 最终达到一个共识. 注意集成学习中关键的一点是让两个学习器有差异.
+
+    (Yu  et  al., 2019)提出了co-teaching+, "通过不同意来更新", 来保持coteaching中两个网络的的差异性. 包含disaggrement-upd. + cross-upd. steps. 在disaggr.-upd. 中两个网络分别预测, 然后只保留预测不同意的数据(对称差?). cross-upd.和Co-teaching一样. 两个网络对于big-loss有相同的drop-rate.
+
+    (Chen et al., 2019)使用noisy dataset上的随机分割作为cross-validation. 意味着认为大多数样本是correct labeled的. 他们提出了Iterative Noisy Cross-Validation(INCV), 来选择一个噪声很小的数据子集. 然后他们在这个子集上使用Co-teaching来训练, 并且逐步去除big-loss样本.
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Co-teaching}
+
+    (Yao et al., 2020)使用AutoML来探索记忆效应. 注意Co-teaching(+)两个网络的drop-rate相同且都是人工选择的. 他们使用Domain-specific search, 并且用一种牛顿法来估计最优的drop-rate, 数学上可建模为bi-level opt. 
+    \begin{equation}
+        \begin{array}{l}
+        R^{*}=\arg \min _{R(\cdot) \in \mathcal{F}} \mathcal{L}_{\text {val }}\left(f\left(w^{*} ; R\right), \mathcal{D}_{\text {val }}\right) \\
+        \text { s.t. } w^{*}=\arg \min _{w} \mathcal{L}_{\text {tr }}\left(f\left(w^{*} ; R\right), \mathcal{D}_{\operatorname{tr}}\right)
+        \end{array}
+    \end{equation}
+
+    (Li et al., 2020)启发与MixMatch, 提出了DivideMix, 使用SSL技术. 它使用了GMM来动态地分割训练数据为labeled clean data + unlabeled noisy data. 在SSL部分, 他们使用了Co-training 的一个变体 Co-refinement在有标签数据上, 并且在无标签数据上使用Co-guessing. 具体上讲, Co-refinement把ground-truth和网络预测结合, 得到refined label; Co-guessing把两个网络的预测输出平均. 使用MixMatch中的方法来合并数据.
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Beyond Memorization}
+
+    (Hendrycks et al., 2019)展示了, pre-training技术可以提高模型健壮性和不确定性, 包括对抗健壮性和标签噪声. 
+
+    (Bahri et al., 2020)提出了Deep k-NN方法, 作为base DNN的中间层来滤除噪声. 具体上由两步组成, 首先具有结构$\mathcal A$的模型$\mathcal M$通过kNN被训练来得到噪声数据$\mathcal {D}_{noise}$, 通过去除和其邻居数据label不同的样本. 接着在$\mathcal{D}_{\text {filtered }} \cup \mathcal{D}_{\text {clean }}$上重新训练结构$\mathcal A$.
+
+\end{frame}
+
+\section{Future}
+
+\begin{frame}
+    \frametitle{Future}
+
+    \bt{Build Up New Datasets} 从合成数据集(MNIST, CIFAR)到真实噪声数据集(Clothing1M). 到更新更大的数据集("web-label noise", Jiang et al., 2020). 需要NLP的噪声数据集.
+
+    \bt{Instance-Dependent Noise} 之前的所有方法都是基于噪声和instance无关的假设. 但是实际场景中这只是一个近似. 我们应该考虑IDN模型. 直觉上这是显然的, 因为模糊或者低质量的样本显然有更高概率被mislabel. 但是和输入feature相关的noise显然大大提高了体系维度, 增加了复杂度. 并且如果没有额外的假设/信息, IDN是不可区分的(Cheng et al., 2020).
+
+    (Menon  et  al., 2018)提出了一个边界相容的IDN, 考虑在分类边界附近的样本具有更大的噪声. 但是这个方法仅限于二元分类, 并且无法估计噪声函数.
+
+    (Cheng et al., 2020)研究了一种特殊的IDN, 其中噪声函数是有上界的. 同样他们的方法也限于二分类, 并且只在小数据集上进行了测试.
+
+    (Berthon et al., 2020)考虑了使用每个instance的置信度: confidence-scored IDN. 基于此, 他们提出了instance-level的前向矫正.
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Future: Adversarial LNRL}
+
+    (Wang  et  al., 2020)提出了新的defense algorithm MART, 将错误/正确分类的样本分别微分. 具体上讲, 使用了Misclassification-Aware-Regularization 
+    \begin{equation}
+        1 / n \sum_{i=1}^{n} \mathbf{1}\left(h_{\theta}\left(x_{i}\right) \neq h_{\theta}\left(\hat{x}_{i}^{\prime}\right)\right) \cdot \mathbf{1}\left(h_{\theta}\left(x_{i}\right) \neq y_{i}\right)
+    \end{equation}
+    其中$\hat{x}_{i}^{\prime}$是某种对抗样本\footnotemark
+
+    同时(Zhang et al., 2020)也考虑了同样的问题: 对抗训练中的错分类问题. 提出了friendly adversarial training(FAT), 在训练DNN时使用错分类对抗样本最小化loss, 使用正确分类对抗样本最大化loss. 使用了early-stopped PGD, 一旦对抗样本被错分类就停止PGD.
+    \footnotetext[1]{详见笔记}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Beyond Labels: Noisy Data}
+
+    \begin{enumerate}
+        \item \bt{Feature}: 对抗样本是一种特殊的feature noise. 可以表示为$p(\bar{X} \mid Y)$. 对抗训练显然是一种主要办法. 注意随机扰动是另一种噪声. (Zhang et al., 2019)提出了一种robust ResNet, 启发于动力系统. 使用显示Euler法的step factor来研究问题, 他们证明了, 小step factor有利于泛化健壮性.
+        \item \bt{Preference}: ranking中的preference噪声问题, 常见于各种推荐系统/在线排序/评分系统. (Han et al., 2018)提出了POPAL模型, 使用集成了一个denoising vector的Plackett-Luce模型. 基于Kendall-tau距离, 这个向量用确定的概率校正k-ary noisy preferences. 然而POPAL不能处理k-ary noisy preferences 的动态长度, 于是(Pan et al., 2018)提出了COUPLE, 使用stagewise training. 使用了online Bayesian inference来优化两个模型.
+ 
+    \end{enumerate}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Beyond Labels: Noisy Data}
+
+    \begin{enumerate}
+        \item \bt{Domain}: Domain Adaptation(DA)是一个ML的基本问题. 传统DA认为source domain的有标签数据是clean的, 但不一定为真. 当source domain的label是noisy的, 称为wild domain adaptation(WDA). (Liu et al., 2019)提出了Butterfly框架, 同时维护四个DNNs, 可以迭代地获得DIR(domain-specific repr.), 和TSR(target-specific repr.). (Yu et al.,  2020)提出了Denoising Conditional Invariant Component(DCIC)框架, 可证明保证能提取不变表示, 并且无偏地估计target domain的数据分布.
+        \item \bt{Similarity}: 基于相似度的学习是weak-supervised learning的问题, 可用的是无标签数据和相似数据(挺像Graph ULL).(Wu et al., 2020)使用一个噪声转移模型来建模相似性噪声.
+
+    \end{enumerate}
+
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Beyond Labels: Noisy Data}
+
+    \begin{enumerate}
+        \item \bt{Graph}: 图结构是否对噪声(node/edge feature/label, noisy links)健壮? (Wang  et  al., 2020)提出了健壮和无监督的框架Cross-Graph, 可以处理图中的结构损坏. (Hu et al., 2019)是pre-training GNNs, 可能能够提高健壮性.
+        \item \bt{Demonstration}: 模仿学习(Imitation Learning, IL)的目标时从高质量演示中学到好的策略. 当演示的质量不齐时, 显然导致了diverse-quality demos. 可以使用置信度/ranking scores/小部分高质量demos来估计noise, 来轻松的学习. 但是没有已有expert data时不一定能work. (Tangkaratt et al., 2020)提出了一个模型, 使用概率图模型来VILD建模demo质量. 具体上, 他们通过奖励函数(代表了某种专家决策)来估计质量, 使用了变分法来处理大的s-a空间, 使用importance sampling.
+    \end{enumerate}
 
 \end{frame}
 
