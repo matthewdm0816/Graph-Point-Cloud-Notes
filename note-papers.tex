@@ -3262,6 +3262,91 @@ Adversarial Training: AT, TRADES, free adversarial training(FAT).
     \includegraphics[width=\textwidth]{kwta-facts.png}
 \end{figure}
 
+\section{Normalized Loss Functions for Deep Learning with Noisy Labels}
+
+理论证明, l1范数作为loss是label-noise robust的, 但是一些常用loss比如cross-ent. 不是. GCE(Zhang \& Sabuncu, 2018)是MAE和CE的一种混合来提供健壮性. Symmetric CE(SCE)结合了RCE和CE, 只有RCE项是robust的. 本工作证明, 任何loss可以是noise-robust的, 只要加上正则化. 还发现许多loss都underfit. 分类loss为Active loss, 只显式最大化正样本概率和Passive loss, 同时还显式地最小化负标签概率. 提出APLs(Active Passive Losses)
+
+Reverse Cross Entropy (RCE) loss (Wang et al., $2019 \mathrm{c}$ )定义为: $R C E=$ $-\sum_{k=1}^{K} \boldsymbol{p}(k \mid x) \log \boldsymbol{q}(k \mid \boldsymbol{x})$, with $\boldsymbol{q}(k \neq y \mid \boldsymbol{x})=0$ 截断到小的阈值, $\log (\boldsymbol{q}(k \neq y \mid \boldsymbol{x}))=A$ (eg. $A=-4$ ). RCE robust to label noise, 可以和 CE结合得到SCE for robust classification and boosted learning (Wang et al., 2019c).
+
+Focal Loss.
+
+我们知道, 如果$\sum_{j}^{K} \mathcal{L}(f(x), j)=C, \forall x \in \mathcal{X}, \forall f$
+那么这个损失函数在温和的假设下是noise robust的. 那么我们手动地正则化loss
+\begin{equation}
+    \mathcal{L}_{\text {norm }}=\frac{\mathcal{L}(f(\boldsymbol{x}), y)}{\sum_{j=1}^{K} \mathcal{L}(f(x), j)}
+\end{equation}
+
+那么分别正则化CE, MAE, RCE, FL:
+\begin{enumerate}
+    \item NCE:\begin{equation}
+        \begin{aligned}
+        N C E &=\frac{-\sum_{k=1}^{K} \boldsymbol{q}(k \mid \boldsymbol{x}) \log \boldsymbol{p}(k \mid \boldsymbol{x})}{-\sum_{j=1}^{K} \sum_{k=1}^{K} \boldsymbol{q}(y=j \mid \boldsymbol{x}) \log \boldsymbol{p}(k \mid \boldsymbol{x})} \\
+        &=\log _{\prod_{k}^{K} \boldsymbol{p}(k \mid \boldsymbol{x})} \boldsymbol{p}(y \mid \boldsymbol{x})
+        \end{aligned}
+    \end{equation}
+    \item NMAE:\begin{equation}
+        \begin{aligned}
+        N M A E &=\frac{\sum_{k=1}^{K}|p(k \mid \boldsymbol{x})-\boldsymbol{q}(k \mid \boldsymbol{x})|}{\sum_{j=1}^{K} \sum_{k=1}^{K}|\boldsymbol{p}(k \mid \boldsymbol{x})-\boldsymbol{q}(y=j \mid \boldsymbol{x})|} \\
+        &=\frac{1}{K-1}(1-\boldsymbol{p}(y \mid \boldsymbol{x}))=\frac{1}{2(K-1)} \cdot M A E
+        \end{aligned}
+    \end{equation} 
+    显然这只是MAE乘上了一个系数
+    \item NRCE: \begin{equation}
+        \begin{aligned}
+        N R C E &=\frac{-\sum_{k=1}^{K} \boldsymbol{p}(k \mid \boldsymbol{x}) \log \boldsymbol{q}(k \mid \boldsymbol{x})}{-\sum_{j=1}^{K} \sum_{k=1}^{K} \boldsymbol{p}(k \mid \boldsymbol{x}) \log \boldsymbol{q}(y=j \mid \boldsymbol{x})} \\
+        &=\frac{1}{K-1}(1-\boldsymbol{p}(y \mid \boldsymbol{x}))=\frac{1}{A(K-1)} \cdot R C E
+        \end{aligned}
+    \end{equation}
+    类似MAE, 这也只是加上了一个系数
+    \item NFL:\begin{equation}
+        \begin{aligned}
+        N F L &=\frac{-\sum_{k=1}^{K} q(k \mid \boldsymbol{x})(1-\boldsymbol{p}(k \mid \boldsymbol{x}))^{\gamma} \log \boldsymbol{p}(k \mid \boldsymbol{x})}{-\sum_{j=1}^{K} \sum_{k=1}^{K} \boldsymbol{q}(y=j \mid \boldsymbol{x})(1-\boldsymbol{p}(k \mid \boldsymbol{x}))^{\gamma} \log \boldsymbol{p}(k \mid \boldsymbol{x})} \\
+        &=\log _{\prod_{k}^{K}(1-\boldsymbol{p}(k \mid \boldsymbol{x}))^{\gamma} \boldsymbol{p}(k \mid \boldsymbol{x})}(1-\boldsymbol{p}(y \mid \boldsymbol{x}))^{\gamma} \boldsymbol{p}(y \mid \boldsymbol{x})
+        \end{aligned}
+    \end{equation}
+\end{enumerate}
+注意这四个loss只是proof-of-concept, 完全可以用其他loss.
+
+\begin{lemma}
+    In a multi-class classification problem, any normalized loss function $\mathcal{L}_{\text {norm }}$ is noise tolerant under symmetric (or uniform) label noise, if noise rate $\eta<\frac{K-1}{K}$.
+\end{lemma}
+
+\begin{lemma}
+    In a multi-class classification problem, given $R\left(f^{*}\right)=0$ and $0 \leq \mathcal{L}_{\text {norm }}(f(x), k) \leq \frac{1}{K-1}, \forall k$, any
+    normalized loss function $\mathcal{L}_{\text {norm }}$ is noise tolerant under asymmetric (or class-conditional) label noise, if noise rate $\eta_{j k}<1-\eta_{y} .$
+    \label{lemma.2}
+\end{lemma}
+
+对于\ref{lemma.2}, $R\left(f^{*}\right)=0$ 并不一定能达到, 由于类别并不一定可分. 但是经验上效果也很好.
+
+\subsection{Robustness Alone is not Sufficient}
+
+\begin{remark}
+    然而robusteness并不是代表实际好用. 注意, 同minimizer的robustness显著弱于无偏估计性.
+\end{remark}
+
+注意到实验上, 正则化的loss虽然不会随训练时间增加generalization gap, 但是性能很差, 差于为正则化的版本, 暗示了underfitting的问题.
+
+定义APL
+\begin{equation}
+    \mathcal{L}_{\mathrm{APL}}=\alpha \cdot \mathcal{L}_{\mathrm{A} \text { Ative }}+\beta \cdot \mathcal{L}_{\text {Passive }}
+\end{equation}
+其中两个loss都应该是noise robust的. 可以证明若如此, 则APL也是noise robust的.
+
+为什么robust loss underfit? 考虑NCE, 由于最大化分子(分布的熵)
+\begin{equation}
+    Q=-\sum_{k \neq \nu} \log \left(p_{k}\right)
+\end{equation}
+也会导致loss变小, 所以容易让学习器学到无意义的预测. 这可能妨碍了收敛并且underfit.
+
+为什么APL可以解决underfit? 根据定义, passive loss显式地让Q减少, 来控制上述问题.
+
+类似地, 对GCE使用正则化
+\begin{equation}
+    N G C E=\left(1-\boldsymbol{p}(y \mid \boldsymbol{x})^{\rho}\right) /\left(K-\sum_{k=1}^{K} \boldsymbol{p}(k \mid \boldsymbol{x})^{\rho}\right)
+\end{equation}
+    
+
 \section{A Survey of Label-noise Representation Learning(LNRL): Past, Present and Future}
 
 \begin{figure}[htbp]

@@ -609,5 +609,20 @@
 
 \end{frame}
 
+\begin{frame}
+    \frametitle{Graph \& Label Noise}
+
+    Few existing literature. (Hoang et al., 2019)展示了noisy label下各种网络的性能下降. 其他一些文献大多关于使用GNN来clean label noise.
+
+    \bt{Idea} 
+    \begin{itemize}
+        \item 图上天然的正则化$\bs x^T \mathcal L \bs x$. 同时图上类似LID的类似物(曲率, Hessian, Dirac Operator)
+        \item 图上相近的node会有更高的混淆概率(变成neighbor的label). 是否可能这么估计一个noisy transition mat.
+        \item 各种pre-training的方法(e.g., GCC) + 使用类似LID的指标来监控fine-tune的early-stopping/rollback.
+        \item 类似co-teaching, boost多个模型?
+    \end{itemize}
+
+\end{frame}
+
 
 \end{document}
