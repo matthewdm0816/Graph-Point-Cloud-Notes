@@ -174,7 +174,7 @@
         $F^{\top}=\left[X_{1}, \ldots, X_{n}\right], X_i=\operatorname{Diag}(\bs x_i)$,
         鼓励稀疏性. 这会鼓励一小部分clean data来control model.
         \item (Berthelot et al., 2019)提出了MixMatch来进行SSL. 其中的一个关键部分是Minimum Ent. Reg.(MER), 也是一种显式正则化. MER提出于(Grandvalet \&  Bengio, 2005), 关键idea是把CE加入一个正则项, 鼓励在unlabeled data上给出high-confidence的输出, 具体地, 最小化在unlabeled数据上的熵.
-        \item 类似于MER, psedo-label方法(D.-H.   Lee,, 2013)(i.e. lebel guessing)进行隐式的ent.最小化. 具体上讲, 首先计算模型(通过各种augmentation)预测的类型分布, 再通过temperature sharpening func. 来最小化label dist.的熵.
+        \item 类似于MER, psedo-label方法(D.-H.   Lee, et al., 2013)(i.e. lebel guessing)进行隐式的ent.最小化. 具体上讲, 首先计算模型(通过各种augmentation)预测的类型分布, 再通过temperature sharpening func. 来最小化label dist.的熵.
     \end{enumerate}
 
 \end{frame}
