@@ -4483,6 +4483,97 @@ T的精确求解intractable, 使用IPOT算法进行估计.
     \end{equation}
 \end{enumerate}
 
-\section{Vusial Commonsense R-CNN}
+\section{Visual Commonsense R-CNN}
+
+提出VC R-CNN. 使用causual intervention$P(Y \mid \operatorname{do}(X))$代替传统的lld. 相信应该使用causual commonsense feature而不是单纯的visual feature. 在大规模VL出数据中, weakly-supervise是趋势. 然而在很多数据集中, commonsense并不会被记录, 比如不会刻意说"人通过双腿走", 人无监督地从物理世界学习, 我们希望模型也这么干.
+
+\cfig{vcrcnn-casual.png}
+
+在NLP, 学习如何预测缺失/周围的context是有效的学习无监督表示的方法. 但是V+L中并不显然, 因为语言中常常把逻辑因果性嵌入了, 对于图像信息则不然. 你可以把"do"操作理解为, 从别的图像中借用一个对象"Z", 和X,Y放在一起, 那么再测试此时X是否还cause Y.
+
+VC RCNN基于RCNN的backbone.
+
+\cfig{vcrcnn-arch.png}
+
+\subsection{Sense-making by Intervention}
+\subsubsection{Casual Intervention}
+\cfig{vcrcnn-c2.png}
+
+视觉世界常常包含confounder $Z$, 影响X, Y, 导致只是学习XY的lld不好, 于是, 由于贝叶斯规则, 有
+\begin{equation}
+    P(Y \mid X)=\sum_{z} P(Y \mid X, z) \underline{P(z \mid X)}
+\end{equation}
+那么对$P(Y \mid X)$的预测最终会变成高$P(z \mid X)$的项$P(Y \mid X, z)$的预测.
+
+根据上图左侧, 有
+\begin{equation}
+    P(Y \mid d o(X))=\sum_{z} P(Y \mid X, z) \underline{P(z)}
+\end{equation}
+于是这个intervention迫使各个项按Z的先验分布来取权重.
+
+我们也同时想要学习$\boldsymbol{X} \rightarrow \boldsymbol{Y}$ or $\boldsymbol{Y} \rightarrow \boldsymbol{X}$.
+
+此外, 还有可能有unobserved confounder, 但是在USL中, 只能利用到物体信息.
+
+\subsubsection{The Proposed Implementation}
+
+我们提出proxy task, 为预测local context label of Y. 关于confounder set Z, 我们保存一些固定数量的dictionary $N\times d$, N是数据集中类别的数量(MSCOCO, 80), 每个d维特征都是平均的RoI特征. 特征通过Faster RCNN pretrain.
+
+具体上, $P(Y \mid do(X)) = \sum_{z} P\left(y^{c} \mid \boldsymbol{x}, \boldsymbol{z}\right) P(\boldsymbol{z})$, 使用impl.
+\begin{equation}
+    P(Y \mid d o(X)):=\mathbb{E}_{\boldsymbol{z}}\left[\operatorname{Softmax}\left(f_{y}(\boldsymbol{x}, \boldsymbol{z})\right)\right]
+\end{equation}
+注意期望运算需要昂贵的采样操作.
+
+使用NWGM(Normalized Weighted Geometric Mean)来估计上述期望, 简单地说, NWGM把softmax提出期望算子
+\begin{equation}
+    \mathbb{E}_{\boldsymbol{z}}\left[\operatorname{Softmax}\left(f_{y}(\boldsymbol{x}, \boldsymbol{z})\right)\right] \stackrel{\mathrm{NWGM}}{\approx} \operatorname{Softmax}\left(\mathbb{E}_{\boldsymbol{z}}\left[f_{y}(\boldsymbol{x}, \boldsymbol{z})\right]\right)
+\end{equation}
+
+本工作中, f使用线性模型$f_{y}(\boldsymbol{x}, \boldsymbol{z})=\boldsymbol{W}_{1} \boldsymbol{x}+\boldsymbol{W}_{2} \cdot g_{y}(\boldsymbol{z})$, where $\boldsymbol{W}_{1}, \boldsymbol{W}_{2} \in \mathbb{R}^{N \times d}$代表了FC层. 那么有
+\begin{equation}
+    \mathbb{E}_{\boldsymbol{z}}\left[f_{y}(\boldsymbol{x}, \boldsymbol{z})\right]=\boldsymbol{W}_{1} \boldsymbol{x}+\boldsymbol{W}_{2} \cdot \mathbb{E}_{\boldsymbol{z}}\left[g_{y}(\boldsymbol{z})\right]
+\end{equation}
+
+\begin{remark}
+    Really? 总感觉这里X, Y直接没啥nonlinear iteraction了
+\end{remark}
+
+我们建模$g_{y}(\cdot)$为scaled 点积注意力, 具体上有
+\begin{equation}
+    \mathbb{E}_{\boldsymbol{z}}\left[g_{y}(\boldsymbol{z})\right]=\sum_{z}\left[\operatorname{Softmax}\left(\boldsymbol{q}^{T} \boldsymbol{K} / \sqrt{\sigma}\right) \odot \boldsymbol{Z}\right] P(\boldsymbol{z})
+\end{equation}
+其中
+\begin{equation}
+    q=\boldsymbol{W}_{3} \boldsymbol{y}, \boldsymbol{K}=\boldsymbol{W}_{4} \boldsymbol{Z}^{T}
+\end{equation}
+
+\bt{NCC(Neural Causation Coefficient)}
+考虑到confounders在类别中平均的特征并不是很可靠, Z可能包含colliders(v-structure), 导致不可靠的相关.使用NCC来移除Z中可能的collider. 给出x, z, $NCC(x\to z)$计算了相对因果强度, 然后我们在training samples里去除高于某个阈值的样本.
+
+\section{VC R-CNN}
+
+使用CNN作为骨架(e.g., ResNet101), 丢弃Faster RCNN中的RPN模块. 直接使用ground-truth bounding box来得到物体repr., 然后任意两对去测试contextual prediction + self predition. 对于self-prediction有NLL loss
+\begin{equation}
+    L_{\text {self }}\left(p, x^{c}\right)=-\log \left(p\left[x^{c}\right]\right)
+\end{equation}
+对于成对预测, 有
+\begin{equation}
+    L_{c x t}\left(p_{i}, y_{i}^{c}\right)=-\log \left(p_{i}\left[y_{i}^{c}\right]\right)
+\end{equation}
+总obj. 为
+\begin{equation}
+    L(X)=L_{\text {self }}\left(p, x^{c}\right)+\frac{1}{K} \sum_{i} L_{c x l}\left(p_{i}, y_{i}^{c}\right)
+\end{equation}
+
+最后, 拿训练好的VCRCNN作为feature extractor和其他visual feature extractor concat使用. 他们不建议在early-stage就concat到一些self-att.的模型上, 增加self-att的计算复杂度并且某种意义上编码了P(Y|X), 冲突.
+
+\begin{remark}
+    那么我们如果考虑更高阶的causual relation呢?
+\end{remark}
+
+\subsection{Experiments}
+
+对于MSCOCO, 移除只有一个bounding box的图片. 移除在MSCOCO-Captioning验证集上的样本. OpenImages使用.
 
 \end{document}
