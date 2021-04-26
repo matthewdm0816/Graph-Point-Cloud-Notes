@@ -4483,7 +4483,7 @@ T的精确求解intractable, 使用IPOT算法进行估计.
     \end{equation}
 \end{enumerate}
 
-\section{Visual Commonsense R-CNN}
+\subsection{Visual Commonsense R-CNN}
 
 提出VC R-CNN. 使用causual intervention$P(Y \mid \operatorname{do}(X))$代替传统的lld. 相信应该使用causual commonsense feature而不是单纯的visual feature. 在大规模VL出数据中, weakly-supervise是趋势. 然而在很多数据集中, commonsense并不会被记录, 比如不会刻意说"人通过双腿走", 人无监督地从物理世界学习, 我们希望模型也这么干.
 
@@ -4576,7 +4576,83 @@ VC RCNN基于RCNN的backbone.
 
 对于MSCOCO, 移除只有一个bounding box的图片. 移除在MSCOCO-Captioning验证集上的样本. OpenImages使用.
 \begin{remark}
-    说实在的, marginal improvement.(0.7\% on old models)
+    说实在的, marginal improvement on VQA. (0.7\% on old models), 作者也指出了在Image Captioning上效果比较好(2-3\%)
 \end{remark}
+
+\section{MCAN: Deep Modular Co-Attention Networks for VQA}
+
+本工作设计了一种好的co-attention机制来做VQA任务的特征融合. 最近的工作展示了co-attention可以更好的学习image-text repr., 但是缺乏image region和word的关联. 为了解决这些问题, BAN, DCN作为dense co-att模型. 他们都可以叠成多层co-att, 然而性能并没有提高多少! 我们认为问题在于在后面的层里存在不少自己模态内的注意力. 使用SA(SelfAtt)模块建模intra-modality att和GA(Guided Att)模块来建模inter-modality att. 通过结合它们,得到了MCA层.
+
+\begin{remark}
+    Commonsense推理(如同VC RCNN中)是否在coattention/correlation inference里make sense?
+\end{remark}
+
+\subsection{Modular Co-Attention Layer}
+
+\cfig{mcan-mod.png}
+
+使用不同的组合, 得到三种不同的MCA.
+\subsubsection{SA \& GA Units}
+
+\cfig{mcan-var.png}
+
+简单叙述Attention机制, 给定
+$\bs q \in \R^{1\times d}, \bs K, \bs V \in \R^{N\times d}$,
+得到的按注意力加权feature
+\begin{equation}
+    f=A(q, K, V)=\operatorname{softmax}\left(\frac{q K^{T}}{\sqrt{d}}\right) V
+\end{equation}
+Multi-head Attention涉及使用多个类似的模块
+\begin{equation}
+    \begin{array}{c}
+    f=M A(q, K, V)=\left[\text { head }_{1}, \text { head }_{2}, \ldots, \text { head }_{h}\right] W^{o} \\
+    \qquad{h e a d}_{j}=A\left(q W_{j}^{Q}, K W_{j}^{K}, V W_{j}^{V}\right)
+    \end{array}
+\end{equation}
+其中\begin{equation}
+    W_{j}^{Q}, W_{j}^{K}, W_{j}^{V} \in \mathbb{R}^{d \times d_{h}}
+\end{equation}是第j个head的投影矩阵, 并且
+\begin{equation}
+    W_{o} \in \mathbb{R}^{h * d_{h} \times d}
+\end{equation}
+为了防止MHA参数过多, 使用$d_h=d/h$.
+
+具体上, SA的MLP层为(FC(4d)-ReLU-Dropout(0.1)-FC(d)). 接着加上resiudal link和layer norm..
+
+\cfig{mcan-arch.png}
+
+\subsection{Modular Co-Attention Networks}
+
+我们提出stacking+encoder/decoder模型, 包含了多个MCA层.  
+
+\cfig{mcan-arch2.png}
+
+使用的视觉特征是从Faster RCNN(VG上pre-trained)中提取的各层特征, 使用Bottom-Up feature. 使用10-100个目标区域(取决于confidence, w/ threshold), $X \in \mathbb{R}^{m \times d_{x}}$. 
+
+问题token化, 转换成最多14个词, 每个word使用300d GloVe(pretrained) embed. 词embed送到单层LSTM中, 并且使用整个输出作为问题的特征矩阵$Y \in \mathbb{R}^{n \times d_{y}}$.
+
+为了处理可变长长度, 使用0-padding来把填充到最长.(i.e.,m=100, n=14). 每个softmax之前把padding logits改成$\infty$.
+
+具体地堆叠形式请看图.
+
+最后, 加上attetional reduction(FC(d)-ReLU-Dropout(0.1)-FC(1)). 
+\begin{equation}
+    \begin{array}{l}
+    \alpha=\operatorname{softmax}\left(\operatorname{MLP}\left(X^{(L)}\right)\right) \\
+    \tilde{x}=\sum_{i=1}^{m} \alpha_{i} x_{i}^{(L)}
+    \end{array}
+\end{equation}
+然后融合
+\begin{equation}
+    z=\operatorname{LayerNorm}\left(W_{x}^{T} \tilde{x}+W_{y}^{T} \tilde{y}\right)
+\end{equation}
+
+最后, z投影到N分类向量上作为分类结果, 并且使用BCE来训练N-classifier.
+
+\subsection{Experiments}
+
+最后使用$MCAN_{ed}-6$作为best single model, 精度70.63/70.90 (test-dev/std), 在train+val+vg上训练!(vg是从VG数据集来的增强VQA样本).
+
+通过ensemble, 精度可以达到72.45.
 
 \end{document}

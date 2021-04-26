@@ -1,0 +1,97 @@
+\documentclass{beamer}
+%\documentclass[UTF8]{ctexbeamer} % Chines Version
+
+\usepackage[utf8]{inputenc}
+\usepackage{utopia}            % font utopia imported
+\usepackage{amsmath}
+\usepackage{latexsym}
+\usepackage{calc}              % support command '\widthof'
+\usepackage{xcolor}            % support multiple color 
+\usepackage{arydshln}
+\usepackage{amssymb}  
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{bookmark}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{bbold}
+\usepackage{extarrows}
+\usepackage{ctex, xeCJK, zxjatype}
+
+
+%--------
+\usepackage{listings}
+\usepackage{xcolor}
+
+\newcommand{\cfig}[1]{
+    \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{#1}
+\end{figure}
+}
+
+\newcommand{\bt}[1]{\textbf{#1}}
+
+
+\newenvironment{remark}[1][Remark]{\begin{trivlist}
+    \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+
+\usefonttheme{professionalfonts} 
+
+\makeatletter
+\let\@@magyar@captionfix\relax
+\makeatother
+
+\usetheme{Madrid}
+% \usetheme{Singapore}
+% \usetheme{Pittsburgh}
+%\usecolortheme{default,beaver,lily,orchid,seahorse} 
+\usecolortheme{default}
+%default、albatross、beaver、beetle、crane、dolphine、dove、fly、lily、orchid、rose、seagull、seahorse、sidebartab、structure、whale、wolverine
+
+%======================================================================%
+\title[PKUAI]{Recent VQA Approaches}
+
+%\subtitle{(To throw out a brick to attract a jade)}
+
+\author[Wentao Mo]
+{Wentao Mo\inst{1}}  
+
+\institute[AI@PKU] 
+{
+    \inst{1}%
+    Department of Machine Intelligence\\
+    Peking University
+}
+
+\date[PKU]{\today}
+%======================================================================
+
+%======================================================================
+% \AtBeginSection[]
+% {
+% \begin{frame}
+%     \frametitle{Outline}
+%     \tableofcontents[currentsection]
+% \end{frame} 
+% }
+%======================================================================
+
+\begin{document}
+%======================================================================
+\frame{\titlepage}
+%======================================================================
+
+%======================================================================
+\begin{frame}
+    \frametitle{Outline}
+    \tableofcontents
+\end{frame}
+%======================================================================
+
+
+
+
+\end{document}
