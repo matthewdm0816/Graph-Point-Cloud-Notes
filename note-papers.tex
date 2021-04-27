@@ -4655,4 +4655,105 @@ Multi-head Attention涉及使用多个类似的模块
 
 通过ensemble, 精度可以达到72.45.
 
+\section{TRRNet:Tiered Relation Reasoning for Compositional VQA}
+
+现在SoTA VQA方法可以分为两类: 第一类同时学习multi-modal joint表示, 常常使用多层注意力来fuse V+L repr., 这些方法性在compositional VQA上效果不好. 第二类是设计特别的NNs来进行不同任务上的reasoning, 他们可以在CLEVR上效果极佳, 但是很tricky, 实际数据集上难以利用. 
+
+本工作提出tiered rel. reasoning来动态选择obj. lvl. 候选, 根据lan. repr., 并且只在选定的obj. 之间学习关系. 本作提出的TRRNet包含TRR单元, 每个包含: root att., root$\to$ leaf att. passing, leaf att., final message passing mod. 
+
+\subsection{TRRNet}
+
+\subsubsection{Overview}
+
+\cfig{trrnet-arch.png}
+
+图片经过OD, 提取出n个region vis. feat.$V \in \mathbb{R}^{n \times d_{v}}$
+, 和 bounding box$B \in \mathbb{R}^{n \times d_{b}}$.
+语言经过BERT的词嵌入, 并且送进GRU来得到更好的语言embedding $E \in \mathbb{R}^{m \times d}_{e}$
+
+\subsection{Root Attention}
+
+obj. lvl. att.
+\begin{equation}
+    \alpha^{\text {object }}=\operatorname{softmax}(\operatorname{Net}(V, B, E))
+\end{equation}
+apply att., 得到融合的vis. feat.
+\begin{equation}
+    O^{\text {root }}=\alpha^{\text {object }} V^{T} \text { , }
+\end{equation}
+
+有很多root att.的选择, like in Bottom-Up, DCN, BAN, Inter-Intra. 本作使用Bottom-Up和BAN里的方法.
+
+\subsection{Root to Leaf Attention Passing}
+
+使用multi-head \bt{hard} att. 来选择rel. obj.候选. 但是这样的hard att. 不可微分. REINFORCE可以用来通过sampling来得到网络参数(Xu et al., ICML '15). 本文使用一种更简单和完全可微的方式.
+
+具体上, 我们通过选择每个att. head的 top-k attended obj., 再通过concat+MLP映射到$d_r(=256\text{ in this work})$, 表示为Relation操作:
+\begin{equation}
+    \begin{array}{l}
+    V_{\text {Hard }}=\operatorname{Topk}(\alpha, V, K) \\
+    R=\text { Relation }\left(V_{\text {Hard }}, B\right),
+    \end{array}
+\end{equation}
+
+也可以使用refined obj. 候选的triplet relation, 得到关系
+$R_{\text {triple }} \in \mathbb{R}^{K^{3} \times d_{r}}$
+
+\subsubsection{Leaf Attention}
+
+和root att.相同, 使用关系表示$R \in \mathbb{R}^{K^{2} \times d_{r}}$
+和问题embedding $e \in \mathbb{R}^{d_{e}}$
+\begin{equation}
+    h=f(g(e) \odot k(R)),
+\end{equation}
+其中 g,k,f是fc(ReLU).
+\begin{equation}
+    \alpha^{\text {relation }}=\operatorname{softmax}(h)
+\end{equation}
+以及
+\begin{equation}
+    O^{\text {leaf }}=\alpha^{\text {relation }} R^{T} \text { . }
+\end{equation}
+
+
+\subsubsection{Message Passing module for units interaction}
+
+为了可以进行multi-stage reasoning, 提出message passing module, 
+\begin{equation}
+    V_{n e w}=f\left(\left[O^{l e a f}, V\right]\right)
+\end{equation}
+
+\subsubsection{Multi-stage Reasoning and Policy Network}
+
+形式上, 一层TRR unit输入bounding box feat. B, t-th vis. feat. $V_t$, question embed. E, 输入$O_{t}^{\text {root }}, O_{t}^{\text {leaf }}, V_{t+1}$ 
+\begin{equation}
+    O_{t}^{\text {root }}, O_{t}^{\text {leaf }}, V_{t+1}=T R R_{t}\left(B, V_{t}, E\right)
+\end{equation}
+
+在第t个TRR, policy net., 若和上一步的到底哦attended feat.没有区别, 则停止继续推理.
+\begin{equation}
+    \begin{array}{c}
+    d=L 2\left(O_{t-1}^{\text {root }}, O_{t}^{\text {root }}\right) \\
+    z=M L P[M L P(d), M L P(E, t, l)], \\
+    \pi\left(a_{t} \mid s_{t}, \theta\right)=\operatorname{softmax}(z)
+    \end{array}
+\end{equation}  
+policy net.使用REINFORCE中的policy gradient方法来训练. 在训练中分别地训练两个网络(同时保持另一个网络参数固定, 并且最多三步), policy net. 的loss是
+\begin{equation}
+    L=-E_{s \sim \pi}[r-p]
+\end{equation}
+其中每走一步penalty为0.1.
+
+\subsubsection{The Readout Layer}
+\begin{equation}
+    O^{\text {all }}=f\left(\left[O_{t}^{\text {root }}, O_{t}^{\text {leaf }}\right]\right)
+\end{equation}
+\begin{equation}
+    E^{\text {final }}=g(E)
+\end{equation}
+\begin{equation}
+    \text { Answer }=\operatorname{softmax}\left(h\left(O^{a l l} \odot E^{f i n a l}\right)\right),
+\end{equation}
+
+
 \end{document}
