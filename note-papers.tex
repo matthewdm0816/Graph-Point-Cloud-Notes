@@ -4240,7 +4240,7 @@ VQA是多选回答. 使用VQA 2.0, 给予MSCOCO. 对于每个问题, 模型挑�
 
 \section{In Defense of Grid Features for Visual Question Answering}
 
-最近基于region的方法逐渐流行并超过了基于grid的方法. 
+
 为啥region方法好? 更好的对象定域性. 容易同时得到high+low level的信息?. 我们发现使用obj. detectors的grid feature而不是region feature性能不变, 小修改还能提高性能. 相容实验发现主要影响性能的是pre-training的数据集质量 + 输入图像的高分辨率, grid/region只是小问题.
 
 \subsection{Related Work}
@@ -4272,7 +4272,7 @@ Faster R-CNN是c4模型w/ 属性分类分支的变种. 首先使用ResNet的$C_4
 \subsubsection{$1\times 1$ RoIPool for Improved Grid F.}
 
 这意味着用一个一维向量来表示一个region, 而不是Faster RCNN里的HWC三维 .使用$1\times 1$ RoIPool会降低物体检测的性能, 对于VQA, 这要求这个特征尽可能单独地编码信息. 由于预训练的$C_5$输入不适用, 使用最近的直接使用整个$C_5$的ResNet的工作\footnote{
-    Xizhou Zhu, Han Hu, Stephen Lin, and Jifeng Dai.  De-formable convnets v2: More deformable, better results. InCVPR, 2019.
+    Xizhou Zhu, Han Hu, Stephen Lin, and Jifeng Dai.  De-formable convnets v2: More deformable, better results. In CVPR, 2019.
 }.
 
 \subsection{Comparison: Region v. Grids}
@@ -4483,7 +4483,7 @@ T的精确求解intractable, 使用IPOT算法进行估计.
     \end{equation}
 \end{enumerate}
 
-\subsection{Visual Commonsense R-CNN}
+\section{Visual Commonsense R-CNN}
 
 提出VC R-CNN. 使用causual intervention$P(Y \mid \operatorname{do}(X))$代替传统的lld. 相信应该使用causual commonsense feature而不是单纯的visual feature. 在大规模VL出数据中, weakly-supervise是趋势. 然而在很多数据集中, commonsense并不会被记录, 比如不会刻意说"人通过双腿走", 人无监督地从物理世界学习, 我们希望模型也这么干.
 
@@ -4551,7 +4551,7 @@ VC RCNN基于RCNN的backbone.
 \bt{NCC(Neural Causation Coefficient)}
 考虑到confounders在类别中平均的特征并不是很可靠, Z可能包含colliders(v-structure), 导致不可靠的相关.使用NCC来移除Z中可能的collider. 给出x, z, $NCC(x\to z)$计算了相对因果强度, 然后我们在training samples里去除高于某个阈值的样本.
 
-\section{VC R-CNN}
+\subsection{VC R-CNN}
 
 使用CNN作为骨架(e.g., ResNet101), 丢弃Faster RCNN中的RPN模块. 直接使用ground-truth bounding box来得到物体repr., 然后任意两对去测试contextual prediction + self predition. 对于self-prediction有NLL loss
 \begin{equation}
@@ -4754,6 +4754,35 @@ policy net.使用REINFORCE中的policy gradient方法来训练. 在训练中分�
 \begin{equation}
     \text { Answer }=\operatorname{softmax}\left(h\left(O^{a l l} \odot E^{f i n a l}\right)\right),
 \end{equation}
+
+\section{Weekly Seminar 4.28}
+
+\subsection{Causal Signal on Images}
+
+图像不同类别是否有不对称的统计量? obj. feat. / context feat.
+
+使用判别器来拟合样本之间的因果关系.
+
+提出NCC(!)
+\begin{equation}
+    \operatorname{NCC}\left(\left\{\left(x_{i j}, y_{i j}\right)\right\}_{j=1}^{m_{i}}\right)=\psi\left(\frac{1}{m_{i}} \sum_{j=1}^{m_{i}} \phi\left(x_{i j}, y_{i j}\right)\right)
+\end{equation}
+
+\subsection{Causual View on Robustness}
+
+考虑三种导致输出X的r.v. Y(label), Z, M(latent causes, 可人工干预)
+
+\begin{equation}
+    p_{\theta}(x, y, z, m)=p(m) p(z) p(y) p_{\theta}(x \mid y, z, m) .
+\end{equation}
+
+给出一个变分框架建模隐变量.
+
+\subsection{Calibrated Asymmetric Surrogate Loss}
+
+
+
+
 
 
 \end{document}

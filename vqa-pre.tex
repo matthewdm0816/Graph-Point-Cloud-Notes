@@ -24,10 +24,10 @@
 \usepackage{listings}
 \usepackage{xcolor}
 
-\newcommand{\cfig}[1]{
+\newcommand{\cfig}[2]{
     \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{#1}
+    \includegraphics[width=#2\textwidth]{#1}
 \end{figure}
 }
 
@@ -98,7 +98,53 @@
 \begin{frame}
     \frametitle{Visual Commonsense R-CNN}
 
+    提出VC R-CNN. 使用causual intervention$P(Y \mid \operatorname{do}(X))$代替传统的lld. 相信应该使用causual commonsense feature而不是单纯的visual feature.
+
+    Replace
+    \begin{equation}
+        P(Y \mid X)=\sum_{z} P(Y \mid X, z) \underline{P(z \mid X)}
+    \end{equation}
+    w/ intervention
+    \begin{equation}
+        P(Y \mid d o(X))=\sum_{z} P(Y \mid X, z) \underline{P(z)}
+    \end{equation}
+
+    提出proxy task为预测local context label of Y. 关于confounder set Z, 我们保存一些固定数量的dictionary $N\times d$, N是数据集中类别的数量(MSCOCO, 80), 每个d维特征都是平均的RoI特征. 特征通过Faster RCNN pretrain. 
     
+    总obj. 为self-classification+contextual-pair-classification loss
+    \begin{equation}
+        L(X)=L_{\text {self }}\left(p, x^{c}\right)+\frac{1}{K} \sum_{i} L_{c x l}\left(p_{i}, y_{i}^{c}\right)
+    \end{equation}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Visual Commonsense R-CNN}
+
+    \cfig{vcrcnn-arch.png}{0.8}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Visual Commonsense R-CNN}
+
+    具体上, $P(Y \mid do(X)) = \sum_{z} P\left(y^{c} \mid \boldsymbol{x}, \boldsymbol{z}\right) P(\boldsymbol{z})$, 使用
+    \begin{equation}
+        P(Y \mid d o(X)):=\mathbb{E}_{\boldsymbol{z}}\left[\operatorname{Softmax}\left(f_{y}(\boldsymbol{x}, \boldsymbol{z})\right)\right]
+        \stackrel{\mathrm{NWGM}}{\approx} \operatorname{Softmax}\left(\mathbb{E}_{\boldsymbol{z}}\left[f_{y}(\boldsymbol{x}, \boldsymbol{z})\right]\right)
+    \end{equation}
+    并且使用NWGM(Normalized Weighted Geometric Mean)来估计上述期望
+
+    f使用线性模型$f_{y}(\boldsymbol{x}, \boldsymbol{z})=\boldsymbol{W}_{1} \boldsymbol{x}+\boldsymbol{W}_{2} \cdot g_{y}(\boldsymbol{z})$, where $\boldsymbol{W}_{1}, \boldsymbol{W}_{2} \in \mathbb{R}^{N \times d}$代表了FC层. 那么有
+    \begin{equation}
+        \mathbb{E}_{\boldsymbol{z}}\left[f_{y}(\boldsymbol{x}, \boldsymbol{z})\right]=\boldsymbol{W}_{1} \boldsymbol{x}+\boldsymbol{W}_{2} \cdot \mathbb{E}_{\boldsymbol{z}}\left[g_{y}(\boldsymbol{z})\right]
+    \end{equation}
+    建模$g_{y}(\cdot)$为scaled 点积注意力, 具体上有
+    \begin{equation}
+        \mathbb{E}_{\boldsymbol{z}}\left[g_{y}(\boldsymbol{z})\right]=\sum_{z}\left[\operatorname{Softmax}\left(\boldsymbol{q}^{T} \boldsymbol{K} / \sqrt{\sigma}\right) \odot \boldsymbol{Z}\right] P(\boldsymbol{z})
+    \end{equation}
+
+    使用NCC去除$x\to z$的样本.
 
 \end{frame}
 
@@ -107,7 +153,36 @@
 \begin{frame}
     \frametitle{In Defense of Grid Features for VQA}
 
-    
+    最近基于region的方法逐渐流行并超过了基于grid的方法. 但是相容实验发现主要影响性能的是pre-training的数据集质量 + 输入图像的高分辨率, grid/region只是小问题.
+
+    传统上, 一般使用Faster R-CNN, 在cleaned version VG上训练. 对于这些方法, 要获得自底向上注意力特征, 进行如下两步
+    \begin{enumerate}
+        \item Region Selection. 通过一个Region Proposal Net., 提出候选region(Regions of Interst, RoIs), 接着通过一个score comp., 选择top-N的区域, 并且两步都使用NMS.
+        \item 给出了上述步骤的regions, 使用RoIPool来得到region-feature.
+    \end{enumerate}
+    由于VG数据集的复杂性和Faster R-CNN, 这两步计算上都很昂贵. 
+
+    具体的VQA模型(特征融合)使用的是MFH.
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{In Defense of Grid Features for VQA}
+
+    \cfig{gridfeat-comp.png}{1.0}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{In Defense of Grid Features for VQA}
+
+    Faster R-CNN是c4模型w/ 属性分类分支的变种. 首先使用ResNet的$C_4$blocks来得到feature map, 接着per-region feature先$14\times 14$ RoIPool, 再应用$C_5$, 最后avg-pool来得到每个region的F. 我们直接使用$C_5$在grids来得到特征.
+
+    这意味着用一个一维向量来表示一个region, 而不是Faster RCNN里的HWC三维 .使用$1\times 1$ RoIPool会降低物体检测的性能, 对于VQA, 这要求这个特征尽可能单独地编码信息. 由于预训练的$C_5$输入不适用, 使用最近的直接使用整个$C_5$的ResNet的工作\footnote{
+        Xizhou Zhu, Han Hu, Stephen Lin, and Jifeng Dai.  De-formable convnets v2: More deformable, better results. InCVPR, 2019.
+    }.
+
+    Ablation Study发现主要影响性能的是pre-training的数据集质量 + 输入图像的高分辨率, grid/region只是小问题. 使用Res-NeXt改进了性能. 发现使用更大的图像, 更高的精度. 不同的预训练任务上, detection w/ attr. > detection w/o attr. > classification w/ tag > cls. w/ label.
 
 \end{frame}
 

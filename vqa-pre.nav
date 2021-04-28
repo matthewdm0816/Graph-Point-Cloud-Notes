@@ -9,35 +9,43 @@
 \headcommand {\beamer@subsectionentry {0}{1}{1}{3}{VC R-CNN}}
 \headcommand {\slideentry {1}{1}{1}{3/3}{VC R-CNN}{0}}
 \headcommand {\beamer@framepages {3}{3}}
-\headcommand {\beamer@subsectionpages {3}{3}}
-\headcommand {\beamer@subsectionentry {0}{1}{2}{4}{Grid Feature}}
-\headcommand {\slideentry {1}{2}{1}{4/4}{Grid Feature}{0}}
+\headcommand {\slideentry {1}{1}{2}{4/4}{VC R-CNN}{0}}
 \headcommand {\beamer@framepages {4}{4}}
-\headcommand {\beamer@subsectionpages {4}{4}}
-\headcommand {\beamer@subsectionentry {0}{1}{3}{5}{VinVL}}
-\headcommand {\slideentry {1}{3}{1}{5/5}{VinVL}{0}}
+\headcommand {\slideentry {1}{1}{3}{5/5}{VC R-CNN}{0}}
 \headcommand {\beamer@framepages {5}{5}}
-\headcommand {\beamer@sectionpages {3}{5}}
-\headcommand {\beamer@subsectionpages {5}{5}}
-\headcommand {\sectionentry {2}{Feature Fusion Methods}{6}{Feature Fusion Methods}{0}}
-\headcommand {\beamer@subsectionpages {6}{5}}
-\headcommand {\beamer@subsectionentry {0}{2}{1}{6}{MFH}}
-\headcommand {\slideentry {2}{1}{1}{6/6}{MFH}{0}}
+\headcommand {\beamer@subsectionpages {3}{5}}
+\headcommand {\beamer@subsectionentry {0}{1}{2}{6}{Grid Feature}}
+\headcommand {\slideentry {1}{2}{1}{6/6}{Grid Feature}{0}}
 \headcommand {\beamer@framepages {6}{6}}
-\headcommand {\beamer@subsectionpages {6}{6}}
-\headcommand {\beamer@subsectionentry {0}{2}{2}{7}{MCAN}}
-\headcommand {\slideentry {2}{2}{1}{7/7}{MCAN}{0}}
+\headcommand {\slideentry {1}{2}{2}{7/7}{Grid Feature}{0}}
 \headcommand {\beamer@framepages {7}{7}}
-\headcommand {\beamer@subsectionpages {7}{7}}
-\headcommand {\beamer@subsectionentry {0}{2}{3}{8}{TRRNet}}
-\headcommand {\slideentry {2}{3}{1}{8/8}{TRRNet}{0}}
+\headcommand {\slideentry {1}{2}{3}{8/8}{Grid Feature}{0}}
 \headcommand {\beamer@framepages {8}{8}}
-\headcommand {\beamer@subsectionpages {8}{8}}
-\headcommand {\beamer@subsectionentry {0}{2}{4}{9}{BERT/Transformer-based}}
-\headcommand {\slideentry {2}{4}{1}{9/9}{BERT/Transformer-based}{0}}
+\headcommand {\beamer@subsectionpages {6}{8}}
+\headcommand {\beamer@subsectionentry {0}{1}{3}{9}{VinVL}}
+\headcommand {\slideentry {1}{3}{1}{9/9}{VinVL}{0}}
 \headcommand {\beamer@framepages {9}{9}}
-\headcommand {\beamer@partpages {1}{9}}
+\headcommand {\beamer@sectionpages {3}{9}}
+\headcommand {\beamer@subsectionpages {9}{9}}
+\headcommand {\sectionentry {2}{Feature Fusion Methods}{10}{Feature Fusion Methods}{0}}
 \headcommand {\beamer@subsectionpages {10}{9}}
-\headcommand {\beamer@sectionpages {10}{9}}
-\headcommand {\beamer@documentpages {9}}
-\headcommand {\gdef \inserttotalframenumber {9}}
+\headcommand {\beamer@subsectionentry {0}{2}{1}{10}{MFH}}
+\headcommand {\slideentry {2}{1}{1}{10/10}{MFH}{0}}
+\headcommand {\beamer@framepages {10}{10}}
+\headcommand {\beamer@subsectionpages {10}{10}}
+\headcommand {\beamer@subsectionentry {0}{2}{2}{11}{MCAN}}
+\headcommand {\slideentry {2}{2}{1}{11/11}{MCAN}{0}}
+\headcommand {\beamer@framepages {11}{11}}
+\headcommand {\beamer@subsectionpages {11}{11}}
+\headcommand {\beamer@subsectionentry {0}{2}{3}{12}{TRRNet}}
+\headcommand {\slideentry {2}{3}{1}{12/12}{TRRNet}{0}}
+\headcommand {\beamer@framepages {12}{12}}
+\headcommand {\beamer@subsectionpages {12}{12}}
+\headcommand {\beamer@subsectionentry {0}{2}{4}{13}{BERT/Transformer-based}}
+\headcommand {\slideentry {2}{4}{1}{13/13}{BERT/Transformer-based}{0}}
+\headcommand {\beamer@framepages {13}{13}}
+\headcommand {\beamer@partpages {1}{13}}
+\headcommand {\beamer@subsectionpages {14}{13}}
+\headcommand {\beamer@sectionpages {14}{13}}
+\headcommand {\beamer@documentpages {13}}
+\headcommand {\gdef \inserttotalframenumber {13}}
