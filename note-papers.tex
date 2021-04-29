@@ -4229,7 +4229,7 @@ Pretraining dataset: COCO, Conceptual Captions, SBU captions, flicker30k, GQA et
 从Open Images dataset中找到图像, 测试模型的novel objects的描述能力. 使用预测的VG/Open Images标签来生成tag seq., 并且在COCO上训练OSCAR.
 
 \bt{VQA}
-VQA是多选回答. 使用VQA 2.0, 给予MSCOCO. 对于每个问题, 模型挑选3129个回答中的一个. 使用[CLS]的输出来作为特征, 并且送到线性分类器里. 视为multi-label 分类问题, 给每个输出一个soft target score, 取决于和human answer的相近度. 最后使用CE, 使用预测分数和soft-target分数.
+VQA是多选回答. 使用VQA 2.0, 基于MSCOCO. 对于每个问题, 模型挑选3129个回答中的一个. 使用[CLS]的输出来作为特征, 并且送到线性分类器里. 视为multi-label 分类问题, 给每个输出一个soft target score, 取决于和human answer的相近度. 最后使用CE, 使用预测分数和soft-target分数.
 
 \bt{GQA}
 需要提供额外理由. 对于每个问题, 模型从1852个candidate里选择.
@@ -4278,7 +4278,7 @@ Faster R-CNN是c4模型w/ 属性分类分支的变种. 首先使用ResNet的$C_4
 \subsection{Comparison: Region v. Grids}
 
 具体的VQA模型使用的是co-attention model\footnote{
-    Zhou Yu, Jun Yu, Chenchao Xiang, Jianping Fan, andDacheng Tao.  Beyond bilinear: Generalized multimodal factorized high-order pooling for visual question answering.TNNLS, 2018.
+    Zhou Yu, Jun Yu, Chenchao Xiang, Jianping Fan, andDacheng Tao.  Beyond bilinear: Generalized multimodal factorized high-order pooling for visual question answering, 2018.
 }
 
 推理速度远快于基于regions的方法.
@@ -4339,7 +4339,7 @@ $V=\left[V_{1}, \ldots, V_{o}\right] \in \mathbb{R}^{n \times k \times o}$
 \begin{equation}
     z=\operatorname{SumPool}\left(\tilde{U}^{T} x \circ \tilde{V}^{T} y, k\right)
 \end{equation}
-之后接上dropput, power norm.$z \leftarrow \operatorname{sign}(z)|z|^{0.5}$
+之后接上dropout, power norm.$z \leftarrow \operatorname{sign}(z)|z|^{0.5}$
 和l2 norm.$(z \leftarrow z /\|z\|)$.
 
 接着MFH. 设MFB里的中间表示为
@@ -4378,6 +4378,10 @@ MFH/MFB+CoAtt模型! LSTM生成特征, 使用自注意力得到Question Att. Fea
     \item 缺少l2 norm降低了性能(-3\%), power norm影响并不大.
     \item l2 norm明显让neuron value变得稳定, 让模型更稳定.
 \end{enumerate}
+
+\begin{remark}
+    这里l2-norm是不是就是LayerNorm?
+\end{remark}
 
 \section{UNITER UNiversal Image-TExt Representation Learning}
 
@@ -4754,6 +4758,8 @@ policy net.使用REINFORCE中的policy gradient方法来训练. 在训练中分�
 \begin{equation}
     \text { Answer }=\operatorname{softmax}\left(h\left(O^{a l l} \odot E^{f i n a l}\right)\right),
 \end{equation}
+
+最后相容实验指出, 带PN比硬编码要提高了0.5\%.
 
 \section{Weekly Seminar 4.28}
 
