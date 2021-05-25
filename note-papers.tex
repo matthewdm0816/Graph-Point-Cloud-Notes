@@ -4787,8 +4787,143 @@ policy net.使用REINFORCE中的policy gradient方法来训练. 在训练中分�
 \subsection{Calibrated Asymmetric Surrogate Loss}
 
 
+\section{GCNII: GCN via Initial residual and Identity Mapping}
+
+\subsection{Related Models}
+
+\bt{APPNP} 使用了PPR(Personalized Page-Rank)矩阵来导出K-order的滤波器
+\begin{equation}
+    \mathbf{H}=\alpha\left(\mathbf{I}_{n}-(1-\alpha) \tilde{\mathbf{A}}\right)^{-1} f_{\theta}(\mathbf{X})
+\end{equation}
+
+To make k-hop aggr., 近似的有Taylor展开
+\begin{equation}
+    \boldsymbol{H}^{(\ell+1)}=(1-\alpha) \tilde{\boldsymbol{P}} \boldsymbol{H}^{(\ell)}+\alpha \boldsymbol{H}^{(0)}
+\end{equation}
+
+\bt{JKNet}是第一个深度GCN网络. 在最后一层, JKNet使用了之前所有层的表示的Concat来从不同层级学到表示. 根据他们的证明, 这能解决over-smoothing的问题
+
+\bt{DropEdge}建议随机地drop edge来降低在over-smoothing上的收敛. 一个典型的网络层为
+\begin{equation}
+    \mathbf{H}^{(\ell+1)}=\sigma\left(\tilde{\mathbf{P}}_{\text {drop }} \mathbf{H}^{(\ell)} \mathbf{W}^{(\ell)}\right)
+\end{equation}
+
+\subsection{GCNII}
+想法是不适用ChebNet/GCN那样的固定系数, 而是学到任意系数的多项式.
+\begin{equation}
+    \mathbf{H}^{(\ell+1)}=\sigma\left(\left(\left(1-\alpha_{\ell}\right) \tilde{\mathbf{P}} \mathbf{H}^{(\ell)}+\alpha_{\ell} \mathbf{H}^{(0)}\right)\left(\left(1-\beta_{\ell}\right) \mathbf{I}_{n}+\beta_{\ell} \mathbf{W}^{(\ell)}\right)\right)
+\end{equation}
+类似APPNP, 这里第一项试图在学到至少$\alpha_{\ell}$那么多的原特征. 实践中常常设置为0.1或者0.2.
+
+类似ResNet,第二项借用了恒等映射.恒等映射被证明具有一下性质, 一个线性ResNet满足
+\begin{enumerate}
+    \item 最优的权值矩阵具有小的范数
+    \item 唯一的临界点是全局最小点
+\end{enumerate}
+
+(Oono \& Suzuki, 2020)证明了对于K-层的GCN的节点特征将会收敛到一个子空间, 导致info loss. 收敛速度取决于$s^K$, 是权值矩阵的最大奇异值. 使用$\left(1-\beta_{\ell}\right) \mathbf{I}_{n}+\beta_{\ell} \mathbf{W}^{(\ell)}$可以将奇异值拉近1, 防止特征空间退化.
+
+设置$\beta_{\ell}$的原则是根据不同的层改变, 实验中使用的是$\beta_{\ell}=\log \left(\frac{\lambda}{\ell}+1\right) \approx \frac{\lambda}{\ell}$
+
+\subsection{Connection to Iterative Shrinkage-Thresholding}
+
+最近有一些基于优化观点的网络结构设计工作. FFN被看作是对一些目标函数的迭代优化, 一个假设是更好的优化算法lead to更好的结构. 考虑LASSO目标函数
+\begin{equation}
+    \min _{x \in \mathcal{R}^{n}} \frac{1}{2}\|\mathbf{B} \mathbf{x}-\mathbf{y}\|_{2}^{2}+\lambda\|\mathbf{x}\|_{1}
+\end{equation}
+Iterative-shrinkage alg.可以有效的解决上述优化问题, 他的迭代为
+\begin{equation}
+    \mathbf{x}^{t+1}=P_{\mu_{t} \lambda}\left(\mathbf{x}^{t}-\mu_{t} \mathbf{B}^{T} \mathbf{B} \mathbf{x}^{t}+\mu_{t} \mathbf{B}^{T} \mathbf{y}\right)
+\end{equation}
+其中$\mu_t$是迭代步长, 
+\begin{equation}
+    P_{\theta}(z)=\left\{\begin{array}{lr}
+    z-\theta, & \text { if } z \geq \theta \\
+    0, & \text { if }|z|<\theta \\
+    z+\theta, & \text { if } z \leq-\theta
+    \end{array}\right.
+\end{equation}
+是soft-thresholding函数.
+
+\subsection{Spectral Analysis}
+
+\begin{theorem}
+    Assume the self-looped graph $\tilde{G}$ is connected. Let $\mathbf{h}^{(K)}=\left(\frac{\mathbf{I}_{n}+\tilde{\mathbf{D}}^{-1 / 2} \tilde{\mathbf{A}} \tilde{\mathbf{D}}^{-1 / 2}}{2}\right)^{K} \cdot \mathbf{x}$ denote the representation by applying a $K$ -layer renormalized graph convolution with residual connection to a graph signal $\mathrm{x}$. Let $\lambda_{\tilde{G}}$ denote the spectral gap of the self-looped graph $\tilde{G}$, that is, the least nonzero eigenvalue of the normalized Laplacian $\tilde{\mathbf{L}}=\mathbf{I}_{n}-\tilde{\mathbf{D}}^{-1 / 2} \tilde{\mathbf{A}} \tilde{\mathbf{D}}^{-1 / 2} .$ We have
+    1) As $K$ goes to infinity, $\mathbf{h}^{(K)}$ converges to $\boldsymbol{\pi}=\frac{\left\langle\mathbf{D}^{1 / 2} \mathbf{1}, \mathbf{x}\right\rangle}{2 m+n}$.
+    $\tilde{\mathbf{D}}^{1 / 2} \mathbf{1}$, where $\mathbf{1}$ denotes an all-one vector.
+    2) The convergence rate is determined by
+    $$
+    \mathbf{h}^{(K)}=\pi \pm\left(\sum_{i=1}^{n} x_{i}\right) \cdot\left(1-\frac{\lambda_{\tilde{G}}^{2}}{2}\right)^{K} \cdot \mathbf{1}
+    $$
+\end{theorem} 
+
+猜想: 更高degree的节点特征会更容易over-smoothed.
+
+\begin{theorem}
+    Consider the self-looped graph $\tilde{G}$ and a graph signal x. A $K$ -layer GCNII can express a $K$ order polynomial filter $\left(\sum_{\ell=0}^{K} \theta_{\ell} \tilde{\mathbf{L}}^{\ell}\right) \mathbf{x}$ with arbitrary coefficients $\theta .$
+\end{theorem}
+
+这保证了GCNII的expressiveness. 并且在层数趋近无穷的时候特征分布不会退化.
+
+\section{MLPMixer}
+
+\cfig{mlpmixer-arch.png}
+
+主要包含了两种MLP, token-mixing和channel-mixing MLP
+\begin{equation}
+    \begin{aligned}
+    \mathbf{U}_{*, i} &=\mathbf{X}_{*, i}+\mathbf{W}_{2} \sigma\left(\mathbf{W}_{1} \text { LayerNorm }(\mathbf{X})_{*, i}\right), & & \text { for } i=1 \ldots C, \\
+    \mathbf{Y}_{j, *} &=\mathbf{U}_{j, *}+\mathbf{W}_{4} \sigma\left(\mathbf{W}_{3} \text { LayerNorm }(\mathbf{U})_{j, *}\right), & & \text { for } j=1 \ldots S .
+    \end{aligned}
+\end{equation}
 
 
+\section{DETR:E2E Object Detection with Transformers}
 
+现代的Object Detectors一般使用一些代理任务来进行物体检测(by proposals/anchors/window centers). 为了简化pipeline, 他们设计了一个E2E的物体检测方法.
+
+\cfig{detr-arch.png}
+在CNN后接着一个Transformer的encoder-decoder结构, 来直接得到prediction box, 最后使用bipartite loss来和GT进行matching. 同时DETR的输出无需NMS之类的后处理.
+
+\subsection{Set Prediction Loss}
+
+DETR预测一个固定长度的N个物体, 使用bipartite matching来得到loss
+\begin{equation}
+    \hat{\sigma}=\underset{\sigma \in \mathfrak{S}_{N}}{\arg \min } \sum_{i}^{N} \mathcal{L}_{\operatorname{match}}\left(y_{i}, \hat{y}_{\sigma(i)}\right)
+\end{equation}
+其中$\sigma$是一个permutation. 使用匈牙利算法可以有效地计算最优的alignment. 并且定义matching cost为
+\begin{equation}
+    -\mathbb{1}_{\left\{c_{i} \neq \varnothing\right\}} \hat{p}_{\sigma(i)}\left(c_{i}\right)+\mathbb{1}_{\left\{c_{i} \neq \varnothing\right\}} \mathcal{L}_{\mathrm{box}}\left(b_{i}, \hat{b}_{\sigma(i)}\right) .
+\end{equation}
+总的loss为
+\begin{equation}
+    \mathcal{L}_{\text {Hungarian }}(y, \hat{y})=\sum_{i=1}^{N}\left[-\log \hat{p}_{\hat{\sigma}(i)}\left(c_{i}\right)+\mathbb{1}_{\left\{c_{i} \neq \varnothing\right\}} \mathcal{L}_{\text {box }}\left(b_{i}, \hat{b}_{\hat{\sigma}}(i)\right)\right],
+\end{equation}
+实践中, 对于空类将其权重变为0.1, 来解决class imbalance, 和Faster RCNN相同.
+注意在Matching Loss里我们使用的是prob而不是log-prob, 为了和box-loss有相同的量级.
+
+关于BB Loss, $\ell1$范数对不同大小的BB有不同的权重, 所以使用$\ell1$范数和广义IoU的组合:
+\begin{equation}
+    \mathcal{L}_{\mathrm{box}}\left(b_{i}, \hat{b}_{\sigma(i)}\right)= \lambda_{\text {iou }} \mathcal{L}_{\text {iou }}\left(b_{i}, \hat{b}_{\sigma(i)}\right)+\lambda_{\mathrm{L} 1}\left\|b_{i}-\hat{b}_{\sigma(i)}\right\|_{1}
+\end{equation}
+
+\subsection{DETR Architecture}
+\cfig{detr-net.png}
+
+使用auxiliary decoding loss来帮助训练decoder.在每层decoder后面加入LN+FFN和Hugarian Loss(FFN共享权值), 来作为辅助decoder.
+
+\section{Counterfactual VQA: A Cause-Effect Look at Language Bias}
+\cfig{cfvqa-arch.png}
+VQA数据集中常常具有巨大的language bias. 比如, 在所有'Can you see a...'问题中回答yes就有90\%的准确率!
+
+最近,提出了VQA-CP数据集, trainset/testset具有不同的语言先验, 这要求模型必须减少language bias. 为了解决这个问题, 最近的方法包括加强Visual Grounding, 弱化语言先验,和implicit/explicit数据增强. \begin{enumerate}
+    \item 使用人类的视觉/文本解释来强化visual grounding.
+    \item 使用ensemble多个QA分支来capture 语言先验, 通过对抗学习/多人物学习
+    \item 自动生成额外的QA对来balance data.
+\end{enumerate}
+\subsection{Preliminaries}
 
 \end{document}
+
+
+

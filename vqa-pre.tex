@@ -585,6 +585,73 @@
 
 \section{Pretraining Models}
 
+\section{VizWiz Dataset}
 
+\begin{frame}
+    \frametitle{VizWiz Dataset for VQA}
+
+    Visual Question Answering(VQA Task): Given a visual image/video input, and a question, the model is required to give a correct answer.
+
+    Perceptual differences/challenges comparing to VQAv2 dataset 
+    \begin{enumerate}
+        \item Dirty/vague/occuluded image
+        \item Long text description info in image
+        \item Unsuitable/unanswerable image/question pair
+        \item Domain gap from COCO/ImageNet
+        \item Too many choices of answers, casual Q/A. Extra-long and casual question/answer like "Hopefully this is a better picture. I'd like to know what the bag I am holding is of. Hello?"(Q) and "green mountain vermont country blend"(A) , the good news is that it's possibly the long-tail
+    \end{enumerate}
+
+
+    
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{VizWiz: Challenges and Possible Solutions}
+
+    \begin{table}
+        \begin{tabular}{c | c | c}
+        Vague/dirty & Domain gap & Unsuitable\\
+        \hline \hline
+        \includegraphics[width=0.3\textwidth]{img/vw_vague.jpg} & 
+        \includegraphics[width=0.3\textwidth]{img/vw_gap.jpg} &
+        \includegraphics[width=0.3\textwidth]{img/vw_unans.jpg}
+
+        \\
+        & 
+        & Q: What can is this?
+        \end{tabular}
+        
+        % \caption{Triathlon results}
+    \end{table}
+
+
+
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{VizWiz: Challenges and Possible Solutions}
+
+    \begin{table}
+        \begin{tabular}{c | c}
+        Occuluded & Long text in images\\
+        \hline \hline
+        \includegraphics[width=0.3\textwidth]{img/vw_occ.jpg} & 
+        \includegraphics[width=0.3\textwidth]{img/vw_text.jpg}\\
+        & Use text in image features extracted? 
+        \end{tabular}
+        % \caption{Triathlon results}
+    \end{table}
+
+    
+    Working on
+    \begin{itemize}
+        \item Try to stats the answer distribution
+        \item Extract visual features for images (use pretrained model from detectron2)
+        \item Based on pytorch
+    \end{itemize}
+
+\end{frame}
 
 \end{document}
